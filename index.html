@@ -2,1071 +2,324 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>مستشفى الدورة الأهلي — الهيكل التنظيمي</title>
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="الدورة الأهلي">
+<meta name="theme-color" content="#0a2540">
+<title>مستشفى الدورة الأهلي</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #0a0f1e;
-    --bg2: #0f1628;
-    --card: #141d35;
-    --card2: #1a2540;
-    --border: rgba(100,150,255,0.12);
-    --border2: rgba(100,150,255,0.25);
-    --accent: #2563eb;
-    --accent2: #3b82f6;
-    --accent3: #60a5fa;
-    --gold: #f59e0b;
-    --gold2: #fbbf24;
-    --text: #e8edf8;
-    --text2: #94a3b8;
-    --text3: #64748b;
-    --success: #10b981;
-    --red: #ef4444;
-    --purple: #8b5cf6;
-    --teal: #14b8a6;
-    --orange: #f97316;
-    --pink: #ec4899;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Cairo', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* HEADER */
-  .header {
-    background: linear-gradient(135deg, #0f1628 0%, #141d35 50%, #0f1628 100%);
-    border-bottom: 1px solid var(--border2);
-    padding: 20px 16px 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-  }
-  .logo-circle {
-    width: 52px; height: 52px;
-    background: linear-gradient(135deg, var(--accent), var(--accent3));
-    border-radius: 14px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px; flex-shrink: 0;
-    box-shadow: 0 4px 20px rgba(37,99,235,0.4);
-  }
-  .header-text h1 { font-size: 18px; font-weight: 700; color: var(--text); line-height: 1.2; }
-  .header-text p { font-size: 12px; color: var(--accent3); margin-top: 2px; }
-  .header-stats {
-    margin-right: auto;
-    text-align: left;
-    background: rgba(37,99,235,0.1);
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    padding: 6px 12px;
-    min-width: 80px;
-  }
-  .header-stats .num { font-size: 20px; font-weight: 900; color: var(--gold2); line-height: 1; }
-  .header-stats .lbl { font-size: 10px; color: var(--text2); }
-
-  /* SEARCH */
-  .search-bar {
-    padding: 12px 16px;
-    background: var(--bg2);
-    border-bottom: 1px solid var(--border);
-  }
-  .search-bar input {
-    width: 100%;
-    background: var(--card);
-    border: 1px solid var(--border2);
-    border-radius: 12px;
-    padding: 10px 14px;
-    color: var(--text);
-    font-family: 'Cairo', sans-serif;
-    font-size: 14px;
-    outline: none;
-    direction: rtl;
-  }
-  .search-bar input::placeholder { color: var(--text3); }
-  .search-bar input:focus { border-color: var(--accent2); }
-
-  /* TABS */
-  .tabs {
-    display: flex;
-    padding: 12px 16px;
-    gap: 8px;
-    overflow-x: auto;
-    background: var(--bg2);
-    scrollbar-width: none;
-  }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab-btn {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 7px 16px;
-    font-family: 'Cairo', sans-serif;
-    font-size: 12px;
-    color: var(--text2);
-    cursor: pointer;
-    white-space: nowrap;
-    transition: all 0.2s;
-    flex-shrink: 0;
-  }
-  .tab-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: white;
-    font-weight: 600;
-  }
-
-  /* MAIN CONTENT */
-  .content { padding: 16px; }
-
-  /* TOP LEADERSHIP SECTION */
-  .leadership-section { margin-bottom: 20px; }
-  .section-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text3);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 10px;
-    padding-right: 4px;
-  }
-
-  /* HOSPITAL TOP CARD */
-  .hospital-top {
-    background: linear-gradient(135deg, #1e2a4a, #1a2540);
-    border: 1px solid rgba(245,158,11,0.3);
-    border-radius: 16px;
-    padding: 18px;
-    text-align: center;
-    margin-bottom: 12px;
-    position: relative;
-    overflow: hidden;
-  }
-  .hospital-top::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--gold), var(--gold2), var(--gold));
-  }
-  .hospital-top h2 { font-size: 20px; font-weight: 900; color: var(--gold2); }
-  .hospital-top p { font-size: 12px; color: var(--text2); margin-top: 4px; }
-  .connector { width: 2px; height: 16px; background: var(--border2); margin: 0 auto; }
-
-  /* LEADER CARDS */
-  .leader-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
-  .leader-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .leader-card:hover { border-color: var(--border2); transform: translateY(-1px); }
-  .leader-card.chairman {
-    border-color: rgba(245,158,11,0.3);
-    background: linear-gradient(135deg, var(--card), #1e2a4a);
-  }
-  .leader-card.deputy { border-color: rgba(96,165,250,0.2); }
-  .avatar {
-    width: 46px; height: 46px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-  }
-  .av-gold { background: rgba(245,158,11,0.15); border: 1px solid rgba(245,158,11,0.3); }
-  .av-blue { background: rgba(37,99,235,0.15); border: 1px solid rgba(37,99,235,0.3); }
-  .av-teal { background: rgba(20,184,166,0.15); border: 1px solid rgba(20,184,166,0.3); }
-  .leader-info { flex: 1; }
-  .leader-info .title { font-size: 11px; color: var(--text3); margin-bottom: 2px; }
-  .leader-info .name { font-size: 15px; font-weight: 700; color: var(--text); }
-  .leader-info .subtitle { font-size: 11px; color: var(--text2); margin-top: 2px; }
-  .arrow-icon { font-size: 14px; color: var(--text3); }
-
-  /* DEPARTMENTS GRID */
-  .dept-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-  .dept-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px 12px;
-    cursor: pointer;
-    transition: all 0.25s;
-    position: relative;
-    overflow: hidden;
-  }
-  .dept-card::before {
-    content: '';
-    position: absolute;
-    top: 0; right: 0; left: 0;
-    height: 3px;
-    border-radius: 14px 14px 0 0;
-    transition: opacity 0.2s;
-    opacity: 0.8;
-  }
-  .dept-card:hover { transform: translateY(-2px); border-color: var(--border2); }
-  .dept-card:hover::before { opacity: 1; }
-
-  .dc-blue::before { background: var(--accent2); }
-  .dc-teal::before { background: var(--teal); }
-  .dc-orange::before { background: var(--orange); }
-  .dc-purple::before { background: var(--purple); }
-  .dc-pink::before { background: var(--pink); }
-  .dc-success::before { background: var(--success); }
-  .dc-red::before { background: var(--red); }
-  .dc-gold::before { background: var(--gold); }
-  .dc-blue2::before { background: #38bdf8; }
-  .dc-indigo::before { background: #6366f1; }
-
-  .dept-icon { font-size: 24px; margin-bottom: 8px; display: block; }
-  .dept-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-  .dept-count {
-    font-size: 11px;
-    color: var(--text2);
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-  .count-badge {
-    background: rgba(37,99,235,0.15);
-    border: 1px solid rgba(37,99,235,0.2);
-    border-radius: 20px;
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--accent3);
-  }
-
-  /* DEPT DETAIL VIEW */
-  .detail-view { display: none; }
-  .detail-view.active { display: block; }
-  .overview-view { }
-  .overview-view.hidden { display: none; }
-
-  .back-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 8px 14px;
-    font-family: 'Cairo', sans-serif;
-    font-size: 13px;
-    color: var(--text2);
-    cursor: pointer;
-    margin-bottom: 16px;
-    width: fit-content;
-    transition: all 0.2s;
-  }
-  .back-btn:hover { border-color: var(--accent2); color: var(--accent3); }
-
-  .dept-header-card {
-    border-radius: 16px;
-    padding: 20px;
-    margin-bottom: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-  .dept-header-card h2 { font-size: 22px; font-weight: 900; margin-bottom: 4px; }
-  .dept-header-card p { font-size: 13px; opacity: 0.8; }
-  .dept-header-stats {
-    display: flex;
-    gap: 12px;
-    margin-top: 14px;
-  }
-  .dhs-item {
-    background: rgba(0,0,0,0.2);
-    border-radius: 10px;
-    padding: 8px 14px;
-    text-align: center;
-  }
-  .dhs-num { font-size: 22px; font-weight: 900; line-height: 1; }
-  .dhs-lbl { font-size: 10px; opacity: 0.7; margin-top: 2px; }
-
-  /* EMPLOYEE LIST */
-  .emp-list-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--text3);
-    margin-bottom: 10px;
-    padding-right: 4px;
-  }
-  .emp-list { display: flex; flex-direction: column; gap: 8px; }
-  .emp-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .emp-card:hover { border-color: var(--border2); background: var(--card2); }
-  .emp-avatar {
-    width: 40px; height: 40px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    flex-shrink: 0;
-    background: rgba(37,99,235,0.12);
-    border: 1px solid rgba(37,99,235,0.2);
-    font-weight: 700;
-    color: var(--accent3);
-    font-family: 'Cairo', sans-serif;
-  }
-  .emp-info { flex: 1; }
-  .emp-name { font-size: 14px; font-weight: 600; color: var(--text); }
-  .emp-role { font-size: 11px; color: var(--text2); margin-top: 2px; }
-  .emp-badge {
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 20px;
-    font-weight: 600;
-    white-space: nowrap;
-  }
-  .badge-head {
-    background: rgba(245,158,11,0.12);
-    border: 1px solid rgba(245,158,11,0.25);
-    color: var(--gold2);
-  }
-  .badge-staff {
-    background: rgba(37,99,235,0.1);
-    border: 1px solid rgba(37,99,235,0.2);
-    color: var(--accent3);
-  }
-  .badge-tech {
-    background: rgba(20,184,166,0.1);
-    border: 1px solid rgba(20,184,166,0.2);
-    color: var(--teal);
-  }
-  .badge-admin {
-    background: rgba(139,92,246,0.1);
-    border: 1px solid rgba(139,92,246,0.2);
-    color: var(--purple);
-  }
-
-  /* ADD EMPLOYEE BUTTON */
-  .add-emp-btn {
-    width: 100%;
-    background: rgba(37,99,235,0.08);
-    border: 1px dashed rgba(37,99,235,0.3);
-    border-radius: 12px;
-    padding: 12px;
-    font-family: 'Cairo', sans-serif;
-    font-size: 13px;
-    color: var(--accent3);
-    cursor: pointer;
-    margin-top: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    transition: all 0.2s;
-  }
-  .add-emp-btn:hover { background: rgba(37,99,235,0.15); border-color: var(--accent2); }
-
-  /* MODAL */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.7);
-    z-index: 200;
-    align-items: flex-end;
-    justify-content: center;
-  }
-  .modal-overlay.active { display: flex; }
-  .modal {
-    background: var(--card2);
-    border: 1px solid var(--border2);
-    border-radius: 20px 20px 0 0;
-    padding: 20px 16px 40px;
-    width: 100%;
-    max-width: 480px;
-    animation: slideUp 0.3s ease;
-  }
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-  }
-  .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-  .form-group { margin-bottom: 14px; }
-  .form-group label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 6px; }
-  .form-group input, .form-group select {
-    width: 100%;
-    background: var(--card);
-    border: 1px solid var(--border2);
-    border-radius: 10px;
-    padding: 10px 12px;
-    color: var(--text);
-    font-family: 'Cairo', sans-serif;
-    font-size: 14px;
-    outline: none;
-    direction: rtl;
-    appearance: none;
-  }
-  .form-group input:focus, .form-group select:focus { border-color: var(--accent2); }
-  .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
-  .btn-save {
-    flex: 1;
-    background: var(--accent);
-    border: none;
-    border-radius: 12px;
-    padding: 13px;
-    color: white;
-    font-family: 'Cairo', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .btn-save:hover { background: var(--accent2); }
-  .btn-cancel {
-    flex: 1;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 13px;
-    color: var(--text2);
-    font-family: 'Cairo', sans-serif;
-    font-size: 15px;
-    cursor: pointer;
-  }
-
-  /* STATS OVERVIEW */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 14px;
-    text-align: center;
-  }
-  .stat-num { font-size: 28px; font-weight: 900; color: var(--gold2); line-height: 1; }
-  .stat-lbl { font-size: 11px; color: var(--text2); margin-top: 4px; }
-
-  /* SEARCH RESULTS */
-  .search-results { margin-bottom: 16px; }
-  .search-results-label { font-size: 12px; color: var(--text2); margin-bottom: 10px; padding-right: 4px; }
-
-  /* EMPTY STATE */
-  .empty-state { text-align: center; padding: 40px 20px; color: var(--text3); }
-  .empty-state .emoji { font-size: 40px; display: block; margin-bottom: 10px; }
-  .empty-state p { font-size: 14px; }
-
-  .no-results { text-align: center; padding: 30px; color: var(--text3); font-size: 14px; }
-
-  /* EMP DETAIL MODAL */
-  .emp-detail-header {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 16px;
-  }
-  .emp-detail-avatar {
-    width: 60px; height: 60px;
-    border-radius: 16px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--accent3);
-    background: rgba(37,99,235,0.12);
-    border: 1px solid rgba(37,99,235,0.25);
-  }
-  .detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 14px;
-  }
-  .detail-row:last-child { border-bottom: none; }
-  .detail-row .key { color: var(--text3); font-size: 12px; }
-  .detail-row .val { color: var(--text); font-weight: 600; }
-
-  .delete-emp-btn {
-    width: 100%;
-    background: rgba(239,68,68,0.1);
-    border: 1px solid rgba(239,68,68,0.2);
-    border-radius: 12px;
-    padding: 12px;
-    font-family: 'Cairo', sans-serif;
-    font-size: 14px;
-    color: var(--red);
-    cursor: pointer;
-    margin-top: 16px;
-    transition: all 0.2s;
-  }
-  .delete-emp-btn:hover { background: rgba(239,68,68,0.2); }
-
-  .floating-total {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: linear-gradient(135deg, var(--accent), #1d4ed8);
-    border-radius: 50px;
-    padding: 10px 24px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 8px 32px rgba(37,99,235,0.5);
-    font-size: 13px;
-    font-weight: 700;
-    color: white;
-    z-index: 50;
-    transition: all 0.3s;
-  }
-  .ft-num { font-size: 18px; font-weight: 900; color: var(--gold2); }
+:root {
+  --primary: #0a2540;
+  --accent: #1a6b8a;
+  --gold: #c9a84c;
+  --gold-light: #f0d990;
+  --light: #e8f4f8;
+  --white: #ffffff;
+  --danger: #c0392b;
+  --success: #1a7a4a;
+  --text: #1a2a3a;
+  --muted: #6b8299;
+  --border: #d0dde8;
+  --card: #f7fafd;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; font-family: 'Tajawal', sans-serif; background: #0a2540; color: var(--text); overscroll-behavior: none; }
+#splash { position: fixed; inset: 0; background: linear-gradient(160deg, #0a2540 0%, #1a3a5c 60%, #0d4f6a 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; transition: opacity 0.5s ease; }
+#splash .logo-big { font-size: 72px; margin-bottom: 16px; }
+#splash h1 { color: var(--gold); font-size: 1.6rem; font-weight: 800; text-align: center; }
+#splash p  { color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 8px; }
+.spinner { margin-top: 36px; width: 36px; height: 36px; border: 3px solid rgba(201,168,76,0.2); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+#app { display: none; flex-direction: column; height: 100vh; height: 100dvh; }
+.status-bar { height: var(--safe-top); background: var(--primary); }
+.header { background: linear-gradient(90deg, #0a2540 0%, #1a4a6a 50%, #0a2540 100%); padding: 14px 16px 12px; border-bottom: 2px solid var(--gold); flex-shrink: 0; }
+.header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.logo { font-size: 28px; }
+.header-title h1 { color: white; font-size: 1.05rem; font-weight: 800; }
+.header-title p  { color: var(--gold); font-size: 0.75rem; }
+.sync-badge { margin-right: auto; display: flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.08); border: 1px solid rgba(201,168,76,0.3); border-radius: 20px; padding: 4px 10px; font-size: 0.72rem; color: rgba(255,255,255,0.7); }
+.sync-dot { width: 7px; height: 7px; border-radius: 50%; background: #aaa; transition: background 0.3s; }
+.sync-dot.online  { background: #2ecc71; box-shadow: 0 0 6px #2ecc71; }
+.sync-dot.offline { background: #e74c3c; }
+.stats-row { display: flex; gap: 8px; }
+.stat-chip { flex: 1; text-align: center; background: rgba(255,255,255,0.07); border: 1px solid rgba(201,168,76,0.25); border-radius: 10px; padding: 6px 4px; }
+.stat-chip .num { color: var(--gold); font-size: 1.2rem; font-weight: 800; line-height: 1; }
+.stat-chip .lbl { color: rgba(255,255,255,0.6); font-size: 0.68rem; }
+.tabs { display: flex; background: #0d1e30; border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
+.tab { flex: 1; padding: 11px 4px; color: rgba(255,255,255,0.45); background: none; border: none; font-family: 'Tajawal', sans-serif; font-size: 0.75rem; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.tab .tab-icon { font-size: 1.1rem; }
+.tab.active { color: var(--gold); border-bottom-color: var(--gold); }
+.scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #f0f4f8; padding-bottom: calc(16px + var(--safe-bottom)); }
+.chart-wrap { background: white; margin: 14px; border-radius: 14px; padding: 20px 12px; overflow-x: auto; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+.org-tree { display: flex; flex-direction: column; align-items: center; min-width: 700px; }
+.node-hospital { background: linear-gradient(135deg, #0a2540, #1a6b8a); color: white; padding: 14px 32px; border-radius: 10px; font-size: 1rem; font-weight: 800; border: 2px solid var(--gold); box-shadow: 0 4px 16px rgba(10,37,64,0.35); }
+.vline { width: 2px; background: var(--gold); }
+.node-exec { background: linear-gradient(135deg, #1a3a5c, #1a6b8a); color: white; padding: 10px 14px; border-radius: 8px; text-align: center; border: 1px solid rgba(201,168,76,0.4); box-shadow: 0 3px 10px rgba(0,0,0,0.2); min-width: 130px; }
+.node-exec .role { font-size: 0.65rem; color: var(--gold); font-weight: 600; margin-bottom: 3px; }
+.node-exec .name { font-size: 0.82rem; font-weight: 700; }
+.exec-row { display: flex; gap: 16px; align-items: flex-start; }
+.exec-item { display: flex; flex-direction: column; align-items: center; }
+.dept-items-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 0; padding: 0 10px; }
+.dept-item { display: flex; flex-direction: column; align-items: center; }
+.node-dept { background: var(--card); border: 2px solid var(--border); border-radius: 8px; padding: 10px 12px; min-width: 100px; text-align: center; position: relative; cursor: pointer; transition: all 0.2s; }
+.node-dept:active { transform: scale(0.96); }
+.node-dept .dept-icon { font-size: 1.2rem; margin-bottom: 4px; }
+.node-dept .dept-name { font-size: 0.72rem; font-weight: 700; color: var(--primary); }
+.node-dept .dept-cnt  { font-size: 0.65rem; color: var(--muted); margin-top: 2px; }
+.dept-badge { position: absolute; top: -7px; left: -7px; background: var(--accent); color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 0.62rem; font-weight: 800; border: 2px solid white; }
+.search-box { margin: 14px 14px 10px; background: white; border-radius: 12px; display: flex; align-items: center; gap: 10px; padding: 10px 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.08); }
+.search-box input { border: none; background: none; font-family: 'Tajawal', sans-serif; font-size: 0.9rem; flex: 1; color: var(--text); }
+.search-box input:focus { outline: none; }
+.dept-cards { padding: 0 14px; display: flex; flex-direction: column; gap: 12px; }
+.dept-card { background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
+.dept-card-head { padding: 13px 16px; display: flex; align-items: center; gap: 10px; }
+.dept-card-head .ico { font-size: 1.4rem; background: rgba(255,255,255,0.18); border-radius: 8px; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.dept-card-head .hinfo h3 { color: white; font-size: 0.95rem; font-weight: 700; }
+.dept-card-head .hinfo p  { color: rgba(255,255,255,0.7); font-size: 0.75rem; }
+.dept-card-head .add-btn { margin-right: auto; background: rgba(255,255,255,0.2); border: none; border-radius: 20px; color: white; font-size: 0.75rem; font-weight: 700; padding: 5px 12px; cursor: pointer; font-family: 'Tajawal', sans-serif; transition: background 0.2s; }
+.dept-card-head .add-btn:active { background: rgba(255,255,255,0.35); }
+.emp-list { padding: 4px 0; }
+.emp-row { display: flex; align-items: center; gap: 10px; padding: 9px 14px; border-bottom: 1px solid #f0f4f8; transition: background 0.15s; }
+.emp-row:last-child { border-bottom: none; }
+.emp-avatar { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; font-weight: 800; color: white; flex-shrink: 0; }
+.emp-info { flex: 1; min-width: 0; }
+.emp-name { font-size: 0.88rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.emp-role { font-size: 0.72rem; color: var(--muted); }
+.emp-acts { display: flex; gap: 6px; flex-shrink: 0; }
+.btn-sm { width: 30px; height: 30px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; transition: all 0.15s; }
+.btn-edit { background: #e8f4f8; color: var(--accent); }
+.btn-edit:active { background: var(--accent); color: white; }
+.btn-del  { background: #fde8e8; color: var(--danger); }
+.btn-del:active  { background: var(--danger); color: white; }
+.empty-dept { padding: 16px; text-align: center; color: var(--muted); font-size: 0.82rem; }
+.form-wrap { padding: 14px; }
+.form-card { background: white; border-radius: 14px; padding: 20px 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+.form-head { font-size: 1.05rem; font-weight: 800; color: var(--primary); margin-bottom: 18px; padding-bottom: 12px; border-bottom: 2px solid var(--border); display: flex; align-items: center; gap: 8px; }
+.form-group { margin-bottom: 14px; }
+label { display: block; font-size: 0.82rem; font-weight: 700; color: var(--text); margin-bottom: 5px; }
+input, select { width: 100%; padding: 11px 13px; border: 2px solid var(--border); border-radius: 9px; font-size: 0.9rem; font-family: 'Tajawal', sans-serif; color: var(--text); background: var(--card); transition: border-color 0.2s; appearance: none; }
+input:focus, select:focus { outline: none; border-color: var(--accent); background: white; }
+.btn-save { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; border: none; border-radius: 10px; font-size: 1rem; font-weight: 700; font-family: 'Tajawal', sans-serif; cursor: pointer; margin-top: 6px; transition: opacity 0.2s; }
+.btn-save:active { opacity: 0.85; transform: scale(0.98); }
+.toast { position: fixed; bottom: calc(80px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: #1a2a3a; color: white; padding: 10px 20px; border-radius: 30px; font-size: 0.85rem; font-weight: 600; opacity: 0; transition: all 0.3s; z-index: 500; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.3); pointer-events: none; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { background: var(--success); }
+.toast.error   { background: var(--danger); }
+.modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 800; display: none; align-items: flex-end; justify-content: center; padding-bottom: var(--safe-bottom); }
+.modal-bg.open { display: flex; }
+.modal { background: white; width: 100%; max-width: 500px; border-radius: 20px 20px 0 0; padding: 20px 16px 24px; animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 40px; height: 4px; background: #ddd; border-radius: 2px; margin: 0 auto 16px; }
+.modal-title { font-size: 1rem; font-weight: 800; color: var(--primary); margin-bottom: 16px; }
+.modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+.btn-cancel { flex: 1; padding: 11px; background: #f0f4f8; border: none; border-radius: 10px; font-family: 'Tajawal', sans-serif; font-size: 0.9rem; font-weight: 600; color: var(--muted); cursor: pointer; }
+.btn-danger { flex: 1; padding: 11px; background: var(--danger); border: none; border-radius: 10px; font-family: 'Tajawal', sans-serif; font-size: 0.9rem; font-weight: 700; color: white; cursor: pointer; }
+.btn-primary { flex: 1; padding: 11px; background: linear-gradient(135deg, var(--primary), var(--accent)); border: none; border-radius: 10px; font-family: 'Tajawal', sans-serif; font-size: 0.9rem; font-weight: 700; color: white; cursor: pointer; }
+#loading { position: fixed; inset: 0; background: rgba(10,37,64,0.7); z-index: 700; display: none; align-items: center; justify-content: center; }
+#loading.show { display: flex; }
+.loading-box { background: white; border-radius: 14px; padding: 24px 32px; text-align: center; }
+.loading-box p { color: var(--text); font-size: 0.9rem; margin-top: 10px; font-weight: 600; }
 </style>
 </head>
 <body>
-
-<!-- HEADER -->
-<div class="header">
-  <div class="logo-circle">🏥</div>
-  <div class="header-text">
-    <h1>مستشفى الدورة الأهلي</h1>
-    <p>الهيكل التنظيمي للموارد البشرية</p>
-  </div>
-  <div class="header-stats">
-    <div class="num" id="total-count">0</div>
-    <div class="lbl">موظف</div>
-  </div>
+<div id="splash">
+  <div class="logo-big">🏥</div>
+  <h1>مستشفى الدورة الأهلي</h1>
+  <p>نظام الهيكل التنظيمي المتزامن</p>
+  <div class="spinner"></div>
 </div>
-
-<!-- SEARCH -->
-<div class="search-bar">
-  <input type="text" id="search-input" placeholder="🔍  ابحث عن موظف أو قسم..." oninput="handleSearch()">
-</div>
-
-<!-- TABS -->
-<div class="tabs">
-  <button class="tab-btn active" onclick="switchTab('overview', this)">نظرة عامة</button>
-  <button class="tab-btn" onclick="switchTab('chart', this)">الهيكل الهرمي</button>
-  <button class="tab-btn" onclick="switchTab('stats', this)">إحصاءات</button>
-</div>
-
-<!-- CONTENT -->
-<div class="content">
-
-  <!-- OVERVIEW TAB -->
-  <div id="tab-overview" class="overview-view">
-    <div id="search-results-section" style="display:none">
-      <p class="search-results-label">نتائج البحث:</p>
-      <div class="emp-list" id="search-results-list"></div>
+<div id="app">
+  <div class="status-bar"></div>
+  <div class="header">
+    <div class="header-top">
+      <div class="logo">🏥</div>
+      <div class="header-title">
+        <h1>مستشفى الدورة الأهلي</h1>
+        <p>الهيكل التنظيمي المتزامن</p>
+      </div>
+      <div class="sync-badge">
+        <div class="sync-dot" id="sync-dot"></div>
+        <span id="sync-label">جاري الاتصال</span>
+      </div>
     </div>
-
-    <div id="main-overview">
-      <!-- Hospital + Leadership -->
-      <div class="leadership-section">
-        <div class="hospital-top">
-          <h2>🏥 مستشفى الدورة الأهلي</h2>
-          <p>بغداد — العراق</p>
-        </div>
-        <div class="connector"></div>
-        <div class="leader-grid" style="margin-top:10px">
-          <div class="leader-card chairman" onclick="showLeaderDetail('chairman')">
-            <div class="avatar av-gold">👑</div>
-            <div class="leader-info">
-              <div class="title">رئيس مجلس الإدارة</div>
-              <div class="name" id="chairman-name-display">اضغط لتعديل الاسم</div>
-            </div>
-            <div class="arrow-icon">›</div>
+    <div class="stats-row">
+      <div class="stat-chip"><div class="num" id="total-count">0</div><div class="lbl">إجمالي الموظفين</div></div>
+      <div class="stat-chip"><div class="num">10</div><div class="lbl">الأقسام</div></div>
+      <div class="stat-chip"><div class="num" id="mgmt-count">0</div><div class="lbl">الإدارة العليا</div></div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" id="tab-chart" onclick="switchTab('chart')"><span class="tab-icon">🏛️</span> الهيكل</button>
+    <button class="tab" id="tab-list" onclick="switchTab('list')"><span class="tab-icon">📋</span> الأقسام</button>
+    <button class="tab" id="tab-add" onclick="switchTab('add')"><span class="tab-icon">➕</span> إضافة</button>
+  </div>
+  <div class="scroll-area">
+    <div id="view-chart">
+      <div class="chart-wrap">
+        <div class="org-tree">
+          <div class="node-hospital">🏥 مستشفى الدورة الأهلي</div>
+          <div class="vline" style="height:20px;"></div>
+          <div class="node-exec" style="min-width:160px;">
+            <div class="role">👑 رئيس مجلس الإدارة</div>
+            <div class="name" id="c-chairman">—</div>
           </div>
-          <div class="leader-card deputy" onclick="showLeaderDetail('deputy')">
-            <div class="avatar av-blue">👤</div>
-            <div class="leader-info">
-              <div class="title">معاون رئيس مجلس الإدارة</div>
-              <div class="name" id="deputy-name-display">اضغط لتعديل الاسم</div>
-            </div>
-            <div class="arrow-icon">›</div>
+          <div class="vline" style="height:16px;"></div>
+          <div style="width:70%;height:2px;background:var(--gold);"></div>
+          <div class="exec-row" style="gap:12px;">
+            <div class="exec-item"><div class="vline" style="height:16px;"></div><div class="node-exec"><div class="role">🤝 معاون الرئيس</div><div class="name" id="c-vchairman">—</div></div></div>
+            <div class="exec-item"><div class="vline" style="height:16px;"></div><div class="node-exec"><div class="role">⚕️ المدير الفني</div><div class="name" id="c-techdir">—</div></div></div>
+            <div class="exec-item"><div class="vline" style="height:16px;"></div><div class="node-exec"><div class="role">🗂️ المدير الإداري</div><div class="name" id="c-admindir">—</div></div></div>
           </div>
-          <div class="leader-card" onclick="showLeaderDetail('technical')">
-            <div class="avatar av-teal">🩺</div>
-            <div class="leader-info">
-              <div class="title">المدير الفني</div>
-              <div class="name" id="technical-name-display">اضغط لتعديل الاسم</div>
-            </div>
-            <div class="arrow-icon">›</div>
-          </div>
-          <div class="leader-card" onclick="showLeaderDetail('admin')">
-            <div class="avatar av-blue">🏢</div>
-            <div class="leader-info">
-              <div class="title">المدير الإداري</div>
-              <div class="name" id="admin-name-display">اضغط لتعديل الاسم</div>
-            </div>
-            <div class="arrow-icon">›</div>
-          </div>
+          <div class="vline" style="height:16px;"></div>
+          <div style="width:95%;height:2px;background:#ddd;"></div>
+          <div class="dept-items-row" id="chart-depts" style="margin-top:0;"></div>
         </div>
       </div>
-
-      <!-- Departments -->
-      <p class="section-label" style="margin-top:20px">الأقسام</p>
-      <div class="dept-grid" id="dept-grid"></div>
     </div>
-
-    <!-- DEPT DETAIL -->
-    <div id="dept-detail" class="detail-view">
-      <button class="back-btn" onclick="goBack()">→ رجوع</button>
-      <div id="dept-detail-content"></div>
+    <div id="view-list" style="display:none;">
+      <div class="search-box"><span>🔍</span><input type="text" placeholder="ابحث عن موظف أو قسم..." oninput="filterList(this.value)" id="search-inp"></div>
+      <div class="dept-cards" id="dept-cards"></div>
     </div>
-  </div>
-
-  <!-- CHART TAB -->
-  <div id="tab-chart" style="display:none">
-    <div id="org-chart-container"></div>
-  </div>
-
-  <!-- STATS TAB -->
-  <div id="tab-stats" style="display:none">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-num" id="stat-total">0</div>
-        <div class="stat-lbl">إجمالي الموظفين</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="stat-depts">10</div>
-        <div class="stat-lbl">الأقسام</div>
+    <div id="view-add" style="display:none;">
+      <div class="form-wrap">
+        <div class="form-card">
+          <div class="form-head">➕ إضافة موظف جديد</div>
+          <div class="form-group"><label>الاسم الكامل *</label><input type="text" id="f-name" placeholder="مثال: أحمد محمد علي"></div>
+          <div class="form-group"><label>المسمى الوظيفي *</label><input type="text" id="f-role" placeholder="مثال: فني أشعة، محاسب..."></div>
+          <div class="form-group"><label>القسم *</label><select id="f-dept"></select></div>
+          <div class="form-group"><label>رقم الهاتف (اختياري)</label><input type="tel" id="f-phone" placeholder="07XX XXX XXXX"></div>
+          <button class="btn-save" onclick="addEmployee()">💾 حفظ الموظف</button>
+        </div>
       </div>
     </div>
-    <p class="section-label">الأقسام حسب عدد الموظفين</p>
-    <div id="stats-dept-list"></div>
   </div>
 </div>
-
-<!-- FLOATING TOTAL -->
-<div class="floating-total">
-  <span>إجمالي الموظفين</span>
-  <span class="ft-num" id="ft-total">0</span>
-</div>
-
-<!-- ADD EMPLOYEE MODAL -->
-<div class="modal-overlay" id="add-modal">
+<div id="loading"><div class="loading-box"><div class="spinner" style="margin:0 auto;"></div><p id="loading-msg">جاري الحفظ...</p></div></div>
+<div class="modal-bg" id="edit-modal">
   <div class="modal">
-    <h3>➕ إضافة موظف</h3>
-    <div class="form-group">
-      <label>الاسم الكامل</label>
-      <input type="text" id="new-emp-name" placeholder="مثال: أحمد محمد علي" dir="rtl">
-    </div>
-    <div class="form-group">
-      <label>المسمى الوظيفي</label>
-      <input type="text" id="new-emp-role" placeholder="مثال: فني مختبر" dir="rtl">
-    </div>
-    <div class="form-group">
-      <label>رقم الموظف</label>
-      <input type="text" id="new-emp-id" placeholder="مثال: EMP-001" dir="ltr">
-    </div>
-    <div class="form-group">
-      <label>نوع الموظف</label>
-      <select id="new-emp-type">
-        <option value="head">رئيس القسم</option>
-        <option value="staff">موظف</option>
-        <option value="tech">فني</option>
-        <option value="admin">إداري</option>
-      </select>
-    </div>
-    <div class="modal-actions">
-      <button class="btn-save" onclick="saveEmployee()">حفظ</button>
-      <button class="btn-cancel" onclick="closeModal('add-modal')">إلغاء</button>
-    </div>
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ تعديل بيانات الموظف</div>
+    <div class="form-group"><label>الاسم الكامل</label><input type="text" id="e-name"></div>
+    <div class="form-group"><label>المسمى الوظيفي</label><input type="text" id="e-role"></div>
+    <div class="form-group"><label>القسم</label><select id="e-dept"></select></div>
+    <div class="form-group"><label>رقم الهاتف</label><input type="tel" id="e-phone"></div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeModal('edit-modal')">إلغاء</button><button class="btn-primary" onclick="saveEdit()">💾 حفظ</button></div>
   </div>
 </div>
-
-<!-- EMPLOYEE DETAIL MODAL -->
-<div class="modal-overlay" id="emp-detail-modal">
+<div class="modal-bg" id="del-modal">
   <div class="modal">
-    <div id="emp-detail-content"></div>
-    <button class="btn-cancel" style="width:100%;margin-top:10px" onclick="closeModal('emp-detail-modal')">إغلاق</button>
+    <div class="modal-handle"></div>
+    <div class="modal-title">🗑️ تأكيد الحذف</div>
+    <p style="color:var(--muted);font-size:0.88rem;line-height:1.6;">هل أنت متأكد من حذف الموظف <strong id="del-name-txt"></strong>؟<br>لا يمكن التراجع عن هذا الإجراء.</p>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeModal('del-modal')">إلغاء</button><button class="btn-danger" onclick="confirmDelete()">🗑️ حذف</button></div>
   </div>
 </div>
-
-<!-- LEADER EDIT MODAL -->
-<div class="modal-overlay" id="leader-modal">
-  <div class="modal">
-    <h3 id="leader-modal-title">تعديل معلومات المدير</h3>
-    <div class="form-group">
-      <label>الاسم الكامل</label>
-      <input type="text" id="leader-name-input" placeholder="أدخل الاسم" dir="rtl">
-    </div>
-    <div class="modal-actions">
-      <button class="btn-save" onclick="saveLeader()">حفظ</button>
-      <button class="btn-cancel" onclick="closeModal('leader-modal')">إلغاء</button>
-    </div>
-  </div>
-</div>
-
-<script>
-// ====== DATA ======
-const DEPTS = [
-  { id: 'maintenance', name: 'الصيانة', icon: '🔧', color: 'dc-orange' },
-  { id: 'radiology', name: 'الأشعة', icon: '🩻', color: 'dc-blue' },
-  { id: 'reception', name: 'الاستعلامات', icon: '🖥️', color: 'dc-teal' },
-  { id: 'security', name: 'الأمنية', icon: '🛡️', color: 'dc-indigo' },
-  { id: 'emergency', name: 'الطوارئ', icon: '🚨', color: 'dc-red' },
-  { id: 'cafeteria', name: 'الكافتيريا', icon: '☕', color: 'dc-gold' },
-  { id: 'surgery', name: 'العمليات', icon: '⚕️', color: 'dc-blue2' },
-  { id: 'anesthesia', name: 'التخدير', icon: '💉', color: 'dc-purple' },
-  { id: 'accounts', name: 'الحسابات', icon: '💰', color: 'dc-success' },
-  { id: 'it', name: 'قسم IT', icon: '💻', color: 'dc-pink' },
-];
-
-const LEADER_TITLES = {
-  chairman: 'رئيس مجلس الإدارة',
-  deputy: 'معاون رئيس مجلس الإدارة',
-  technical: 'المدير الفني',
-  admin: 'المدير الإداري'
+<div class="toast" id="toast"></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyC0bpTdP1mO55YtmOW6F-TwyCGM4OYQJHE",
+  authDomain: "dora-hospital-a5566.firebaseapp.com",
+  databaseURL: "https://dora-hospital-a5566-default-rtdb.firebaseio.com",
+  projectId: "dora-hospital-a5566",
+  storageBucket: "dora-hospital-a5566.firebasestorage.app",
+  messagingSenderId: "1046396648622",
+  appId: "1:1046396648622:web:59a54c44ad8c4307f7c13f"
 };
-
-let leaders = JSON.parse(localStorage.getItem('hospital_leaders') || '{}');
-let employees = JSON.parse(localStorage.getItem('hospital_employees') || '{}');
-let currentDept = null;
-let currentLeader = null;
-let currentTab = 'overview';
-
-// Init empty arrays
-DEPTS.forEach(d => { if (!employees[d.id]) employees[d.id] = []; });
-
-function save() {
-  localStorage.setItem('hospital_employees', JSON.stringify(employees));
-  localStorage.setItem('hospital_leaders', JSON.stringify(leaders));
-  updateTotals();
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+const DEPTS = [
+  { id:'maintenance', name:'الصيانة',         icon:'🔧', color:'#e67e22' },
+  { id:'radiology',   name:'الأشعة',          icon:'🩻', color:'#8e44ad' },
+  { id:'reception',   name:'الاستعلامات',     icon:'📞', color:'#2980b9' },
+  { id:'security',    name:'الأمنية',          icon:'🔒', color:'#c0392b' },
+  { id:'emergency',   name:'الطوارئ',          icon:'🚨', color:'#e74c3c' },
+  { id:'cafeteria',   name:'الكافتيريا',       icon:'☕', color:'#f39c12' },
+  { id:'operations',  name:'العمليات',         icon:'🔬', color:'#27ae60' },
+  { id:'anesthesia',  name:'التخدير',          icon:'💉', color:'#16a085' },
+  { id:'accounts',    name:'الحسابات',         icon:'💰', color:'#2ecc71' },
+  { id:'it',          name:'تقنية المعلومات',  icon:'💻', color:'#3498db' },
+];
+const MGMT = [
+  { id:'chairman',  title:'رئيس مجلس الإدارة',        chartId:'c-chairman'  },
+  { id:'vchairman', title:'معاون رئيس مجلس الإدارة',  chartId:'c-vchairman' },
+  { id:'techdir',   title:'المدير الفني',              chartId:'c-techdir'   },
+  { id:'admindir',  title:'المدير الإداري',            chartId:'c-admindir'  },
+];
+const AVATAR_COLORS = ['#1a6b8a','#c0392b','#27ae60','#8e44ad','#e67e22','#2980b9','#16a085','#d35400'];
+let employees = {};
+let editingKey = null, deletingKey = null, currentTab = 'chart', filterText = '';
+const empRef = ref(db, 'employees');
+onValue(empRef, snap => {
+  employees = snap.val() || {};
+  updateStats();
+  if (currentTab==='chart') renderChart();
+  if (currentTab==='list')  renderList();
+  setSync(true);
+}, () => setSync(false));
+function setSync(online) {
+  document.getElementById('sync-dot').className = 'sync-dot '+(online?'online':'offline');
+  document.getElementById('sync-label').textContent = online?'متزامن':'بدون إنترنت';
 }
-
-function getTotalCount() {
-  return Object.values(employees).reduce((s, a) => s + a.length, 0);
+function avatarColor(name) { let h=0; for(let c of(name||'A'))h=(h<<5)-h+c.charCodeAt(0); return AVATAR_COLORS[Math.abs(h)%AVATAR_COLORS.length]; }
+function initials(name) { return(name||'?').trim().split(' ').slice(0,2).map(w=>w[0]||'').join(''); }
+function empList() { return Object.entries(employees).map(([k,v])=>({...v,_key:k})); }
+function showToast(msg,type='success') { const t=document.getElementById('toast'); t.textContent=msg; t.className='toast show '+type; setTimeout(()=>t.className='toast',2800); }
+function showLoading(msg='جاري الحفظ...') { document.getElementById('loading-msg').textContent=msg; document.getElementById('loading').style.display='flex'; }
+function hideLoading() { document.getElementById('loading').style.display='none'; }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+window.switchTab = function(tab) {
+  currentTab=tab;
+  ['chart','list','add'].forEach(t=>{ document.getElementById('view-'+t).style.display=t===tab?'block':'none'; document.getElementById('tab-'+t).className='tab'+(t===tab?' active':''); });
+  if(tab==='chart')renderChart();
+  if(tab==='list')renderList();
+  if(tab==='add'){populateDeptSelect('f-dept');clearForm();}
+};
+function updateStats() { const all=empList(); document.getElementById('total-count').textContent=all.length; document.getElementById('mgmt-count').textContent=all.filter(e=>e.mgmtRole).length; }
+function renderChart() {
+  MGMT.forEach(m=>{ const mgr=empList().find(e=>e.mgmtRole===m.id); document.getElementById(m.chartId).textContent=mgr?mgr.name:'(غير محدد)'; });
+  const row=document.getElementById('chart-depts'); row.innerHTML='';
+  DEPTS.forEach(d=>{ const cnt=empList().filter(e=>e.deptId===d.id&&!e.mgmtRole).length; const el=document.createElement('div'); el.className='dept-item'; el.innerHTML=`<div class="vline" style="height:14px;background:${d.color}55;"></div><div class="node-dept" onclick="switchTab('list')"><div class="dept-badge" style="background:${d.color};">${cnt}</div><div class="dept-icon">${d.icon}</div><div class="dept-name">${d.name}</div><div class="dept-cnt">${cnt} موظف</div></div>`; row.appendChild(el); });
 }
-
-function updateTotals() {
-  const t = getTotalCount();
-  document.getElementById('total-count').textContent = t;
-  document.getElementById('ft-total').textContent = t;
-  if (document.getElementById('stat-total')) {
-    document.getElementById('stat-total').textContent = t;
-  }
-
-  // Update leader names
-  Object.keys(LEADER_TITLES).forEach(k => {
-    const el = document.getElementById(k + '-name-display');
-    if (el) el.textContent = leaders[k] || 'لم يُحدَّد بعد';
-  });
+function renderList(filter='') {
+  const f=(filter||filterText).toLowerCase(); const grid=document.getElementById('dept-cards'); grid.innerHTML=''; const all=empList();
+  let mgrEmps=all.filter(e=>e.mgmtRole); if(f)mgrEmps=mgrEmps.filter(e=>e.name.toLowerCase().includes(f)||e.role?.toLowerCase().includes(f));
+  grid.appendChild(buildCard({id:'management',name:'الإدارة العليا',icon:'👑',color:'#0a2540'},mgrEmps,true));
+  DEPTS.forEach(d=>{ let emps=all.filter(e=>e.deptId===d.id&&!e.mgmtRole); if(f)emps=emps.filter(e=>e.name.toLowerCase().includes(f)||e.role?.toLowerCase().includes(f)||d.name.includes(f)); grid.appendChild(buildCard(d,emps,false)); });
 }
-
-// ====== RENDER DEPTS ======
-function renderDepts() {
-  const grid = document.getElementById('dept-grid');
-  grid.innerHTML = DEPTS.map(d => `
-    <div class="dept-card ${d.color}" onclick="showDept('${d.id}')">
-      <span class="dept-icon">${d.icon}</span>
-      <div class="dept-name">${d.name}</div>
-      <div class="dept-count">
-        <span class="count-badge">${employees[d.id]?.length || 0}</span>
-        موظف
-      </div>
-    </div>
-  `).join('');
+function buildCard(dept,emps,isMgmt) {
+  const card=document.createElement('div'); card.className='dept-card';
+  const empRows=emps.length?emps.map(e=>`<div class="emp-row"><div class="emp-avatar" style="background:${isMgmt?'var(--gold)':avatarColor(e.name)};${isMgmt?'color:#0a2540;':''}">${initials(e.name)}</div><div class="emp-info"><div class="emp-name">${e.name}</div><div class="emp-role">${isMgmt?(MGMT.find(m=>m.id===e.mgmtRole)?.title||e.role):e.role}${e.phone?' · '+e.phone:''}</div></div><div class="emp-acts"><button class="btn-sm btn-edit" onclick="openEdit('${e._key}')">✏️</button><button class="btn-sm btn-del" onclick="openDelete('${e._key}','${e.name.replace(/'/g,"\\'")}')">🗑️</button></div></div>`).join(''):`<div class="empty-dept">لا يوجد موظفون في هذا القسم</div>`;
+  card.innerHTML=`<div class="dept-card-head" style="background:linear-gradient(135deg,${dept.color}dd,${dept.color});"><div class="ico">${dept.icon}</div><div class="hinfo"><h3>${isMgmt?'':'قسم '}${dept.name}</h3><p>${emps.length} موظف</p></div><button class="add-btn" onclick="quickAdd('${dept.id}')">+ إضافة</button></div><div class="emp-list">${empRows}</div>`;
+  return card;
 }
-
-// ====== SHOW DEPT ======
-function showDept(deptId) {
-  currentDept = deptId;
-  const dept = DEPTS.find(d => d.id === deptId);
-  const emps = employees[deptId] || [];
-
-  const colorMap = {
-    'dc-orange': '#f97316', 'dc-blue': '#3b82f6', 'dc-teal': '#14b8a6',
-    'dc-indigo': '#6366f1', 'dc-red': '#ef4444', 'dc-gold': '#f59e0b',
-    'dc-blue2': '#38bdf8', 'dc-purple': '#8b5cf6', 'dc-success': '#10b981',
-    'dc-pink': '#ec4899'
-  };
-  const c = colorMap[dept.color] || '#3b82f6';
-
-  const empListHtml = emps.length > 0
-    ? emps.map((e, i) => `
-      <div class="emp-card" onclick="showEmpDetail('${deptId}', ${i})">
-        <div class="emp-avatar">${getInitials(e.name)}</div>
-        <div class="emp-info">
-          <div class="emp-name">${e.name}</div>
-          <div class="emp-role">${e.role || '—'} ${e.empId ? '· ' + e.empId : ''}</div>
-        </div>
-        <span class="emp-badge ${getBadgeClass(e.type)}">${getTypeLabel(e.type)}</span>
-      </div>
-    `).join('')
-    : `<div class="empty-state"><span class="emoji">👥</span><p>لا يوجد موظفون في هذا القسم بعد</p></div>`;
-
-  document.getElementById('dept-detail-content').innerHTML = `
-    <div class="dept-header-card" style="background:linear-gradient(135deg,${c}22,${c}11);border:1px solid ${c}33;color:white">
-      <div style="font-size:36px;margin-bottom:8px">${dept.icon}</div>
-      <h2>قسم ${dept.name}</h2>
-      <div class="dept-header-stats">
-        <div class="dhs-item">
-          <div class="dhs-num">${emps.length}</div>
-          <div class="dhs-lbl">موظف</div>
-        </div>
-      </div>
-    </div>
-    <p class="emp-list-label">قائمة الموظفين</p>
-    <div class="emp-list" id="dept-emp-list">
-      ${empListHtml}
-    </div>
-    <button class="add-emp-btn" onclick="openAddModal()">+ إضافة موظف جديد</button>
-  `;
-
-  document.getElementById('main-overview').style.display = 'none';
-  document.getElementById('dept-detail').classList.add('active');
-}
-
-function goBack() {
-  currentDept = null;
-  document.getElementById('main-overview').style.display = 'block';
-  document.getElementById('dept-detail').classList.remove('active');
-  renderDepts();
-  updateTotals();
-}
-
-// ====== LEADER MODAL ======
-function showLeaderDetail(key) {
-  currentLeader = key;
-  document.getElementById('leader-modal-title').textContent = 'تعديل: ' + LEADER_TITLES[key];
-  document.getElementById('leader-name-input').value = leaders[key] || '';
-  document.getElementById('leader-modal').classList.add('active');
-}
-
-function saveLeader() {
-  const name = document.getElementById('leader-name-input').value.trim();
-  if (!name) return;
-  leaders[currentLeader] = name;
-  save();
-  closeModal('leader-modal');
-}
-
-// ====== ADD EMPLOYEE ======
-function openAddModal() {
-  document.getElementById('new-emp-name').value = '';
-  document.getElementById('new-emp-role').value = '';
-  document.getElementById('new-emp-id').value = '';
-  document.getElementById('new-emp-type').value = 'staff';
-  document.getElementById('add-modal').classList.add('active');
-}
-
-function saveEmployee() {
-  const name = document.getElementById('new-emp-name').value.trim();
-  const role = document.getElementById('new-emp-role').value.trim();
-  const empId = document.getElementById('new-emp-id').value.trim();
-  const type = document.getElementById('new-emp-type').value;
-  if (!name) { alert('الرجاء إدخال اسم الموظف'); return; }
-  if (!currentDept) return;
-  employees[currentDept].push({ name, role, empId, type });
-  save();
-  closeModal('add-modal');
-  showDept(currentDept);
-}
-
-// ====== EMP DETAIL ======
-function showEmpDetail(deptId, idx) {
-  const e = employees[deptId][idx];
-  const dept = DEPTS.find(d => d.id === deptId);
-  document.getElementById('emp-detail-content').innerHTML = `
-    <div class="emp-detail-header">
-      <div class="emp-detail-avatar">${getInitials(e.name)}</div>
-      <div>
-        <div style="font-size:18px;font-weight:700">${e.name}</div>
-        <div style="font-size:12px;color:var(--text2);margin-top:4px">${e.role || 'موظف'}</div>
-      </div>
-    </div>
-    <div class="detail-row"><span class="key">القسم</span><span class="val">${dept.icon} ${dept.name}</span></div>
-    <div class="detail-row"><span class="key">رقم الموظف</span><span class="val">${e.empId || '—'}</span></div>
-    <div class="detail-row"><span class="key">المسمى الوظيفي</span><span class="val">${e.role || '—'}</span></div>
-    <div class="detail-row"><span class="key">النوع</span><span class="val"><span class="emp-badge ${getBadgeClass(e.type)}">${getTypeLabel(e.type)}</span></span></div>
-    <button class="delete-emp-btn" onclick="deleteEmployee('${deptId}', ${idx})">🗑️ حذف الموظف</button>
-  `;
-  document.getElementById('emp-detail-modal').classList.add('active');
-}
-
-function deleteEmployee(deptId, idx) {
-  if (!confirm('هل أنت متأكد من حذف هذا الموظف؟')) return;
-  employees[deptId].splice(idx, 1);
-  save();
-  closeModal('emp-detail-modal');
-  showDept(deptId);
-}
-
-// ====== SEARCH ======
-function handleSearch() {
-  const q = document.getElementById('search-input').value.trim().toLowerCase();
-  const resultsSection = document.getElementById('search-results-section');
-  const mainOverview = document.getElementById('main-overview');
-
-  if (!q) {
-    resultsSection.style.display = 'none';
-    mainOverview.style.display = 'block';
-    return;
-  }
-
-  // Hide dept detail if open
-  document.getElementById('dept-detail').classList.remove('active');
-  mainOverview.style.display = 'none';
-  resultsSection.style.display = 'block';
-
-  const results = [];
-  DEPTS.forEach(d => {
-    (employees[d.id] || []).forEach((e, i) => {
-      if (e.name.toLowerCase().includes(q) || (e.role || '').toLowerCase().includes(q) || (e.empId || '').toLowerCase().includes(q)) {
-        results.push({ dept: d, emp: e, idx: i });
-      }
-    });
-  });
-
-  const list = document.getElementById('search-results-list');
-  if (results.length === 0) {
-    list.innerHTML = '<div class="no-results">لا توجد نتائج مطابقة</div>';
-  } else {
-    list.innerHTML = results.map(r => `
-      <div class="emp-card" onclick="showEmpDetail('${r.dept.id}', ${r.idx})">
-        <div class="emp-avatar">${getInitials(r.emp.name)}</div>
-        <div class="emp-info">
-          <div class="emp-name">${r.emp.name}</div>
-          <div class="emp-role">${r.emp.role || '—'} · ${r.dept.icon} ${r.dept.name}</div>
-        </div>
-        <span class="emp-badge ${getBadgeClass(r.emp.type)}">${getTypeLabel(r.emp.type)}</span>
-      </div>
-    `).join('');
-  }
-}
-
-// ====== TABS ======
-function switchTab(tab, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  currentTab = tab;
-  document.getElementById('tab-overview').style.display = tab === 'overview' ? 'block' : 'none';
-  document.getElementById('tab-chart').style.display = tab === 'chart' ? 'block' : 'none';
-  document.getElementById('tab-stats').style.display = tab === 'stats' ? 'block' : 'none';
-
-  if (tab === 'chart') renderOrgChart();
-  if (tab === 'stats') renderStats();
-}
-
-// ====== ORG CHART ======
-function renderOrgChart() {
-  const container = document.getElementById('org-chart-container');
-  const total = getTotalCount();
-  let html = `
-    <div style="text-align:center;padding:16px 0;overflow-x:auto">
-      <div style="background:linear-gradient(135deg,#1e2a4a,#1a2540);border:1px solid rgba(245,158,11,0.3);border-radius:14px;padding:14px 20px;display:inline-block;margin-bottom:0;min-width:200px">
-        <div style="font-size:24px">🏥</div>
-        <div style="font-weight:900;font-size:16px;color:var(--gold2)">مستشفى الدورة الأهلي</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:4px">${total} موظف</div>
-      </div>
-      <div style="width:2px;height:20px;background:var(--border2);margin:0 auto"></div>
-      <div style="background:var(--card);border:1px solid rgba(245,158,11,0.25);border-radius:12px;padding:10px 16px;display:inline-block;margin-bottom:0">
-        <div style="font-size:11px;color:var(--text3)">رئيس مجلس الإدارة</div>
-        <div style="font-weight:700;font-size:14px">${leaders['chairman'] || 'غير محدد'}</div>
-      </div>
-      <div style="width:2px;height:20px;background:var(--border2);margin:0 auto"></div>
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:0">
-        ${['deputy','technical','admin'].map(k=>`
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 12px;font-size:12px;text-align:center;min-width:100px">
-            <div style="color:var(--text3);font-size:10px">${LEADER_TITLES[k]}</div>
-            <div style="font-weight:600;font-size:12px;margin-top:2px">${leaders[k] || 'غير محدد'}</div>
-          </div>
-        `).join('')}
-      </div>
-      <div style="width:2px;height:20px;background:var(--border2);margin:0 auto"></div>
-      <p style="font-size:11px;color:var(--text3);margin-bottom:12px">الأقسام</p>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:right">
-        ${DEPTS.map(d=>`
-          <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:10px 12px;cursor:pointer" onclick="switchTab('overview',document.querySelectorAll('.tab-btn')[0]);showDept('${d.id}')">
-            <span style="font-size:18px">${d.icon}</span>
-            <div style="font-size:12px;font-weight:700;margin-top:4px">${d.name}</div>
-            <div style="font-size:11px;color:var(--accent3);margin-top:2px">${employees[d.id]?.length || 0} موظف</div>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `;
-  container.innerHTML = html;
-}
-
-// ====== STATS ======
-function renderStats() {
-  document.getElementById('stat-total').textContent = getTotalCount();
-  const sorted = DEPTS.map(d => ({ ...d, count: employees[d.id]?.length || 0 }))
-    .sort((a,b) => b.count - a.count);
-  const max = sorted[0]?.count || 1;
-  const colorMap = {
-    'dc-orange': '#f97316','dc-blue':'#3b82f6','dc-teal':'#14b8a6',
-    'dc-indigo':'#6366f1','dc-red':'#ef4444','dc-gold':'#f59e0b',
-    'dc-blue2':'#38bdf8','dc-purple':'#8b5cf6','dc-success':'#10b981','dc-pink':'#ec4899'
-  };
-  document.getElementById('stats-dept-list').innerHTML = sorted.map(d => `
-    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer" onclick="switchTab('overview',document.querySelectorAll('.tab-btn')[0]);showDept('${d.id}')">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:8px">
-          <span style="font-size:18px">${d.icon}</span>
-          <span style="font-size:14px;font-weight:600">${d.name}</span>
-        </div>
-        <span style="font-size:16px;font-weight:900;color:var(--gold2)">${d.count}</span>
-      </div>
-      <div style="height:6px;background:var(--border);border-radius:10px;overflow:hidden">
-        <div style="height:100%;width:${max > 0 ? (d.count/max*100) : 0}%;background:${colorMap[d.color]};border-radius:10px;transition:width 0.5s"></div>
-      </div>
-    </div>
-  `).join('');
-}
-
-// ====== HELPERS ======
-function getInitials(name) {
-  if (!name) return '?';
-  const parts = name.trim().split(' ');
-  return parts.length >= 2 ? parts[0][0] + parts[1][0] : name[0];
-}
-function getBadgeClass(type) {
-  return { head:'badge-head', staff:'badge-staff', tech:'badge-tech', admin:'badge-admin' }[type] || 'badge-staff';
-}
-function getTypeLabel(type) {
-  return { head:'رئيس قسم', staff:'موظف', tech:'فني', admin:'إداري' }[type] || 'موظف';
-}
-function closeModal(id) {
-  document.getElementById(id).classList.remove('active');
-}
-
-// Close modal on overlay click
-document.querySelectorAll('.modal-overlay').forEach(o => {
-  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); });
-});
-
-// ====== INIT ======
-renderDepts();
-updateTotals();
+window.filterList=function(v){filterText=v;renderList(v);};
+function populateDeptSelect(selId) { const sel=document.getElementById(selId); const cur=sel.value; sel.innerHTML='<option value="">-- اختر القسم --</option>'; DEPTS.forEach(d=>sel.innerHTML+=`<option value="${d.id}">${d.icon} ${d.name}</option>`); sel.innerHTML+=`<option value="management">👑 الإدارة العليا</option>`; if(cur)sel.value=cur; }
+function clearForm() { ['f-name','f-role','f-phone'].forEach(id=>document.getElementById(id).value=''); document.getElementById('f-dept').value=''; }
+window.quickAdd=function(deptId){switchTab('add');setTimeout(()=>{populateDeptSelect('f-dept');document.getElementById('f-dept').value=deptId;},60);};
+window.addEmployee=async function(){
+  const name=document.getElementById('f-name').value.trim(),role=document.getElementById('f-role').value.trim(),dept=document.getElementById('f-dept').value,phone=document.getElementById('f-phone').value.trim();
+  if(!name||!role||!dept){showToast('⚠️ يرجى تعبئة جميع الحقول المطلوبة','error');return;}
+  const emp={name,role,phone};
+  if(dept==='management'){const vacant=MGMT.find(m=>!empList().find(e=>e.mgmtRole===m.id));emp.mgmtRole=vacant?vacant.id:'admindir';emp.deptId=null;}
+  else{emp.deptId=dept;emp.mgmtRole=null;}
+  showLoading('جاري الإضافة...');
+  try{await push(empRef,emp);clearForm();showToast(`✅ تمت إضافة ${name}`);switchTab('list');}catch(e){showToast('❌ فشل الحفظ','error');}
+  hideLoading();
+};
+window.openEdit=function(key){editingKey=key;const e=employees[key];if(!e)return;document.getElementById('e-name').value=e.name||'';document.getElementById('e-role').value=e.role||'';document.getElementById('e-phone').value=e.phone||'';populateDeptSelect('e-dept');document.getElementById('e-dept').value=e.mgmtRole?'management':(e.deptId||'');document.getElementById('edit-modal').classList.add('open');};
+window.saveEdit=async function(){const e=employees[editingKey];if(!e)return;const upd={name:document.getElementById('e-name').value.trim(),role:document.getElementById('e-role').value.trim(),phone:document.getElementById('e-phone').value.trim()};const d=document.getElementById('e-dept').value;if(d==='management'){upd.deptId=null;upd.mgmtRole=e.mgmtRole||'admindir';}else{upd.deptId=d;upd.mgmtRole=null;}closeModal('edit-modal');showLoading('جاري التعديل...');try{await update(ref(db,'employees/'+editingKey),upd);showToast('✅ تم التعديل بنجاح');}catch(err){showToast('❌ فشل التعديل','error');}hideLoading();};
+window.openDelete=function(key,name){deletingKey=key;document.getElementById('del-name-txt').textContent=name;document.getElementById('del-modal').classList.add('open');};
+window.confirmDelete=async function(){closeModal('del-modal');showLoading('جاري الحذف...');try{await remove(ref(db,'employees/'+deletingKey));showToast('🗑️ تم الحذف');}catch(e){showToast('❌ فشل الحذف','error');}hideLoading();};
+window.closeModal=closeModal;
+window.addEventListener('load',()=>{setTimeout(()=>{const splash=document.getElementById('splash');splash.style.opacity='0';setTimeout(()=>{splash.style.display='none';document.getElementById('app').style.display='flex';populateDeptSelect('f-dept');},500);},1800);});
+document.querySelectorAll('.modal-bg').forEach(bg=>{bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('open');});});
 </script>
 </body>
 </html>
