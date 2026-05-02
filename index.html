@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
+ 
   :root {
     --blue: #1a5fa8;
     --blue-light: #e8f1fb;
@@ -29,7 +29,7 @@
     --radius: 14px;
     --radius-sm: 8px;
   }
-
+ 
   body {
     font-family: 'Tajawal', sans-serif;
     background: var(--bg);
@@ -39,7 +39,7 @@
     margin: 0 auto;
     overflow-x: hidden;
   }
-
+ 
   /* Header */
   .header {
     background: linear-gradient(145deg, #1a5fa8 0%, #0d3d7a 100%);
@@ -113,7 +113,7 @@
   .stat-box .lbl {
     font-size: 11px; color: rgba(255,255,255,0.75);
   }
-
+ 
   /* Search */
   .search-wrap {
     padding: 14px 16px 0;
@@ -141,10 +141,10 @@
     font-size: 16px;
     pointer-events: none;
   }
-
+ 
   /* Main content */
   .main { padding: 14px 16px 32px; }
-
+ 
   /* Section label */
   .section-label {
     font-size: 12px; font-weight: 700;
@@ -153,7 +153,7 @@
     letter-spacing: 0.5px;
     margin: 18px 0 8px;
   }
-
+ 
   /* Node card */
   .node {
     background: white;
@@ -165,7 +165,7 @@
     transition: transform 0.15s;
   }
   .node:active { transform: scale(0.98); }
-
+ 
   .node-header {
     display: flex; align-items: center;
     gap: 12px;
@@ -197,30 +197,30 @@
     flex-shrink: 0;
   }
   .node.open .node-arrow { transform: rotate(90deg); }
-
+ 
   /* Top leadership special */
   .node.top {
     border: 1.5px solid var(--blue);
   }
   .node.top .node-icon { background: var(--blue-light); }
   .node.top .node-badge { background: var(--blue-light); color: var(--blue); }
-
+ 
   .node.deputy { border: 1.5px solid #7c3abd; }
   .node.deputy .node-icon { background: #f3eafd; }
   .node.deputy .node-badge { background: #f3eafd; color: #7c3abd; }
-
+ 
   .node.tech { border: 1.5px solid var(--teal); }
   .node.tech .node-icon { background: var(--teal-light); }
   .node.tech .node-badge { background: var(--teal-light); color: var(--teal); }
-
+ 
   .node.admin { border: 1.5px solid var(--gold); }
   .node.admin .node-icon { background: var(--gold-light); }
   .node.admin .node-badge { background: var(--gold-light); color: var(--gold); }
-
+ 
   /* Department */
   .node.dept .node-icon { background: #f0f4ff; }
   .node.dept .node-badge { background: #f0f4ff; color: #3a5fd9; }
-
+ 
   /* Employees list */
   .employees {
     display: none;
@@ -228,7 +228,7 @@
     background: #f8faff;
   }
   .node.open .employees { display: block; }
-
+ 
   .emp-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 16px 6px;
@@ -241,7 +241,7 @@
     font-family: 'Tajawal', sans-serif;
     cursor: pointer;
   }
-
+ 
   .emp-list { padding: 0 12px 12px; }
   .emp-item {
     display: flex; align-items: center; gap: 10px;
@@ -265,7 +265,7 @@
     background: none; border: none; cursor: pointer;
     font-size: 15px; padding: 2px;
   }
-
+ 
   .emp-add-form {
     display: none;
     padding: 10px 12px;
@@ -295,13 +295,13 @@
     padding: 9px 14px; font-family: 'Tajawal', sans-serif;
     font-size: 13px; cursor: pointer;
   }
-
+ 
   /* Empty */
   .emp-empty {
     text-align: center; padding: 16px;
     font-size: 13px; color: var(--text-muted);
   }
-
+ 
   /* Bottom bar */
   .bottom-bar {
     position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
@@ -321,12 +321,12 @@
   }
   .bar-btn.active { color: var(--blue); }
   .bar-btn .icon { font-size: 22px; }
-
+ 
   .content-pad { padding-bottom: 80px; }
 </style>
 </head>
 <body>
-
+ 
 <!-- HEADER -->
 <div class="header">
   <div class="logo-wrap">
@@ -349,18 +349,18 @@
     </div>
   </div>
 </div>
-
+ 
 <!-- SEARCH -->
 <div class="search-wrap" style="padding: 14px 16px 0; position: relative;">
   <input class="search-input" type="text" placeholder="ابحث عن موظف أو قسم..." id="search" oninput="doSearch(this.value)">
   <span class="search-icon">🔍</span>
 </div>
-
+ 
 <!-- MAIN -->
 <div class="main content-pad" id="main-content">
-
+ 
   <div class="section-label">القيادة العليا</div>
-
+ 
   <!-- Board Chairman -->
   <div class="node top" id="n-chairman">
     <div class="node-header" onclick="toggle('n-chairman')">
@@ -388,7 +388,7 @@
       </div>
     </div>
   </div>
-
+ 
   <!-- Deputy -->
   <div class="node deputy" id="n-deputy">
     <div class="node-header" onclick="toggle('n-deputy')">
@@ -410,7 +410,7 @@
       </div>
     </div>
   </div>
-
+ 
   <!-- Tech Director -->
   <div class="node tech" id="n-tech">
     <div class="node-header" onclick="toggle('n-tech')">
@@ -432,7 +432,7 @@
       </div>
     </div>
   </div>
-
+ 
   <!-- Admin Director -->
   <div class="node admin" id="n-admin">
     <div class="node-header" onclick="toggle('n-admin')">
@@ -454,14 +454,14 @@
       </div>
     </div>
   </div>
-
+ 
   <div class="section-label">الأقسام الطبية</div>
-
+ 
   <!-- Departments -->
   <div id="depts-container"></div>
-
+ 
 </div>
-
+ 
 <!-- BOTTOM BAR -->
 <div class="bottom-bar">
   <button class="bar-btn active">
@@ -477,7 +477,7 @@
     <span class="icon">⚙️</span>الإعدادات
   </button>
 </div>
-
+ 
 <script>
 const DEPTS = [
   { id:'n-nursing',   icon:'👩‍⚕️', title:'قسم التمريض',          color:'#e8f4fd', tc:'#1565a8' },
@@ -496,9 +496,9 @@ const DEPTS = [
   { id:'n-cafeteria', icon:'🍽️', title:'الكافتيريا',             color:'#fdf0e8', tc:'#a84a15' },
   { id:'n-services',  icon:'🧹', title:'موظفو الخدمات',          color:'#e8fdfa', tc:'#15758a' },
 ];
-
+ 
 let data = {};
-
+ 
 function loadData() {
   try {
     const s = localStorage.getItem('aldoura_data');
@@ -508,11 +508,11 @@ function loadData() {
   const allIds = ['n-chairman','n-deputy','n-tech','n-admin', ...DEPTS.map(d=>d.id)];
   allIds.forEach(id => { if (!data[id]) data[id] = []; });
 }
-
+ 
 function saveData() {
   try { localStorage.setItem('aldoura_data', JSON.stringify(data)); } catch(e){}
 }
-
+ 
 function buildDepts() {
   const c = document.getElementById('depts-container');
   c.innerHTML = '';
@@ -546,23 +546,23 @@ function buildDepts() {
     </div>`;
   });
 }
-
+ 
 function renderAll() {
   const allIds = ['n-chairman','n-deputy','n-tech','n-admin', ...DEPTS.map(d=>d.id)];
   allIds.forEach(id => renderNode(id));
   updateStats();
 }
-
+ 
 function renderNode(id) {
   const emps = data[id] || [];
   const listEl = document.getElementById('list-' + id);
   const badgeEl = document.getElementById('badge-' + id);
   const subEl = document.getElementById('sub-' + id);
   if (!listEl) return;
-
+ 
   badgeEl.textContent = emps.length;
   subEl.textContent = emps.length === 0 ? 'لا يوجد موظفون' : emps.length + ' موظف';
-
+ 
   listEl.innerHTML = emps.length === 0
     ? '<div class="emp-empty">لم يتم إضافة موظفين بعد</div>'
     : emps.map((e,i) => `
@@ -577,30 +577,30 @@ function renderNode(id) {
         </div>
       </div>`).join('');
 }
-
+ 
 function updateStats() {
   let total = 0;
   Object.values(data).forEach(arr => total += arr.length);
   document.getElementById('total-count').textContent = total;
   document.getElementById('active-count').textContent = total;
 }
-
+ 
 function toggle(id) {
   const node = document.getElementById(id);
   node.classList.toggle('open');
 }
-
+ 
 function showForm(id) {
   document.getElementById('form-' + id).classList.add('show');
   document.getElementById('fname-' + id).focus();
 }
-
+ 
 function hideForm(id) {
   document.getElementById('form-' + id).classList.remove('show');
   document.getElementById('fname-' + id).value = '';
   document.getElementById('frole-' + id).value = '';
 }
-
+ 
 function addEmp(id) {
   const name = document.getElementById('fname-' + id).value.trim();
   const role = document.getElementById('frole-' + id).value.trim();
@@ -612,7 +612,7 @@ function addEmp(id) {
   updateStats();
   hideForm(id);
 }
-
+ 
 function delEmp(id, idx) {
   if (!confirm('حذف الموظف؟')) return;
   data[id].splice(idx, 1);
@@ -620,7 +620,7 @@ function delEmp(id, idx) {
   renderNode(id);
   updateStats();
 }
-
+ 
 function doSearch(q) {
   const all = document.querySelectorAll('.node');
   if (!q.trim()) { all.forEach(n => n.style.display = ''); return; }
@@ -630,7 +630,7 @@ function doSearch(q) {
     node.style.display = (title.includes(q.toLowerCase()) || emps.includes(q.toLowerCase())) ? '' : 'none';
   });
 }
-
+ 
 function showReport() {
   let total = 0;
   let report = '📊 تقرير الموظفين:\n\n';
@@ -644,7 +644,7 @@ function showReport() {
   report += `\nالإجمالي: ${total} موظف`;
   alert(report);
 }
-
+ 
 // Init
 loadData();
 buildDepts();
