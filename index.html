@@ -95,16 +95,16 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min
     <div class="stat-box"><div class="num" id="active-count">0</div><div class="lbl">في الخدمة</div></div>
   </div>
 </div>
- 
+
 <div class="search-wrap">
   <input class="search-input" type="text" placeholder="ابحث عن موظف أو قسم..." id="search" oninput="doSearch(this.value)">
   <span class="search-icon">🔍</span>
 </div>
- 
+
 <div class="main content-pad">
- 
-  <div class="section-label">الادارة</div>
- 
+
+  <div class="section-label">القيادة</div>
+
   <div class="node top" id="top_chairman">
     <div class="node-header" onclick="toggle('top_chairman')">
       <div class="node-icon">👔</div>
@@ -125,7 +125,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min
       </div>
     </div>
   </div>
- 
+
   <div class="node deputy" id="top_deputy">
     <div class="node-header" onclick="toggle('top_deputy')">
       <div class="node-icon">🤝</div>
@@ -146,7 +146,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min
       </div>
     </div>
   </div>
- 
+
   <div class="node tech" id="top_tech">
     <div class="node-header" onclick="toggle('top_tech')">
       <div class="node-icon">🩺</div>
@@ -167,7 +167,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min
       </div>
     </div>
   </div>
- 
+
   <div class="node admin" id="top_admin">
     <div class="node-header" onclick="toggle('top_admin')">
       <div class="node-icon">📋</div>
@@ -188,20 +188,36 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min
       </div>
     </div>
   </div>
- 
+
   <div class="section-label">الأقسام</div>
   <div id="depts-container"></div>
- 
+
 </div>
- 
+
 <div class="bottom-bar">
   <button class="bar-btn active"><span class="icon">🏠</span>الرئيسية</button>
   <button class="bar-btn" onclick="showReport()"><span class="icon">📊</span>التقارير</button>
   <button class="bar-btn"><span class="icon">🔔</span>الإشعارات</button>
   <button class="bar-btn"><span class="icon">⚙️</span>الإعدادات</button>
 </div>
- 
-<script>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, onValue, push, remove, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCD2mMpZRCGm_VlMBkQ8pYuljpkicNH2r0",
+  authDomain: "aldora-198e2.firebaseapp.com",
+  databaseURL: "https://aldora-198e2-default-rtdb.firebaseio.com",
+  projectId: "aldora-198e2",
+  storageBucket: "aldora-198e2.firebasestorage.app",
+  messagingSenderId: "870226728358",
+  appId: "1:870226728358:web:0b0a0c2090a30988e6eb67"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 const DEPTS = [
   {id:'dept_nursing',    icon:'👩‍⚕️', title:'قسم التمريض',         color:'#e8f4fd', tc:'#1565a8'},
   {id:'dept_icu',        icon:'💉',   title:'قسم العناية المركزة',  color:'#fde8e8', tc:'#a81515'},
@@ -219,9 +235,16 @@ const DEPTS = [
   {id:'dept_cafeteria',  icon:'🍽️',  title:'الكافتيريا',           color:'#fdf0e8', tc:'#a84a15'},
   {id:'dept_services',   icon:'🧹',   title:'موظفو الخدمات',        color:'#e8fdfa', tc:'#15758a'},
 ];
- 
-let data = {};
- 
+
+const TOP_IDS = ['top_chairman','top_deputy','top_tech','top_admin'];
+let localData = {};
+
+// Show loading indicator
+function showLoading(id) {
+  const listEl = document.getElementById('list_' + id);
+  if (listEl) listEl.innerHTML = '<div class="emp-empty">⏳ جاري التحميل...</div>';
+}
+
 function buildDepts() {
   const c = document.getElementById('depts-container');
   DEPTS.forEach(function(d) {
@@ -234,14 +257,14 @@ function buildDepts() {
         '<div class="node-icon" style="background:' + d.color + '">' + d.icon + '</div>' +
         '<div class="node-info">' +
           '<div class="node-title">' + d.title + '</div>' +
-          '<div class="node-subtitle" id="sub_' + d.id + '">لا يوجد موظفون</div>' +
+          '<div class="node-subtitle" id="sub_' + d.id + '">جاري التحميل...</div>' +
         '</div>' +
-        '<div class="node-badge" id="badge_' + d.id + '" style="background:' + d.color + ';color:' + d.tc + '">0</div>' +
+        '<div class="node-badge" id="badge_' + d.id + '" style="background:' + d.color + ';color:' + d.tc + '">-</div>' +
         '<div class="node-arrow">›</div>' +
       '</div>' +
       '<div class="employees">' +
         '<div class="emp-header"><span>الموظفون</span><button class="add-btn" onclick="showForm(\'' + d.id + '\')">+ إضافة</button></div>' +
-        '<div class="emp-list" id="list_' + d.id + '"></div>' +
+        '<div class="emp-list" id="list_' + d.id + '"><div class="emp-empty">⏳ جاري التحميل...</div></div>' +
         '<div class="emp-add-form" id="form_' + d.id + '">' +
           '<input type="text" placeholder="اسم الموظف" id="fname_' + d.id + '">' +
           '<input type="text" placeholder="المسمى الوظيفي" id="frole_' + d.id + '">' +
@@ -252,19 +275,25 @@ function buildDepts() {
         '</div>' +
       '</div>';
     c.appendChild(div);
-    data[d.id] = [];
   });
 }
- 
-function renderAll() {
-  var topIds = ['top_chairman','top_deputy','top_tech','top_admin'];
-  topIds.forEach(function(id){ if(!data[id]) data[id]=[]; renderNode(id); });
-  DEPTS.forEach(function(d){ renderNode(d.id); });
-  updateStats();
+
+function listenToSection(id) {
+  const dbRef = ref(db, 'hospital/' + id);
+  onValue(dbRef, function(snapshot) {
+    localData[id] = [];
+    if (snapshot.exists()) {
+      snapshot.forEach(function(child) {
+        localData[id].push({ key: child.key, name: child.val().name, role: child.val().role || '' });
+      });
+    }
+    renderNode(id);
+    updateStats();
+  });
 }
- 
+
 function renderNode(id) {
-  var emps = data[id] || [];
+  var emps = localData[id] || [];
   var listEl = document.getElementById('list_' + id);
   var badgeEl = document.getElementById('badge_' + id);
   var subEl = document.getElementById('sub_' + id);
@@ -274,47 +303,47 @@ function renderNode(id) {
   if (emps.length === 0) {
     listEl.innerHTML = '<div class="emp-empty">لم يتم إضافة موظفين بعد</div>';
   } else {
-    listEl.innerHTML = emps.map(function(e, i) {
+    listEl.innerHTML = emps.map(function(e) {
       return '<div class="emp-item">' +
         '<div class="emp-avatar">' + (e.name.trim().charAt(0) || '؟') + '</div>' +
         '<div style="flex:1;min-width:0"><div class="emp-name">' + e.name + '</div><div class="emp-role">' + (e.role || 'موظف') + '</div></div>' +
-        '<button class="emp-del" onclick="delEmp(\'' + id + '\',' + i + ')">🗑️</button>' +
+        '<button class="emp-del" onclick="delEmp(\'' + id + '\',\'' + e.key + '\')">🗑️</button>' +
         '</div>';
     }).join('');
   }
 }
- 
+
 function updateStats() {
   var total = 0;
-  Object.values(data).forEach(function(arr){ total += arr.length; });
+  Object.values(localData).forEach(function(arr){ total += arr.length; });
   var tc = document.getElementById('total-count');
   var ac = document.getElementById('active-count');
   if(tc) tc.textContent = total;
   if(ac) ac.textContent = total;
 }
- 
-function toggle(id) {
+
+window.toggle = function(id) {
   var node = document.getElementById(id);
   if (node) node.classList.toggle('open');
-}
- 
-function showForm(id) {
+};
+
+window.showForm = function(id) {
   var form = document.getElementById('form_' + id);
   if (form) form.classList.add('show');
   var inp = document.getElementById('fname_' + id);
   if (inp) inp.focus();
-}
- 
-function hideForm(id) {
+};
+
+window.hideForm = function(id) {
   var form = document.getElementById('form_' + id);
   if (form) form.classList.remove('show');
   var fn = document.getElementById('fname_' + id);
   var fr = document.getElementById('frole_' + id);
   if(fn) fn.value = '';
   if(fr) fr.value = '';
-}
- 
-function addEmp(id) {
+};
+
+window.addEmp = function(id) {
   var fnEl = document.getElementById('fname_' + id);
   var frEl = document.getElementById('frole_' + id);
   if (!fnEl) return;
@@ -322,45 +351,45 @@ function addEmp(id) {
   var role = frEl ? frEl.value.trim() : '';
   if (!name) { fnEl.style.borderColor = '#e53'; return; }
   fnEl.style.borderColor = '';
-  if (!data[id]) data[id] = [];
-  data[id].push({name: name, role: role});
-  renderNode(id);
-  updateStats();
+  var dbRef = ref(db, 'hospital/' + id);
+  push(dbRef, { name: name, role: role });
   hideForm(id);
-}
- 
-function delEmp(id, idx) {
+};
+
+window.delEmp = function(id, key) {
   if (!confirm('هل تريد حذف الموظف؟')) return;
-  data[id].splice(idx, 1);
-  renderNode(id);
-  updateStats();
-}
- 
-function doSearch(q) {
+  var dbRef = ref(db, 'hospital/' + id + '/' + key);
+  remove(dbRef);
+};
+
+window.doSearch = function(q) {
   var all = document.querySelectorAll('.node');
   if (!q.trim()) { all.forEach(function(n){ n.style.display=''; }); return; }
   all.forEach(function(node) {
     var title = (node.querySelector('.node-title') || {}).textContent || '';
-    var emps = (data[node.id] || []).map(function(e){ return e.name + e.role; }).join(' ');
+    var emps = (localData[node.id] || []).map(function(e){ return e.name + e.role; }).join(' ');
     node.style.display = (title.includes(q) || emps.includes(q)) ? '' : 'none';
   });
-}
- 
-function showReport() {
+};
+
+window.showReport = function() {
   var total = 0, report = 'تقرير الموظفين\n\n';
-  var allIds = ['top_chairman','top_deputy','top_tech','top_admin'].concat(DEPTS.map(function(d){return d.id;}));
+  var allIds = TOP_IDS.concat(DEPTS.map(function(d){return d.id;}));
   allIds.forEach(function(id) {
     var el = document.getElementById(id);
     var title = el ? (el.querySelector('.node-title') || {}).textContent || id : id;
-    var count = (data[id] || []).length;
+    var count = (localData[id] || []).length;
     if (count > 0) { report += title + ': ' + count + ' موظف\n'; total += count; }
   });
   report += '\nالإجمالي: ' + total + ' موظف';
   alert(report);
-}
- 
+};
+
+// Init
 buildDepts();
-renderAll();
+var allIds = TOP_IDS.concat(DEPTS.map(function(d){return d.id;}));
+allIds.forEach(function(id){ localData[id]=[]; listenToSection(id); });
+
 </script>
 </body>
 </html>
