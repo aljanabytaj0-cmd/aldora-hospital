@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
- 
+
   :root {
     --blue: #1a5fa8;
     --blue-light: #e8f1fb;
@@ -29,7 +29,7 @@
     --radius: 14px;
     --radius-sm: 8px;
   }
- 
+
   body {
     font-family: 'Tajawal', sans-serif;
     background: var(--bg);
@@ -39,7 +39,7 @@
     margin: 0 auto;
     overflow-x: hidden;
   }
- 
+
   /* Header */
   .header {
     background: linear-gradient(145deg, #1a5fa8 0%, #0d3d7a 100%);
@@ -113,7 +113,7 @@
   .stat-box .lbl {
     font-size: 11px; color: rgba(255,255,255,0.75);
   }
- 
+
   /* Search */
   .search-wrap {
     padding: 14px 16px 0;
@@ -141,10 +141,10 @@
     font-size: 16px;
     pointer-events: none;
   }
- 
+
   /* Main content */
   .main { padding: 14px 16px 32px; }
- 
+
   /* Section label */
   .section-label {
     font-size: 12px; font-weight: 700;
@@ -153,7 +153,7 @@
     letter-spacing: 0.5px;
     margin: 18px 0 8px;
   }
- 
+
   /* Node card */
   .node {
     background: white;
@@ -165,7 +165,7 @@
     transition: transform 0.15s;
   }
   .node:active { transform: scale(0.98); }
- 
+
   .node-header {
     display: flex; align-items: center;
     gap: 12px;
@@ -197,30 +197,30 @@
     flex-shrink: 0;
   }
   .node.open .node-arrow { transform: rotate(90deg); }
- 
+
   /* Top leadership special */
   .node.top {
     border: 1.5px solid var(--blue);
   }
   .node.top .node-icon { background: var(--blue-light); }
   .node.top .node-badge { background: var(--blue-light); color: var(--blue); }
- 
+
   .node.deputy { border: 1.5px solid #7c3abd; }
   .node.deputy .node-icon { background: #f3eafd; }
   .node.deputy .node-badge { background: #f3eafd; color: #7c3abd; }
- 
+
   .node.tech { border: 1.5px solid var(--teal); }
   .node.tech .node-icon { background: var(--teal-light); }
   .node.tech .node-badge { background: var(--teal-light); color: var(--teal); }
- 
+
   .node.admin { border: 1.5px solid var(--gold); }
   .node.admin .node-icon { background: var(--gold-light); }
   .node.admin .node-badge { background: var(--gold-light); color: var(--gold); }
- 
+
   /* Department */
   .node.dept .node-icon { background: #f0f4ff; }
   .node.dept .node-badge { background: #f0f4ff; color: #3a5fd9; }
- 
+
   /* Employees list */
   .employees {
     display: none;
@@ -228,7 +228,7 @@
     background: #f8faff;
   }
   .node.open .employees { display: block; }
- 
+
   .emp-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 16px 6px;
@@ -241,7 +241,7 @@
     font-family: 'Tajawal', sans-serif;
     cursor: pointer;
   }
- 
+
   .emp-list { padding: 0 12px 12px; }
   .emp-item {
     display: flex; align-items: center; gap: 10px;
@@ -265,7 +265,7 @@
     background: none; border: none; cursor: pointer;
     font-size: 15px; padding: 2px;
   }
- 
+
   .emp-add-form {
     display: none;
     padding: 10px 12px;
@@ -295,13 +295,13 @@
     padding: 9px 14px; font-family: 'Tajawal', sans-serif;
     font-size: 13px; cursor: pointer;
   }
- 
+
   /* Empty */
   .emp-empty {
     text-align: center; padding: 16px;
     font-size: 13px; color: var(--text-muted);
   }
- 
+
   /* Bottom bar */
   .bottom-bar {
     position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
@@ -321,12 +321,12 @@
   }
   .bar-btn.active { color: var(--blue); }
   .bar-btn .icon { font-size: 22px; }
- 
+
   .content-pad { padding-bottom: 80px; }
 </style>
 </head>
 <body>
- 
+
 <!-- HEADER -->
 <div class="header">
   <div class="logo-wrap">
@@ -349,18 +349,18 @@
     </div>
   </div>
 </div>
- 
+
 <!-- SEARCH -->
 <div class="search-wrap" style="padding: 14px 16px 0; position: relative;">
   <input class="search-input" type="text" placeholder="ابحث عن موظف أو قسم..." id="search" oninput="doSearch(this.value)">
   <span class="search-icon">🔍</span>
 </div>
- 
+
 <!-- MAIN -->
 <div class="main content-pad" id="main-content">
- 
-  <div class="section-label">القيادة العليا</div>
- 
+
+  
+
   <!-- Board Chairman -->
   <div class="node top" id="n-chairman">
     <div class="node-header" onclick="toggle('n-chairman')">
@@ -388,7 +388,7 @@
       </div>
     </div>
   </div>
- 
+
   <!-- Deputy -->
   <div class="node deputy" id="n-deputy">
     <div class="node-header" onclick="toggle('n-deputy')">
@@ -410,7 +410,7 @@
       </div>
     </div>
   </div>
- 
+
   <!-- Tech Director -->
   <div class="node tech" id="n-tech">
     <div class="node-header" onclick="toggle('n-tech')">
@@ -432,7 +432,7 @@
       </div>
     </div>
   </div>
- 
+
   <!-- Admin Director -->
   <div class="node admin" id="n-admin">
     <div class="node-header" onclick="toggle('n-admin')">
@@ -454,14 +454,14 @@
       </div>
     </div>
   </div>
- 
-  <div class="section-label">الأقسام الطبية</div>
- 
+
+  <div class="section-label">الأقسام</div>
+
   <!-- Departments -->
   <div id="depts-container"></div>
- 
+
 </div>
- 
+
 <!-- BOTTOM BAR -->
 <div class="bottom-bar">
   <button class="bar-btn active">
@@ -477,177 +477,213 @@
     <span class="icon">⚙️</span>الإعدادات
   </button>
 </div>
- 
+
 <script>
 const DEPTS = [
-  { id:'n-nursing',   icon:'👩‍⚕️', title:'قسم التمريض',          color:'#e8f4fd', tc:'#1565a8' },
-  { id:'n-icu',       icon:'💉', title:'قسم العناية المركزة',    color:'#fde8e8', tc:'#a81515' },
-  { id:'n-emergency', icon:'🚨', title:'قسم الطوارئ',            color:'#fde8e8', tc:'#a81515' },
-  { id:'n-surgery',   icon:'🔪', title:'قسم العمليات',           color:'#e8f0fd', tc:'#1a3fa8' },
-  { id:'n-anesthesia',icon:'😴', title:'قسم التخدير',            color:'#ede8fd', tc:'#5a15a8' },
-  { id:'n-doctors',   icon:'👨‍⚕️', title:'الأطباء المقيمون',       color:'#e8f4fd', tc:'#156a8a' },
-  { id:'n-radiology', icon:'🩻', title:'قسم الأشعة',             color:'#f4e8fd', tc:'#7a15a8' },
-  { id:'n-lab',       icon:'🔬', title:'قسم المختبر',             color:'#e8fdee', tc:'#158a3a' },
-  { id:'n-accounts',  icon:'💰', title:'قسم الحسابات',           color:'#fdf6e8', tc:'#a87c15' },
-  { id:'n-it',        icon:'💻', title:'قسم IT',                 color:'#e8eafd', tc:'#2a15a8' },
-  { id:'n-maintenance',icon:'🔧', title:'قسم الصيانة',           color:'#fde8f0', tc:'#a81565' },
-  { id:'n-reception', icon:'🗂️', title:'قسم الاستعلامات',        color:'#e8fdfd', tc:'#158a8a' },
-  { id:'n-security',  icon:'🛡️', title:'قسم الأمنية',            color:'#eefde8', tc:'#4a8a15' },
-  { id:'n-cafeteria', icon:'🍽️', title:'الكافتيريا',             color:'#fdf0e8', tc:'#a84a15' },
-  { id:'n-services',  icon:'🧹', title:'موظفو الخدمات',          color:'#e8fdfa', tc:'#15758a' },
+  { id:'dept_nursing',    icon:'👩‍⚕️', title:'قسم التمريض',          color:'#e8f4fd', tc:'#1565a8' },
+  { id:'dept_icu',        icon:'💉',  title:'قسم العناية المركزة',    color:'#fde8e8', tc:'#a81515' },
+  { id:'dept_emergency',  icon:'🚨',  title:'قسم الطوارئ',            color:'#fde8e8', tc:'#a81515' },
+  { id:'dept_surgery',    icon:'🔪',  title:'قسم العمليات',           color:'#e8f0fd', tc:'#1a3fa8' },
+  { id:'dept_anesthesia', icon:'😴',  title:'قسم التخدير',            color:'#ede8fd', tc:'#5a15a8' },
+  { id:'dept_doctors',    icon:'👨‍⚕️', title:'الأطباء المقيمون',       color:'#e8f4fd', tc:'#156a8a' },
+  { id:'dept_radiology',  icon:'🩻',  title:'قسم الأشعة',             color:'#f4e8fd', tc:'#7a15a8' },
+  { id:'dept_lab',        icon:'🔬',  title:'قسم المختبر',             color:'#e8fdee', tc:'#158a3a' },
+  { id:'dept_accounts',   icon:'💰',  title:'قسم الحسابات',           color:'#fdf6e8', tc:'#a87c15' },
+  { id:'dept_it',         icon:'💻',  title:'قسم IT',                 color:'#e8eafd', tc:'#2a15a8' },
+  { id:'dept_maintenance',icon:'🔧',  title:'قسم الصيانة',            color:'#fde8f0', tc:'#a81565' },
+  { id:'dept_reception',  icon:'🗂️',  title:'قسم الاستعلامات',        color:'#e8fdfd', tc:'#158a8a' },
+  { id:'dept_security',   icon:'🛡️',  title:'قسم الأمنية',            color:'#eefde8', tc:'#4a8a15' },
+  { id:'dept_cafeteria',  icon:'🍽️',  title:'الكافتيريا',             color:'#fdf0e8', tc:'#a84a15' },
+  { id:'dept_services',   icon:'🧹',  title:'موظفو الخدمات',          color:'#e8fdfa', tc:'#15758a' },
 ];
- 
+
+const TOP_NODES = [
+  { id:'top_chairman', icon:'👔', title:'رئيس مجلس الإدارة' },
+  { id:'top_deputy',   icon:'🤝', title:'معاون رئيس مجلس الإدارة' },
+  { id:'top_tech',     icon:'🩺', title:'المدير الفني' },
+  { id:'top_admin',    icon:'📋', title:'المدير الإداري' },
+];
+
+// In-memory data store
 let data = {};
- 
-function loadData() {
-  try {
-    const s = localStorage.getItem('aldoura_data');
-    if (s) data = JSON.parse(s);
-  } catch(e){}
-  // init missing
-  const allIds = ['n-chairman','n-deputy','n-tech','n-admin', ...DEPTS.map(d=>d.id)];
-  allIds.forEach(id => { if (!data[id]) data[id] = []; });
-}
- 
-function saveData() {
-  try { localStorage.setItem('aldoura_data', JSON.stringify(data)); } catch(e){}
-}
- 
+
+function getEl(id) { return document.getElementById(id); }
+
 function buildDepts() {
-  const c = document.getElementById('depts-container');
+  const c = getEl('depts-container');
   c.innerHTML = '';
   DEPTS.forEach(d => {
-    c.innerHTML += `
-    <div class="node dept" id="${d.id}" style="border-color:${d.tc}22">
-      <div class="node-header" onclick="toggle('${d.id}')">
-        <div class="node-icon" style="background:${d.color}">${d.icon}</div>
+    const div = document.createElement('div');
+    div.className = 'node dept';
+    div.id = d.id;
+    div.style.borderColor = d.tc + '33';
+    div.innerHTML = \`
+      <div class="node-header" onclick="toggle('\${d.id}')">
+        <div class="node-icon" style="background:\${d.color}">\${d.icon}</div>
         <div class="node-info">
-          <div class="node-title">${d.title}</div>
-          <div class="node-subtitle" id="sub-${d.id}">لا يوجد موظفون</div>
+          <div class="node-title">\${d.title}</div>
+          <div class="node-subtitle" id="sub_\${d.id}">لا يوجد موظفون</div>
         </div>
-        <div class="node-badge" id="badge-${d.id}" style="background:${d.color};color:${d.tc}">0</div>
+        <div class="node-badge" id="badge_\${d.id}" style="background:\${d.color};color:\${d.tc}">0</div>
         <div class="node-arrow">›</div>
       </div>
       <div class="employees">
         <div class="emp-header">
           <span>الموظفون</span>
-          <button class="add-btn" onclick="showForm('${d.id}')">+ إضافة</button>
+          <button class="add-btn" onclick="showForm('\${d.id}')">+ إضافة</button>
         </div>
-        <div class="emp-list" id="list-${d.id}"></div>
-        <div class="emp-add-form" id="form-${d.id}">
-          <input type="text" placeholder="اسم الموظف" id="fname-${d.id}">
-          <input type="text" placeholder="المسمى الوظيفي" id="frole-${d.id}">
+        <div class="emp-list" id="list_\${d.id}"></div>
+        <div class="emp-add-form" id="form_\${d.id}">
+          <input type="text" placeholder="اسم الموظف" id="fname_\${d.id}">
+          <input type="text" placeholder="المسمى الوظيفي" id="frole_\${d.id}">
           <div class="form-btns">
-            <button class="btn-save" onclick="addEmp('${d.id}')">حفظ</button>
-            <button class="btn-cancel" onclick="hideForm('${d.id}')">إلغاء</button>
+            <button class="btn-save" onclick="addEmp('\${d.id}')">حفظ</button>
+            <button class="btn-cancel" onclick="hideForm('\${d.id}')">إلغاء</button>
           </div>
         </div>
-      </div>
-    </div>`;
+      </div>\`;
+    c.appendChild(div);
   });
 }
- 
+
+function fixTopNodes() {
+  // Remap old hyphen IDs to underscore IDs in HTML
+  const map = {
+    'n-chairman': 'top_chairman',
+    'n-deputy':   'top_deputy',
+    'n-tech':     'top_tech',
+    'n-admin':    'top_admin',
+  };
+  Object.entries(map).forEach(([oldId, newId]) => {
+    const el = getEl(oldId);
+    if (el) {
+      el.id = newId;
+      // fix internal IDs
+      ['sub','badge','list','form','fname','frole'].forEach(prefix => {
+        const child = getEl(prefix + '-' + oldId);
+        if (child) child.id = prefix + '_' + newId;
+      });
+      // fix onclick attrs
+      el.querySelectorAll('[onclick]').forEach(btn => {
+        btn.setAttribute('onclick', btn.getAttribute('onclick').replace(oldId, newId));
+      });
+    }
+  });
+}
+
 function renderAll() {
-  const allIds = ['n-chairman','n-deputy','n-tech','n-admin', ...DEPTS.map(d=>d.id)];
-  allIds.forEach(id => renderNode(id));
+  const allIds = TOP_NODES.map(n=>n.id).concat(DEPTS.map(d=>d.id));
+  allIds.forEach(id => { if(!data[id]) data[id]=[]; renderNode(id); });
   updateStats();
 }
- 
+
 function renderNode(id) {
-  const emps = data[id] || [];
-  const listEl = document.getElementById('list-' + id);
-  const badgeEl = document.getElementById('badge-' + id);
-  const subEl = document.getElementById('sub-' + id);
+  if (!data[id]) data[id] = [];
+  const emps = data[id];
+  const listEl = getEl('list_' + id);
+  const badgeEl = getEl('badge_' + id);
+  const subEl = getEl('sub_' + id);
   if (!listEl) return;
- 
-  badgeEl.textContent = emps.length;
-  subEl.textContent = emps.length === 0 ? 'لا يوجد موظفون' : emps.length + ' موظف';
- 
+
+  if (badgeEl) badgeEl.textContent = emps.length;
+  if (subEl) subEl.textContent = emps.length === 0 ? 'لا يوجد موظفون' : emps.length + ' موظف';
+
   listEl.innerHTML = emps.length === 0
     ? '<div class="emp-empty">لم يتم إضافة موظفين بعد</div>'
-    : emps.map((e,i) => `
-      <div class="emp-item" id="emp-${id}-${i}">
-        <div class="emp-avatar">${e.name.trim().charAt(0) || '?'}</div>
-        <div>
-          <div class="emp-name">${e.name}</div>
-          <div class="emp-role">${e.role || 'موظف'}</div>
+    : emps.map((e,i) => \`
+      <div class="emp-item">
+        <div class="emp-avatar">\${e.name.trim().charAt(0) || '؟'}</div>
+        <div style="flex:1;min-width:0">
+          <div class="emp-name">\${e.name}</div>
+          <div class="emp-role">\${e.role || 'موظف'}</div>
         </div>
-        <div class="emp-actions">
-          <button class="emp-del" onclick="delEmp('${id}',${i})">🗑️</button>
-        </div>
-      </div>`).join('');
+        <button class="emp-del" onclick="delEmp('\${id}',\${i})">🗑️</button>
+      </div>\`).join('');
 }
- 
+
 function updateStats() {
   let total = 0;
   Object.values(data).forEach(arr => total += arr.length);
-  document.getElementById('total-count').textContent = total;
-  document.getElementById('active-count').textContent = total;
+  const tc = getEl('total-count');
+  const ac = getEl('active-count');
+  if(tc) tc.textContent = total;
+  if(ac) ac.textContent = total;
 }
- 
+
 function toggle(id) {
-  const node = document.getElementById(id);
-  node.classList.toggle('open');
+  const node = getEl(id);
+  if (node) node.classList.toggle('open');
 }
- 
+
 function showForm(id) {
-  document.getElementById('form-' + id).classList.add('show');
-  document.getElementById('fname-' + id).focus();
+  const form = getEl('form_' + id);
+  if (form) { form.classList.add('show'); }
+  const inp = getEl('fname_' + id);
+  if (inp) inp.focus();
 }
- 
+
 function hideForm(id) {
-  document.getElementById('form-' + id).classList.remove('show');
-  document.getElementById('fname-' + id).value = '';
-  document.getElementById('frole-' + id).value = '';
+  const form = getEl('form_' + id);
+  if (form) form.classList.remove('show');
+  const fn = getEl('fname_' + id);
+  const fr = getEl('frole_' + id);
+  if(fn) fn.value = '';
+  if(fr) fr.value = '';
 }
- 
+
 function addEmp(id) {
-  const name = document.getElementById('fname-' + id).value.trim();
-  const role = document.getElementById('frole-' + id).value.trim();
-  if (!name) { document.getElementById('fname-' + id).style.borderColor = 'red'; return; }
+  const fnEl = getEl('fname_' + id);
+  const frEl = getEl('frole_' + id);
+  if (!fnEl) { alert('خطأ: لم يتم العثور على الحقل'); return; }
+  const name = fnEl.value.trim();
+  const role = frEl ? frEl.value.trim() : '';
+  if (!name) {
+    fnEl.style.borderColor = 'red';
+    fnEl.placeholder = 'الرجاء إدخال الاسم';
+    return;
+  }
+  fnEl.style.borderColor = '';
   if (!data[id]) data[id] = [];
   data[id].push({ name, role });
-  saveData();
   renderNode(id);
   updateStats();
   hideForm(id);
 }
- 
+
 function delEmp(id, idx) {
   if (!confirm('حذف الموظف؟')) return;
   data[id].splice(idx, 1);
-  saveData();
   renderNode(id);
   updateStats();
 }
- 
+
 function doSearch(q) {
   const all = document.querySelectorAll('.node');
   if (!q.trim()) { all.forEach(n => n.style.display = ''); return; }
+  const qL = q.toLowerCase();
   all.forEach(node => {
-    const title = node.querySelector('.node-title')?.textContent.toLowerCase() || '';
-    const emps = (data[node.id] || []).map(e => e.name.toLowerCase() + e.role.toLowerCase()).join(' ');
-    node.style.display = (title.includes(q.toLowerCase()) || emps.includes(q.toLowerCase())) ? '' : 'none';
+    const title = node.querySelector('.node-title')?.textContent || '';
+    const emps = (data[node.id] || []).map(e => e.name + e.role).join(' ');
+    node.style.display = (title.includes(q) || emps.includes(q)) ? '' : 'none';
   });
 }
- 
+
 function showReport() {
-  let total = 0;
-  let report = '📊 تقرير الموظفين:\n\n';
-  const allIds = ['n-chairman','n-deputy','n-tech','n-admin', ...DEPTS.map(d=>d.id)];
+  let total = 0, report = '📊 تقرير الموظفين:\n\n';
+  const allIds = TOP_NODES.map(n=>n.id).concat(DEPTS.map(d=>d.id));
   allIds.forEach(id => {
-    const el = document.getElementById(id);
+    const el = getEl(id);
     const title = el?.querySelector('.node-title')?.textContent || id;
     const count = (data[id] || []).length;
-    if (count > 0) { report += `${title}: ${count} موظف\n`; total += count; }
+    if (count > 0) { report += title + ': ' + count + ' موظف\n'; total += count; }
   });
-  report += `\nالإجمالي: ${total} موظف`;
+  report += '\nالإجمالي: ' + total + ' موظف';
   alert(report);
 }
- 
+
 // Init
-loadData();
 buildDepts();
+fixTopNodes();
 renderAll();
 </script>
 </body>
