@@ -95,16 +95,16 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min
     <div class="stat-box"><div class="num" id="active-count">0</div><div class="lbl">في الخدمة</div></div>
   </div>
 </div>
-
+ 
 <div class="search-wrap">
   <input class="search-input" type="text" placeholder="ابحث عن موظف أو قسم..." id="search" oninput="doSearch(this.value)">
   <span class="search-icon">🔍</span>
 </div>
-
+ 
 <div class="main content-pad">
-
-  <div class="section-label">القيادة</div>
-
+ 
+  <div class="section-label">الادارة</div>
+ 
   <div class="node top" id="top_chairman">
     <div class="node-header" onclick="toggle('top_chairman')">
       <div class="node-icon">👔</div>
@@ -125,7 +125,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min
       </div>
     </div>
   </div>
-
+ 
   <div class="node deputy" id="top_deputy">
     <div class="node-header" onclick="toggle('top_deputy')">
       <div class="node-icon">🤝</div>
@@ -146,7 +146,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min
       </div>
     </div>
   </div>
-
+ 
   <div class="node tech" id="top_tech">
     <div class="node-header" onclick="toggle('top_tech')">
       <div class="node-icon">🩺</div>
@@ -167,7 +167,7 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min
       </div>
     </div>
   </div>
-
+ 
   <div class="node admin" id="top_admin">
     <div class="node-header" onclick="toggle('top_admin')">
       <div class="node-icon">📋</div>
@@ -188,19 +188,19 @@ body{font-family:'Tajawal',sans-serif;background:var(--bg);color:var(--text);min
       </div>
     </div>
   </div>
-
+ 
   <div class="section-label">الأقسام</div>
   <div id="depts-container"></div>
-
+ 
 </div>
-
+ 
 <div class="bottom-bar">
   <button class="bar-btn active"><span class="icon">🏠</span>الرئيسية</button>
   <button class="bar-btn" onclick="showReport()"><span class="icon">📊</span>التقارير</button>
   <button class="bar-btn"><span class="icon">🔔</span>الإشعارات</button>
   <button class="bar-btn"><span class="icon">⚙️</span>الإعدادات</button>
 </div>
-
+ 
 <script>
 const DEPTS = [
   {id:'dept_nursing',    icon:'👩‍⚕️', title:'قسم التمريض',         color:'#e8f4fd', tc:'#1565a8'},
@@ -219,9 +219,9 @@ const DEPTS = [
   {id:'dept_cafeteria',  icon:'🍽️',  title:'الكافتيريا',           color:'#fdf0e8', tc:'#a84a15'},
   {id:'dept_services',   icon:'🧹',   title:'موظفو الخدمات',        color:'#e8fdfa', tc:'#15758a'},
 ];
-
+ 
 let data = {};
-
+ 
 function buildDepts() {
   const c = document.getElementById('depts-container');
   DEPTS.forEach(function(d) {
@@ -255,14 +255,14 @@ function buildDepts() {
     data[d.id] = [];
   });
 }
-
+ 
 function renderAll() {
   var topIds = ['top_chairman','top_deputy','top_tech','top_admin'];
   topIds.forEach(function(id){ if(!data[id]) data[id]=[]; renderNode(id); });
   DEPTS.forEach(function(d){ renderNode(d.id); });
   updateStats();
 }
-
+ 
 function renderNode(id) {
   var emps = data[id] || [];
   var listEl = document.getElementById('list_' + id);
@@ -283,7 +283,7 @@ function renderNode(id) {
     }).join('');
   }
 }
-
+ 
 function updateStats() {
   var total = 0;
   Object.values(data).forEach(function(arr){ total += arr.length; });
@@ -292,19 +292,19 @@ function updateStats() {
   if(tc) tc.textContent = total;
   if(ac) ac.textContent = total;
 }
-
+ 
 function toggle(id) {
   var node = document.getElementById(id);
   if (node) node.classList.toggle('open');
 }
-
+ 
 function showForm(id) {
   var form = document.getElementById('form_' + id);
   if (form) form.classList.add('show');
   var inp = document.getElementById('fname_' + id);
   if (inp) inp.focus();
 }
-
+ 
 function hideForm(id) {
   var form = document.getElementById('form_' + id);
   if (form) form.classList.remove('show');
@@ -313,7 +313,7 @@ function hideForm(id) {
   if(fn) fn.value = '';
   if(fr) fr.value = '';
 }
-
+ 
 function addEmp(id) {
   var fnEl = document.getElementById('fname_' + id);
   var frEl = document.getElementById('frole_' + id);
@@ -328,14 +328,14 @@ function addEmp(id) {
   updateStats();
   hideForm(id);
 }
-
+ 
 function delEmp(id, idx) {
   if (!confirm('هل تريد حذف الموظف؟')) return;
   data[id].splice(idx, 1);
   renderNode(id);
   updateStats();
 }
-
+ 
 function doSearch(q) {
   var all = document.querySelectorAll('.node');
   if (!q.trim()) { all.forEach(function(n){ n.style.display=''; }); return; }
@@ -345,7 +345,7 @@ function doSearch(q) {
     node.style.display = (title.includes(q) || emps.includes(q)) ? '' : 'none';
   });
 }
-
+ 
 function showReport() {
   var total = 0, report = 'تقرير الموظفين\n\n';
   var allIds = ['top_chairman','top_deputy','top_tech','top_admin'].concat(DEPTS.map(function(d){return d.id;}));
@@ -358,7 +358,7 @@ function showReport() {
   report += '\nالإجمالي: ' + total + ' موظف';
   alert(report);
 }
-
+ 
 buildDepts();
 renderAll();
 </script>
