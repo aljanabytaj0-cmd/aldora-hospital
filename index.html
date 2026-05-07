@@ -435,10 +435,10 @@ function doLogin(){
   var err=document.getElementById('l-err');
   var uEl=document.getElementById('l-user');
   var pEl=document.getElementById('l-pass');
-  var btnTxt=document.getElementById('btn-txt');
 
   err.style.display='none';
-  uEl.classList.remove('err'); pEl.classList.remove('err');
+  uEl.classList.remove('err');
+  pEl.classList.remove('err');
 
   if(!user||!pass){
     err.textContent='⚠️ يرجى إدخال اسم المستخدم وكلمة المرور';
@@ -448,36 +448,30 @@ function doLogin(){
     return;
   }
 
-  btnTxt.textContent='جاري التحقق...';
-  document.getElementById('login-btn').style.opacity='0.7';
-  document.getElementById('login-btn').disabled=true;
-
   var u=USERS[user];
-  if(!u||u.pass!==pass){
-    setTimeout(function(){
-      btnTxt.textContent='دخول';
-      document.getElementById('login-btn').style.opacity='1';
-      document.getElementById('login-btn').disabled=false;
-      err.textContent='❌ اسم المستخدم أو كلمة المرور غير صحيحة';
-      err.style.display='block';
-      uEl.classList.add('err'); pEl.classList.add('err');
-      pEl.value='';
-    },600);
+  if(!u || u.pass !== pass){
+    err.textContent='❌ اسم المستخدم أو كلمة المرور غير صحيحة';
+    err.style.display='block';
+    uEl.classList.add('err');
+    pEl.classList.add('err');
+    pEl.value='';
     return;
   }
 
-  ROLE=u.role; CAN_SAL=u.sal;
+  ROLE = u.role;
+  CAN_SAL = u.sal;
 
-  setTimeout(function(){
-    btnTxt.textContent='دخول';
-    document.getElementById('login-btn').style.opacity='1';
-    document.getElementById('login-btn').disabled=false;
-    var badge=document.getElementById('role-badge');
-    badge.textContent=u.label; badge.className=u.cls;
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-screen').style.display='block';
-    if(!DB) initFirebase(); else { rebuildUI(); applyPerms(); }
-  },600);
+  var badge = document.getElementById('role-badge');
+  badge.textContent = u.label;
+  badge.className = u.cls;
+
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+
+  rebuildUI();
+  applyPerms();
+
+  if(!DB){ setTimeout(function(){ initFirebase(); }, 200); }
 }
 
 function doLogout(){
@@ -509,15 +503,18 @@ document.getElementById('l-user').onkeydown=function(e){if(e.key==='Enter')docum
 // ═══════════════════════════════════════════════════
 function initFirebase(){
   try{
-    firebase.initializeApp(FB_CONFIG);
+    if(!firebase.apps.length){
+      firebase.initializeApp(FB_CONFIG);
+    }
+    DB = firebase.database();
+    ALL_IDS.forEach(function(id){ LOCAL[id]=[]; listenSec(id); });
+    listenVio();
   }catch(e){
-    // App already initialized
+    console.error('Firebase error:', e);
+    // Firebase failed but app still works locally
+    ALL_IDS.forEach(function(id){ renderNode(id); });
+    updateStats();
   }
-  DB=firebase.database();
-  rebuildUI();
-  applyPerms();
-  ALL_IDS.forEach(function(id){ LOCAL[id]=[]; listenSec(id); });
-  listenVio();
 }
 
 function listenSec(id){
