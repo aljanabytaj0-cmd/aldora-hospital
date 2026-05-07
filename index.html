@@ -127,6 +127,10 @@ body{font-family:"Tajawal",sans-serif;background:var(--bg);color:var(--text);min
 .emp-av{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#1B4FD8 0%,#6C3FC5 100%);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;color:white;flex-shrink:0}
 .emp-name{font-size:13px;font-weight:700;color:var(--text)}
 .emp-role{font-size:11px;color:var(--text-3);margin-top:1px}
+.emp-salary{font-size:11px;font-weight:800;color:var(--success);margin-top:3px;background:var(--success-light);padding:2px 8px;border-radius:20px;display:none}
+.salary-visible .emp-salary{display:inline-block}
+.salary-add-field{display:none}
+.salary-form-visible .salary-add-field{display:block}
 .emp-acts{display:flex;gap:5px;margin-right:auto;flex-shrink:0}
 .btn-edit{background:var(--primary-light);color:var(--primary);border:none;height:28px;padding:0 10px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:800;font-family:"Tajawal",sans-serif}
 .btn-del{background:var(--accent-light);color:var(--accent);border:none;height:28px;padding:0 10px;border-radius:8px;cursor:pointer;font-size:11px;font-weight:800;font-family:"Tajawal",sans-serif}
@@ -362,11 +366,32 @@ body{font-family:"Tajawal",sans-serif;background:var(--bg);color:var(--text);min
     <input type="hidden" id="edit-sec"><input type="hidden" id="edit-key">
     <div class="f-group"><label class="f-label">الاسم الكامل</label><input class="f-input" type="text" id="edit-name" placeholder="الاسم الكامل"></div>
     <div class="f-group"><label class="f-label">المسمى الوظيفي</label><input class="f-input" type="text" id="edit-role" placeholder="المسمى الوظيفي"></div>
+    <div class="f-group"><label class="f-label">💰 الراتب الشهري</label><input class="f-input" type="text" id="edit-salary" placeholder="مثال: 850,000 د.ع"></div>
     <div class="btn-row" style="margin-top:8px"><button class="btn-primary" onclick="saveEdit()">💾 حفظ التعديل</button><button class="btn-ghost" onclick="closeEditModal()">إلغاء</button></div>
   </div>
 </div>
 
 <script>
+// ══ GLOBAL BRIDGES ══
+// HTML onclick calls these global functions
+// They defer to window.xxx which is set by the ES module
+function doLogin(){ window._doLogin && window._doLogin(); }
+function doLogout(){ window._doLogout && window._doLogout(); }
+function switchTab(id){ window.switchTab && window.switchTab(id); }
+function toggle(id){ window.toggle && window.toggle(id); }
+function showForm(id){ window.showForm && window.showForm(id); }
+function hideForm(id){ window.hideForm && window.hideForm(id); }
+function addEmp(id){ window.addEmp && window.addEmp(id); }
+function saveEdit(){ window.saveEdit && window.saveEdit(); }
+function closeEditModal(){ window.closeEditModal && window.closeEditModal(); }
+function filterVio(t,el){ window.filterVio && window.filterVio(t,el); }
+function openVioModal(){ window.openVioModal && window.openVioModal(); }
+function closeVioModal(){ window.closeVioModal && window.closeVioModal(); }
+function toggleVioExtra(){ window.toggleVioExtra && window.toggleVioExtra(); }
+function saveVio(){ window.saveVio && window.saveVio(); }
+function delVio(k){ window.delVio && window.delVio(k); }
+function buildReport(){ window.buildReport && window.buildReport(); }
+
 // ══════════════════════════════════════
 // LOGIN - TOGGLE PASS
 // ══════════════════════════════════════
@@ -403,24 +428,25 @@ const db = getDatabase(fbApp);
 
 // ══ USERS & PERMISSIONS ══
 const USERS = {
-  // صلاحية مطلقة
-  'adm1': { pass:'1992', role:'admin', label:'🔑 رئيس مجلس الإدارة', badgeClass:'h-badge-admin' },
-  'adm2': { pass:'1997', role:'admin', label:'🔑 معاون رئيس مجلس الإدارة', badgeClass:'h-badge-admin' },
-  'dev':  { pass:'2000', role:'admin', label:'⚙️ المطور', badgeClass:'h-badge-admin' },
-  // مشاهدة فقط
-  'dora1':{ pass:'dora1', role:'viewer', label:'👁️ مشاهدة فقط', badgeClass:'h-badge-viewer' },
-  'dora2':{ pass:'dora2', role:'viewer', label:'👁️ مشاهدة فقط', badgeClass:'h-badge-viewer' },
-  'dora3':{ pass:'dora3', role:'viewer', label:'👁️ مشاهدة فقط', badgeClass:'h-badge-viewer' },
-  'dora4':{ pass:'dora4', role:'viewer', label:'👁️ مشاهدة فقط', badgeClass:'h-badge-viewer' },
-  'dora5':{ pass:'dora5', role:'viewer', label:'👁️ مشاهدة فقط', badgeClass:'h-badge-viewer' },
+  // صلاحية مطلقة + يرى الرواتب
+  'adm1': { pass:'1992', role:'admin', canSeeSalary:true,  label:'🔑 رئيس مجلس الإدارة', badgeClass:'h-badge-admin' },
+  'adm2': { pass:'1997', role:'admin', canSeeSalary:true,  label:'🔑 معاون رئيس مجلس الإدارة', badgeClass:'h-badge-admin' },
+  'dev':  { pass:'2000', role:'admin', canSeeSalary:true,  label:'⚙️ المطور', badgeClass:'h-badge-admin' },
+  // مشاهدة فقط - لا يرى الرواتب
+  'dora1':{ pass:'dora1', role:'viewer', canSeeSalary:false, label:'👁️ مشاهدة فقط', badgeClass:'h-badge-viewer' },
+  'dora2':{ pass:'dora2', role:'viewer', canSeeSalary:false, label:'👁️ مشاهدة فقط', badgeClass:'h-badge-viewer' },
+  'dora3':{ pass:'dora3', role:'viewer', canSeeSalary:false, label:'👁️ مشاهدة فقط', badgeClass:'h-badge-viewer' },
+  'dora4':{ pass:'dora4', role:'viewer', canSeeSalary:false, label:'👁️ مشاهدة فقط', badgeClass:'h-badge-viewer' },
+  'dora5':{ pass:'dora5', role:'viewer', canSeeSalary:false, label:'👁️ مشاهدة فقط', badgeClass:'h-badge-viewer' },
 };
 
 let CURRENT_ROLE = null;
+let CURRENT_CAN_SEE_SALARY = false;
 let localData = {}, violations = {}, vioFilter = 'all';
 let fbListeners = [];
 
 // ── LOGIN ──
-window.doLogin = function(){
+window._doLogin = window.doLogin = function(){
   const user = document.getElementById('l-user').value.trim().toLowerCase();
   const pass = document.getElementById('l-pass').value;
   const errEl = document.getElementById('login-err');
@@ -454,6 +480,7 @@ window.doLogin = function(){
       return;
     }
     CURRENT_ROLE = u.role;
+    CURRENT_CAN_SEE_SALARY = u.canSeeSalary || false;
     // Set badge
     const badge = document.getElementById('role-badge');
     badge.textContent = u.label;
@@ -466,9 +493,10 @@ window.doLogin = function(){
   }, 700);
 };
 
-window.doLogout = function(){
+window._doLogout = window.doLogout = function(){
   if(!confirm('هل تريد تسجيل الخروج؟')) return;
   CURRENT_ROLE=null;
+  CURRENT_CAN_SEE_SALARY=false;
   document.getElementById('app-screen').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('l-user').value='';
@@ -488,6 +516,11 @@ function applyPermissions(){
   document.getElementById('viewer-bar').style.display = isViewer ? 'flex' : 'none';
   document.getElementById('btn-new-vio').style.display = isViewer ? 'none' : '';
   document.querySelectorAll('.btn-add').forEach(b=>b.style.display=isViewer?'none':'');
+  // salary visibility - only for adm1, adm2, dev
+  document.querySelectorAll('.add-form').forEach(f=>{
+    if(CURRENT_CAN_SEE_SALARY) f.classList.add('salary-form-visible');
+    else f.classList.remove('salary-form-visible');
+  });
 }
 
 // ── DEPTS ──
@@ -554,6 +587,7 @@ function buildNode(cfg, container){
       '<div class="add-form" id="form_'+cfg.id+'">'+
         '<input class="f-input" type="text" placeholder="الاسم الكامل" id="fname_'+cfg.id+'">'+
         '<input class="f-input" type="text" placeholder="المسمى الوظيفي" id="frole_'+cfg.id+'">'+
+        '<input class="f-input salary-add-field" type="text" placeholder="💰 الراتب الشهري (اختياري)" id="fsal_'+cfg.id+'">'+
         '<div class="btn-row"><button class="btn-primary" onclick="addEmp(''+cfg.id+'')">حفظ</button>'+
         '<button class="btn-ghost" onclick="hideForm(''+cfg.id+'')">إلغاء</button></div>'+
       '</div>'+
@@ -581,7 +615,7 @@ function buildGroup(depts,cid){
 function listenSection(id){
   onValue(ref(db,'hospital/'+id),function(snap){
     localData[id]=[];
-    if(snap.exists()) snap.forEach(c=>localData[id].push({key:c.key,name:c.val().name,role:c.val().role||''}));
+    if(snap.exists()) snap.forEach(c=>localData[id].push({key:c.key,name:c.val().name,role:c.val().role||'',salary:c.val().salary||''}));
     renderNode(id); updateStats();
   });
 }
@@ -614,16 +648,22 @@ function renderNode(id){
     emps.forEach(function(e){
       const div=document.createElement('div');
       div.className='emp-item';
+      const salaryText = e.salary ? '💰 ' + e.salary + ' د.ع' : '💰 غير محدد';
       div.innerHTML=
         '<div class="emp-av">'+(e.name.trim().charAt(0)||'؟')+'</div>'+
-        '<div style="flex:1;min-width:0"><div class="emp-name">'+e.name+'</div><div class="emp-role">'+(e.role||'موظف')+'</div></div>'+
+        '<div style="flex:1;min-width:0">'+
+          '<div class="emp-name">'+e.name+'</div>'+
+          '<div class="emp-role">'+(e.role||'موظف')+'</div>'+
+          '<div class="emp-salary">'+salaryText+'</div>'+
+        '</div>'+
         '<div class="emp-acts">'+
           (CURRENT_ROLE==='admin'?'<button class="btn-edit">تعديل</button><button class="btn-del">حذف</button>':'')+
         '</div>';
       if(CURRENT_ROLE==='admin'){
-        div.querySelector('.btn-edit').addEventListener('click',()=>openEditModal(id,e.key,e.name,e.role||''));
+        div.querySelector('.btn-edit').addEventListener('click',()=>openEditModal(id,e.key,e.name,e.role||'',e.salary||''));
         div.querySelector('.btn-del').addEventListener('click',()=>delEmp(id,e.key));
       }
+      if(CURRENT_CAN_SEE_SALARY) div.classList.add('salary-visible');
       listEl.appendChild(div);
     });
   }
@@ -698,7 +738,9 @@ window.addEmp=function(id){
   const name=fn.value.trim(),role=fr?fr.value.trim():'';
   if(!name){fn.style.borderColor='var(--accent)';return;}
   fn.style.borderColor='';
-  push(ref(db,'hospital/'+id),{name,role});
+  const sal = document.getElementById('fsal_'+id);
+  const salary = sal ? sal.value.trim() : '';
+  push(ref(db,'hospital/'+id),{name,role,salary});
   hideForm(id);
 };
 window.delEmp=function(id,key){
@@ -706,12 +748,13 @@ window.delEmp=function(id,key){
   if(!confirm('حذف الموظف؟')) return;
   remove(ref(db,'hospital/'+id+'/'+key));
 };
-window.openEditModal=function(sec,key,name,role){
+window.openEditModal=function(sec,key,name,role,salary){
   if(CURRENT_ROLE!=='admin') return;
   document.getElementById('edit-sec').value=sec;
   document.getElementById('edit-key').value=key;
   document.getElementById('edit-name').value=name;
   document.getElementById('edit-role').value=role;
+  document.getElementById('edit-salary').value=salary||'';
   document.getElementById('edit-modal').classList.add('show');
   setTimeout(()=>document.getElementById('edit-name').focus(),100);
 };
@@ -722,9 +765,10 @@ window.saveEdit=function(){
   const key=document.getElementById('edit-key').value;
   const name=document.getElementById('edit-name').value.trim();
   const role=document.getElementById('edit-role').value.trim();
+  const salary=document.getElementById('edit-salary').value.trim();
   if(!name){document.getElementById('edit-name').style.borderColor='var(--accent)';return;}
   document.getElementById('edit-name').style.borderColor='';
-  set(ref(db,'hospital/'+sec+'/'+key),{name,role});
+  set(ref(db,'hospital/'+sec+'/'+key),{name,role,salary});
   closeEditModal();
 };
 window.filterVio=function(type,el){
