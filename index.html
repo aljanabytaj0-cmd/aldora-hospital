@@ -464,17 +464,25 @@ function doLogin(){
   ROLE=u.role; CAN_SAL=u.sal;
 
   setTimeout(function(){
-    btnTxt.textContent='دخول';
-    document.getElementById('login-btn').style.opacity='1';
-    var badge=document.getElementById('role-badge');
-    badge.textContent=u.label; badge.className=u.cls;
-    document.getElementById('login-screen').style.display='none';
-    document.getElementById('app-screen').style.display='block';
-    applyPerms();
+  btnTxt.textContent='دخول';
+  document.getElementById('login-btn').style.opacity='1';
+
+  var badge=document.getElementById('role-badge');
+  badge.textContent=u.label;
+  badge.className=u.cls;
+
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app-screen').style.display='block';
+
+  applyPerms();
+
+  try{
     rebuildUI();
-document.getElementById('login-screen').style.display='none';
-document.getElementById('app-screen').style.display='block';
-  },600);
+  }catch(e){
+    console.log(e);
+  }
+
+},600);
 }
 
 function doLogout(){
