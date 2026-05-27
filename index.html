@@ -166,21 +166,37 @@ body{font-family:"Tajawal",sans-serif;background:var(--bg);color:var(--tx);min-h
 .btdv{background:var(--acl);color:var(--ac);border:none;border-radius:7px;padding:5px 12px;font-size:11px;font-family:"Tajawal",sans-serif;cursor:pointer;font-weight:700}
 
 /* ══ DELAY PAGE ══ */
-.month-card{background:#fff;border-radius:var(--rd);border:1.5px solid var(--bd);box-shadow:var(--sh);margin-bottom:9px;overflow:hidden}
-.month-head{display:flex;align-items:center;gap:10px;padding:13px;cursor:pointer}
+/* شهر */
+.month-card{background:#fff;border-radius:var(--rd);border:1.5px solid #BFCFFF;box-shadow:var(--sh);margin-bottom:9px;overflow:hidden}
+.month-head{display:flex;align-items:center;gap:10px;padding:13px;cursor:pointer;background:#fff}
 .month-icon{width:40px;height:40px;border-radius:10px;background:var(--prl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .month-info{flex:1}
-.month-title{font-size:14px;font-weight:800;color:var(--tx)}
-.month-count{font-size:11px;color:var(--t3);margin-top:2px}
-.month-card.open .chv{transform:rotate(90deg)}
-.delay-body{display:none;border-top:1.5px solid var(--bd)}
-.month-card.open .delay-body{display:block}
+.month-title{font-size:14px;font-weight:800;color:var(--pr)}
+.month-meta{font-size:11px;color:var(--t3);margin-top:2px}
+.month-card.open>.month-head>.chv{transform:rotate(90deg)}
+.month-body{display:none;border-top:1.5px solid var(--bd)}
+.month-card.open>.month-body{display:block}
+.month-actions{display:flex;gap:7px;padding:9px 12px;background:#F8FAFF;border-bottom:1px solid var(--bd)}
+/* قسم داخل الشهر */
+.dept-card{border-bottom:1px solid var(--bd)}
+.dept-card:last-child{border-bottom:none}
+.dept-head{display:flex;align-items:center;gap:9px;padding:11px 13px;cursor:pointer;background:#FAFBFF}
+.dept-head:active{background:#F0F4FF}
+.dept-icon-sm{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.dept-name-sm{flex:1;font-size:13px;font-weight:700;color:var(--tx)}
+.dept-count-badge{background:var(--acl);color:var(--ac);border-radius:20px;padding:2px 9px;font-size:11px;font-weight:800}
+.dept-card.open>.dept-head>.chv{transform:rotate(90deg)}
+.dept-body{display:none;border-top:1px solid var(--bd)}
+.dept-card.open>.dept-body{display:block}
+.dept-emp-bar{display:flex;align-items:center;justify-content:space-between;padding:8px 13px 5px;background:#fff}
+.dept-emp-bar span{font-size:10px;color:var(--t3);font-weight:700;letter-spacing:.5px;text-transform:uppercase}
+/* موظف متأخر */
 .delay-item{display:flex;align-items:center;gap:9px;padding:9px 13px;border-bottom:1px solid #F1F5F9}
 .delay-item:last-child{border-bottom:none}
 .delay-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#E63946,#D4800A);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0}
 .delay-info{flex:1}
 .delay-name{font-size:12px;font-weight:700;color:var(--tx)}
-.delay-mins{font-size:11px;color:var(--ac);font-weight:700;margin-top:1px}
+.delay-sub{font-size:11px;color:var(--ac);font-weight:700;margin-top:1px}
 .delay-date{font-size:10px;color:var(--t3);white-space:nowrap}
 
 /* ══ REPORTS ══ */
@@ -315,7 +331,7 @@ body{font-family:"Tajawal",sans-serif;background:var(--bg);color:var(--tx);min-h
     <div style="margin-top:14px">
       <div class="ph"><span class="pt">تأخير البصمة</span><button class="btnew" id="btn-newmonth">＋ إضافة شهر</button></div>
       <div id="months-list"></div>
-      <div id="months-empty" class="ee" style="display:none">لا توجد سجلات تأخير</div>
+      <div id="months-empty" class="ee" style="display:none">لا توجد سجلات تأخير — اضغط "إضافة شهر" للبدء</div>
     </div>
   </div>
 
@@ -382,18 +398,46 @@ body{font-family:"Tajawal",sans-serif;background:var(--bg);color:var(--tx);min-h
   </div>
 </div>
 
-<!-- ADD DELAY MODAL -->
+<!-- ADD DEPT TO MONTH MODAL -->
+<div class="ov" id="adddept-modal">
+  <div class="mo">
+    <div class="moh"><h3>➕ إضافة قسم للشهر</h3><button class="moc" id="close-adddept">✕</button></div>
+    <div class="mob">
+      <input type="hidden" id="adddept-mk">
+      <div class="fg"><label class="fl">اختر القسم</label>
+        <select class="fs2" id="adddept-sel">
+          <option value="">— اختر القسم —</option>
+          <option>رئيس مجلس الإدارة</option><option>معاون رئيس مجلس الإدارة</option>
+          <option>المدير الفني</option><option>المدير الإداري</option>
+          <option>قسم التمريض</option><option>قسم العناية المركزة</option>
+          <option>قسم الطوارئ</option><option>قسم العمليات</option>
+          <option>قسم التخدير</option><option>الأطباء المقيمون</option>
+          <option>قسم الأشعة</option><option>قسم المختبر</option>
+          <option>قسم الصيدلية</option><option>قسم الخدج</option>
+          <option>تمريض الطابق</option><option>قسم العلاج الطبيعي</option>
+          <option>قسم الأسنان</option><option>قسم الحسابات</option>
+          <option>قسم IT</option><option>قسم الصيانة</option>
+          <option>قسم الاستعلامات</option><option>قسم الأمنية</option>
+          <option>الكافتيريا</option><option>موظفو الخدمات</option>
+        </select>
+      </div>
+      <div class="btr"><button class="btp" id="save-adddept">إضافة القسم</button><button class="btg" id="cancel-adddept">إلغاء</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADD DELAY EMPLOYEE MODAL -->
 <div class="ov" id="delay-modal">
   <div class="mo">
-    <div class="moh"><h3>⏰ إضافة تأخير</h3><button class="moc" id="close-delay">✕</button></div>
+    <div class="moh"><h3>⏰ إضافة موظف متأخر</h3><button class="moc" id="close-delay">✕</button></div>
     <div class="mob">
-      <input type="hidden" id="delay-month-key">
+      <input type="hidden" id="delay-mk">
+      <input type="hidden" id="delay-dk">
       <div class="fg"><label class="fl">اسم الموظف</label><input class="fi" type="text" id="d-name" placeholder="الاسم الكامل للموظف"></div>
-      <div class="fg"><label class="fl">القسم</label><input class="fi" type="text" id="d-dept" placeholder="اسم القسم"></div>
       <div class="fg"><label class="fl">مدة التأخير</label><input class="fi" type="text" id="d-mins" placeholder="مثال: 45 دقيقة"></div>
       <div class="fg"><label class="fl">التاريخ</label><input class="fi" type="date" id="d-date"></div>
       <div class="fg"><label class="fl">ملاحظات (اختياري)</label><input class="fi" type="text" id="d-note" placeholder="أي ملاحظات إضافية"></div>
-      <div class="btr"><button class="btdg" id="save-delay">💾 حفظ التأخير</button><button class="btg" id="cancel-delay">إلغاء</button></div>
+      <div class="btr"><button class="btdg" id="save-delay">💾 حفظ</button><button class="btg" id="cancel-delay">إلغاء</button></div>
     </div>
   </div>
 </div>
@@ -520,6 +564,10 @@ document.addEventListener('DOMContentLoaded', function(){
   // Edit
   document.getElementById('save-edit').addEventListener('click', saveEdit);
   document.getElementById('cancel-edit').addEventListener('click', function(){ document.getElementById('edit-modal').classList.remove('show'); });
+  // Add Dept Modal
+  document.getElementById('close-adddept').addEventListener('click', function(){ document.getElementById('adddept-modal').classList.remove('show'); });
+  document.getElementById('cancel-adddept').addEventListener('click', function(){ document.getElementById('adddept-modal').classList.remove('show'); });
+  document.getElementById('save-adddept').addEventListener('click', saveAddDept);
 });
 
 function doLogin(){
@@ -683,6 +731,28 @@ function listenMonths(){
   });
 }
 
+// ── أيقونات الأقسام
+var DEPT_ICONS = {
+  'رئيس مجلس الإدارة':'👩‍💼','معاون رئيس مجلس الإدارة':'🤝',
+  'المدير الفني':'🩺','المدير الإداري':'📋',
+  'قسم التمريض':'👩‍⚕️','قسم العناية المركزة':'💉','قسم الطوارئ':'🚨',
+  'قسم العمليات':'🔪','قسم التخدير':'😴','الأطباء المقيمون':'👨‍⚕️',
+  'قسم الأشعة':'🩻','قسم المختبر':'🔬','قسم الصيدلية':'💊',
+  'قسم الخدج':'🍼','تمريض الطابق':'🏥','قسم العلاج الطبيعي':'🦴',
+  'قسم الأسنان':'🦷','قسم الحسابات':'💰','قسم IT':'💻',
+  'قسم الصيانة':'🔧','قسم الاستعلامات':'🗂️','قسم الأمنية':'🛡️',
+  'الكافتيريا':'🍽️','موظفو الخدمات':'🧹'
+};
+var DEPT_COLORS = {
+  'قسم التمريض':'#EEF3FF','قسم العناية المركزة':'#FFEDEF','قسم الطوارئ':'#FFEDEF',
+  'قسم العمليات':'#EEF3FF','قسم التخدير':'#F0EAFF','الأطباء المقيمون':'#EEF3FF',
+  'قسم الأشعة':'#F0EAFF','قسم المختبر':'#E6F7F0','قسم الصيدلية':'#E6F7F0',
+  'قسم الخدج':'#FFF4E0','تمريض الطابق':'#EEF3FF','قسم العلاج الطبيعي':'#F0EAFF',
+  'قسم الأسنان':'#FFEDEF','قسم الحسابات':'#FFF4E0','قسم IT':'#EEF3FF',
+  'قسم الصيانة':'#FFEDEF','قسم الاستعلامات':'#E6F7F0','قسم الأمنية':'#E6F7F0',
+  'الكافتيريا':'#FFF4E0','موظفو الخدمات':'#F0EAFF'
+};
+
 // ═══════════════════════════════════
 //  RENDER
 // ═══════════════════════════════════
@@ -767,34 +837,97 @@ function renderMonths(){
   list.innerHTML='';
   keys.forEach(function(mk){
     var m=MONTHS[mk];
-    var delays=m.delays?Object.keys(m.delays):[];
+    var depts=m.depts?Object.keys(m.depts):[];
+    var totalDelays=0;
+    depts.forEach(function(dk){
+      if(m.depts[dk].employees) totalDelays+=Object.keys(m.depts[dk].employees).length;
+    });
     var card=document.createElement('div');
     card.className='month-card';
-    var delayRows=delays.map(function(dk){
-      var d=m.delays[dk];
-      var delBtn=ROLE==='admin'?'<button onclick="delDelay(\''+mk+'\',\''+dk+'\')" style="background:var(--acl);color:var(--ac);border:none;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif;margin-right:auto">حذف</button>':'';
-      return '<div class="delay-item"><div class="delay-av">'+(d.name.trim().charAt(0)||'؟')+'</div><div class="delay-info"><div class="delay-name">'+d.name+'</div><div class="delay-mins">⏰ '+(d.mins||'')+(d.dept?' | '+d.dept:'')+(d.note?' | '+d.note:'')+'</div></div><div class="delay-date">'+(d.date||'')+'</div>'+delBtn+'</div>';
-    }).join('');
-    card.innerHTML=
-      '<div class="month-head" data-mk="'+mk+'">'+
-        '<div class="month-icon">📅</div>'+
-        '<div class="month-info"><div class="month-title">'+m.name+'</div><div class="month-count">'+delays.length+' حالة تأخير</div></div>'+
-        (ROLE==='admin'?'<button onclick="openDelayModal(\''+mk+'\')" style="background:var(--pr);color:#fff;border:none;border-radius:20px;padding:4px 11px;font-size:11px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;margin-left:6px">＋ إضافة</button>':'')+
-        (ROLE==='admin'?'<button onclick="delMonth(\''+mk+'\')" style="background:var(--acl);color:var(--ac);border:none;border-radius:20px;padding:4px 9px;font-size:11px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif">حذف</button>':'')+
-        '<div class="chv">›</div>'+
-      '</div>'+
-      '<div class="delay-body">'+(delayRows||'<div class="ee">لا توجد حالات تأخير</div>')+'</div>';
-    card.querySelector('.month-head').addEventListener('click',function(e){
-      if(e.target.tagName==='BUTTON') return;
-      card.classList.toggle('open');
-    });
+    // رأس الشهر
+    var mHead=document.createElement('div');
+    mHead.className='month-head';
+    mHead.innerHTML='<div class="month-icon">📅</div><div class="month-info"><div class="month-title">'+m.name+'</div><div class="month-meta">'+depts.length+' قسم — '+totalDelays+' حالة تأخير</div></div><div class="chv">›</div>';
+    mHead.addEventListener('click',function(){card.classList.toggle('open');});
+    // أزرار الشهر
+    var mActs=document.createElement('div');
+    mActs.className='month-actions';
+    if(ROLE==='admin'){
+      var bAdd=document.createElement('button');
+      bAdd.className='btp';bAdd.style.cssText='flex:1;font-size:12px;padding:8px';bAdd.textContent='＋ إضافة قسم';
+      bAdd.addEventListener('click',function(e){e.stopPropagation();openAddDeptModal(mk);});
+      var bDel=document.createElement('button');
+      bDel.className='btg';bDel.style.cssText='color:var(--ac);background:var(--acl);font-size:12px;padding:8px 14px';bDel.textContent='🗑 حذف الشهر';
+      bDel.addEventListener('click',function(e){e.stopPropagation();delMonth(mk);});
+      mActs.appendChild(bAdd);mActs.appendChild(bDel);
+    }
+    // جسم الشهر
+    var mBody=document.createElement('div');
+    mBody.className='month-body';
+    mBody.appendChild(mActs);
+    if(!depts.length){
+      var noD=document.createElement('div');noD.className='ee';noD.textContent='لا توجد أقسام — اضغط إضافة قسم';
+      mBody.appendChild(noD);
+    } else {
+      depts.forEach(function(dk){
+        var dept=m.depts[dk];
+        var dName=dept.name||dk;
+        var emps=dept.employees?Object.keys(dept.employees):[];
+        var icon=DEPT_ICONS[dName]||'🏢';
+        var color=DEPT_COLORS[dName]||'#EEF3FF';
+        var dCard=document.createElement('div');
+        dCard.className='dept-card';
+        // رأس القسم
+        var dHead=document.createElement('div');
+        dHead.className='dept-head';
+        dHead.innerHTML='<div class="dept-icon-sm" style="background:'+color+'">'+icon+'</div><div class="dept-name-sm">'+dName+'</div><span class="dept-count-badge">'+emps.length+'</span><div class="chv" style="margin-right:4px">›</div>';
+        dHead.addEventListener('click',function(){dCard.classList.toggle('open');});
+        // جسم القسم
+        var dBody=document.createElement('div');
+        dBody.className='dept-body';
+        var dBar=document.createElement('div');
+        dBar.className='dept-emp-bar';
+        dBar.innerHTML='<span>المتأخرون</span>';
+        if(ROLE==='admin'){
+          var bAddE=document.createElement('button');
+          bAddE.className='btna';bAddE.style.fontSize='11px';bAddE.textContent='＋ إضافة موظف';
+          bAddE.addEventListener('click',function(e){e.stopPropagation();openDelayEmpModal(mk,dk,dName);});
+          var bDelD=document.createElement('button');
+          bDelD.style.cssText='background:var(--acl);color:var(--ac);border:none;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;font-family:Tajawal,sans-serif;margin-right:6px';
+          bDelD.textContent='حذف القسم';
+          bDelD.addEventListener('click',function(e){e.stopPropagation();delDept(mk,dk);});
+          dBar.appendChild(bDelD);dBar.appendChild(bAddE);
+        }
+        dBody.appendChild(dBar);
+        var dList=document.createElement('div');
+        if(!emps.length){
+          dList.innerHTML='<div class="ee">لا يوجد موظفون — اضغط إضافة موظف</div>';
+        } else {
+          emps.forEach(function(ek){
+            var emp=dept.employees[ek];
+            var row=document.createElement('div');
+            row.className='delay-item';
+            row.innerHTML='<div class="delay-av">'+(emp.name.trim().charAt(0)||'؟')+'</div><div class="delay-info"><div class="delay-name">'+emp.name+'</div><div class="delay-sub">⏰ '+(emp.mins||'')+(emp.note?' | '+emp.note:'')+'</div></div><div class="delay-date">'+(emp.date||'')+'</div>';
+            if(ROLE==='admin'){
+              var bDelE=document.createElement('button');
+              bDelE.style.cssText='background:var(--acl);color:var(--ac);border:none;border-radius:6px;padding:3px 8px;font-size:10px;font-weight:800;cursor:pointer;font-family:Tajawal,sans-serif;margin-right:6px;flex-shrink:0';
+              bDelE.textContent='حذف';
+              bDelE.addEventListener('click',function(){delDelayEmp(mk,dk,ek);});
+              row.appendChild(bDelE);
+            }
+            dList.appendChild(row);
+          });
+        }
+        dBody.appendChild(dList);
+        dCard.appendChild(dHead);dCard.appendChild(dBody);
+        mBody.appendChild(dCard);
+      });
+    }
+    card.appendChild(mHead);card.appendChild(mBody);
     list.appendChild(card);
   });
 }
 
-// ═══════════════════════════════════
-//  ACTIONS
-// ═══════════════════════════════════
 function showPage(id){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nt').forEach(function(b){b.classList.remove('active');});
@@ -909,34 +1042,65 @@ function delMonth(key){
   if(!confirm('حذف هذا الشهر وجميع سجلاته؟')) return;
   DB.ref('delay_months/'+key).remove();
 }
-function openDelayModal(mk){
+// ── إضافة قسم للشهر
+function openAddDeptModal(mk){
   if(ROLE!=='admin') return;
-  document.getElementById('delay-month-key').value=mk;
+  document.getElementById('adddept-mk').value=mk;
+  document.getElementById('adddept-sel').value='';
+  document.getElementById('adddept-modal').classList.add('show');
+}
+function saveAddDept(){
+  if(ROLE!=='admin') return;
+  var mk=document.getElementById('adddept-mk').value;
+  var dName=document.getElementById('adddept-sel').value;
+  if(!dName){alert('يرجى اختيار قسم');return;}
+  // التحقق من عدم التكرار
+  var m=MONTHS[mk];
+  if(m&&m.depts){
+    var exists=Object.values(m.depts).some(function(d){return d.name===dName;});
+    if(exists){alert('هذا القسم موجود بالفعل في هذا الشهر');return;}
+  }
+  var deptKey='dept_'+Date.now();
+  DB.ref('delay_months/'+mk+'/depts/'+deptKey).set({name:dName,ts:Date.now()});
+  document.getElementById('adddept-modal').classList.remove('show');
+}
+function delDept(mk,dk){
+  if(ROLE!=='admin') return;
+  if(!confirm('حذف هذا القسم وجميع سجلاته؟')) return;
+  DB.ref('delay_months/'+mk+'/depts/'+dk).remove();
+}
+// ── إضافة موظف متأخر
+function openDelayEmpModal(mk,dk,dName){
+  if(ROLE!=='admin') return;
+  document.getElementById('delay-mk').value=mk;
+  document.getElementById('delay-dk').value=dk;
   document.getElementById('d-date').value=new Date().toISOString().split('T')[0];
-  ['d-name','d-dept','d-mins','d-note'].forEach(function(i){var e=document.getElementById(i);if(e)e.value='';});
+  ['d-name','d-mins','d-note'].forEach(function(i){var e=document.getElementById(i);if(e)e.value='';});
   document.getElementById('delay-modal').classList.add('show');
+  setTimeout(function(){var e=document.getElementById('d-name');if(e)e.focus();},150);
 }
 function saveDelay(){
   if(ROLE!=='admin') return;
-  var mk=document.getElementById('delay-month-key').value;
+  var mk=document.getElementById('delay-mk').value;
+  var dk=document.getElementById('delay-dk').value;
   var name=document.getElementById('d-name').value.trim();
   var mins=document.getElementById('d-mins').value.trim();
   if(!name||!mins){alert('أدخل اسم الموظف ومدة التأخير');return;}
-  DB.ref('delay_months/'+mk+'/delays').push({
-    name:name,
-    dept:document.getElementById('d-dept').value.trim(),
-    mins:mins,
+  DB.ref('delay_months/'+mk+'/depts/'+dk+'/employees').push({
+    name:name,mins:mins,
     date:document.getElementById('d-date').value,
     note:document.getElementById('d-note').value.trim(),
     ts:Date.now()
   });
   document.getElementById('delay-modal').classList.remove('show');
 }
-function delDelay(mk,dk){
+function delDelayEmp(mk,dk,ek){
   if(ROLE!=='admin') return;
-  if(!confirm('حذف هذا التأخير؟')) return;
-  DB.ref('delay_months/'+mk+'/delays/'+dk).remove();
+  if(!confirm('حذف هذا الموظف من قائمة التأخير؟')) return;
+  DB.ref('delay_months/'+mk+'/depts/'+dk+'/employees/'+ek).remove();
 }
+// legacy - kept for compatibility
+function delDelay(mk,dk){ delDelayEmp(mk,dk,dk); }
 function doSearch(q){
   document.querySelectorAll('.node').forEach(function(node){
     if(!q.trim()){node.style.display='';return;}
