@@ -231,6 +231,40 @@ body{font-family:"Tajawal",sans-serif;background:var(--bg);color:var(--tx);min-h
 .bb{flex:1;min-width:60px;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;cursor:pointer;font-family:"Tajawal",sans-serif;font-size:9px;font-weight:700;color:var(--t3);padding:3px 2px;transition:color .15s;white-space:nowrap}
 .bb .bi{font-size:19px}
 .bb.active{color:var(--pr)}
+
+/* ══ PERMISSIONS ══ */
+.perm-card{background:#fff;border-radius:var(--rd);padding:14px;box-shadow:var(--sh);border:1.5px solid var(--bd);margin-bottom:12px}
+.perm-card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.perm-user-info{display:flex;align-items:center;gap:10px}
+.perm-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--pr),#6C3FC5);display:flex;align-items:center;justify-content:center;font-size:16px;color:#fff;font-weight:800;flex-shrink:0}
+.perm-user-name{font-size:13px;font-weight:800;color:var(--tx)}
+.perm-user-role{font-size:11px;color:var(--t3);font-weight:600}
+.perm-badge{border-radius:20px;padding:3px 10px;font-size:10px;font-weight:800;background:var(--prl);color:var(--pr)}
+.perm-badge.viewer{background:#FFF4E0;color:#D4800A}
+.perm-badge.limited{background:#E6F7F0;color:#0A9258}
+.perm-section{margin-top:10px;padding-top:10px;border-top:1px solid var(--bd)}
+.perm-section-title{font-size:11px;font-weight:800;color:var(--t2);margin-bottom:8px;letter-spacing:.3px;text-transform:uppercase}
+.perm-toggles{display:flex;flex-direction:column;gap:7px}
+.perm-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg);border-radius:10px}
+.perm-toggle-label{font-size:12px;font-weight:700;color:var(--tx);flex:1}
+.perm-toggle-sub{font-size:10px;color:var(--t3);margin-top:1px}
+.toggle-switch{position:relative;width:42px;height:24px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#CBD5E1;transition:.3s;border-radius:24px}
+.toggle-slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:#fff;transition:.3s;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.15)}
+input:checked + .toggle-slider{background:var(--pr)}
+input:checked + .toggle-slider:before{transform:translateX(18px)}
+.perm-dept-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.perm-dept-item{display:flex;align-items:center;gap:6px;padding:6px 8px;background:var(--bg);border-radius:8px;cursor:pointer}
+.perm-dept-item.allowed{background:var(--prl)}
+.perm-dept-check{width:16px;height:16px;border-radius:4px;border:2px solid var(--bd);background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px}
+.perm-dept-item.allowed .perm-dept-check{background:var(--pr);border-color:var(--pr);color:#fff}
+.perm-dept-name{font-size:10px;font-weight:700;color:var(--tx)}
+.perm-save-btn{width:100%;margin-top:10px;background:var(--pr);color:#fff;border:none;border-radius:13px;padding:11px;font-family:"Tajawal",sans-serif;font-size:13px;font-weight:800;cursor:pointer}
+.perm-save-btn:active{opacity:.85}
+.perm-info-box{background:#EEF3FF;border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:#1B4FD8;font-weight:700;line-height:1.6}
+.fs2{width:100%;border:1.5px solid var(--bd);border-radius:10px;padding:9px 12px;font-family:"Tajawal",sans-serif;font-size:13px;font-weight:600;background:#fff;color:var(--tx);outline:none}
+.fs2:focus{border-color:var(--pr)}
 </style>
 </head>
 <body>
@@ -290,6 +324,7 @@ body{font-family:"Tajawal",sans-serif;background:var(--bg);color:var(--tx);min-h
     <div class="nt" id="nt-v" onclick="showPage('pg-v')"><span class="ti">⚠️</span>المخالفات</div>
     <div class="nt" id="nt-d" onclick="showPage('pg-d')"><span class="ti">⏰</span>تأخير البصمة</div>
     <div class="nt" id="nt-r" onclick="showPage('pg-r')"><span class="ti">📊</span>التقارير</div>
+    <div class="nt" id="nt-p" onclick="showPage('pg-p')" style="display:none"><span class="ti">⚙️</span>الصلاحيات</div>
   </div></div>
 
   <!-- STAFF -->
@@ -344,11 +379,84 @@ body{font-family:"Tajawal",sans-serif;background:var(--bg);color:var(--tx);min-h
     </div>
   </div>
 
+
+  <!-- PERMISSIONS PAGE (dev only) -->
+  <div class="page" id="pg-p">
+    <div style="margin-top:14px" id="perm-content">
+      <div class="ph"><span class="pt">⚙️ إدارة الصلاحيات</span></div>
+      <div class="perm-info-box">🔐 هذه الصفحة مخصصة للمطور فقط. يمكنك من هنا التحكم الكامل بصلاحيات كل حساب.</div>
+
+      <!-- قسم إدارة المستخدمين -->
+      <div class="perm-card" id="user-mgmt-card">
+        <div class="perm-card-head">
+          <div class="perm-user-info">
+            <div class="perm-avatar" style="background:linear-gradient(135deg,#0A9258,#1B4FD8)">👤</div>
+            <div><div class="perm-user-name">إدارة المستخدمين</div><div class="perm-user-role">إضافة وتعديل المستخدمين وكلمات السر</div></div>
+          </div>
+        </div>
+        <!-- نموذج إضافة مستخدم جديد -->
+        <div class="perm-section">
+          <div class="perm-section-title">➕ إضافة مستخدم جديد</div>
+          <div class="fg"><label class="fl">اسم المستخدم (بالإنجليزية)</label><input class="fi" type="text" id="new-user-name" placeholder="مثال: dora6" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+          <div class="fg"><label class="fl">كلمة المرور</label><input class="fi" type="text" id="new-user-pass" placeholder="كلمة المرور"></div>
+          <div class="fg"><label class="fl">نوع الحساب</label>
+            <select class="fs2" id="new-user-role">
+              <option value="viewer">👁️ مشاهدة فقط</option>
+              <option value="admin">🔑 مدير</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl">عرض الرواتب</label>
+            <select class="fs2" id="new-user-sal">
+              <option value="false">❌ لا</option>
+              <option value="true">✅ نعم</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl">التسمية (تظهر بجانب الاسم)</label><input class="fi" type="text" id="new-user-label" placeholder="مثال: 👁️ مشاهدة فقط"></div>
+          <button class="perm-save-btn" style="background:var(--ac)" onclick="addNewUser()">➕ إضافة المستخدم</button>
+        </div>
+        <!-- نموذج تعديل مستخدم موجود -->
+        <div class="perm-section">
+          <div class="perm-section-title">✏️ تعديل مستخدم موجود</div>
+          <div class="fg"><label class="fl">اختر المستخدم</label>
+            <select class="fs2" id="edit-user-sel" onchange="onEditUserChange()">
+              <option value="">— اختر المستخدم —</option>
+            </select>
+          </div>
+          <div id="edit-user-fields" style="display:none">
+            <div class="fg"><label class="fl">كلمة المرور الجديدة</label><input class="fi" type="text" id="edit-user-pass" placeholder="اتركه فارغاً للإبقاء على كلمة المرور الحالية"></div>
+            <div class="fg"><label class="fl">نوع الحساب</label>
+              <select class="fs2" id="edit-user-role">
+                <option value="viewer">👁️ مشاهدة فقط</option>
+                <option value="admin">🔑 مدير</option>
+              </select>
+            </div>
+            <div class="fg"><label class="fl">عرض الرواتب</label>
+              <select class="fs2" id="edit-user-sal">
+                <option value="false">❌ لا</option>
+                <option value="true">✅ نعم</option>
+              </select>
+            </div>
+            <div class="fg"><label class="fl">التسمية</label><input class="fi" type="text" id="edit-user-label" placeholder="التسمية الظاهرة"></div>
+            <button class="perm-save-btn" onclick="saveEditUser()">💾 حفظ التعديلات</button>
+          </div>
+        </div>
+        <!-- قائمة المستخدمين الحاليين -->
+        <div class="perm-section">
+          <div class="perm-section-title">📋 المستخدمون الحاليون</div>
+          <div id="users-list-display"></div>
+        </div>
+      </div>
+
+      <div id="perm-list"></div>
+    </div>
+  </div>
+
   <div class="bbar">
     <button class="bb active" id="bb-s" onclick="showPage('pg-s')"><span class="bi">👥</span>الموظفون</button>
     <button class="bb" id="bb-v" onclick="showPage('pg-v')"><span class="bi">⚠️</span>العقوبات</button>
     <button class="bb" id="bb-d" onclick="showPage('pg-d')"><span class="bi">⏰</span>التأخير</button>
     <button class="bb" id="bb-r" onclick="showPage('pg-r')"><span class="bi">📊</span>التقارير</button>
+    <button class="bb" id="bb-p" onclick="showPage('pg-p')" style="display:none"><span class="bi">⚙️</span>الصلاحيات</button>
   </div>
 </div>
 
@@ -486,6 +594,29 @@ var FB = {
 
 var ROLE=null, CAN_SAL=false, DB=null, FB_INIT=false;
 var LOCAL={}, VIOS={}, MONTHS={}, VFILTER='all';
+var CURRENT_USER=null;
+var PERM_DATA={}; // Loaded from Firebase: {username: {canViewVio:bool, canViewDelay:bool, canViewReports:bool, canEditStaff:bool, canViewSal:bool, allowedDepts:[], allDepts:bool}}
+
+var ALL_DEPT_NAMES=[
+  'رئيس مجلس الإدارة','معاون رئيس مجلس الإدارة','المدير الفني','المدير الإداري',
+  'قسم التمريض','قسم العناية المركزة','قسم الطوارئ','قسم العمليات','قسم التخدير',
+  'الأطباء المقيمون','قسم الأشعة','قسم المختبر','قسم الصيدلية','قسم الخدج',
+  'تمريض الطابق','قسم العلاج الطبيعي','قسم الأسنان','قسم الحسابات','قسم IT',
+  'قسم الصيانة','قسم الاستعلامات','قسم الأمنية','الكافتيريا','موظفو الخدمات'
+];
+
+function getDefaultPerms(username){
+  var u=USERS[username];
+  if(!u) return null;
+  if(u.role==='admin') return {canViewVio:true,canViewDelay:true,canViewReports:true,canEditStaff:true,canViewSal:true,allDepts:true,allowedDepts:ALL_DEPT_NAMES.slice()};
+  return {canViewVio:false,canViewDelay:false,canViewReports:false,canEditStaff:false,canViewSal:false,allDepts:false,allowedDepts:[]};
+}
+
+function getUserPerms(username){
+  if(PERM_DATA[username]) return PERM_DATA[username];
+  return getDefaultPerms(username);
+}
+
 
 var TOP_CFG=[
   {id:'top_chairman',icon:'👩‍💼',title:'رئيس مجلس الإدارة',      cls:'nto',color:'#EEF3FF',tc:'#1B4FD8'},
@@ -603,7 +734,7 @@ function doLogin(){
   }
 
   btn.textContent='جاري الدخول...';
-  ROLE=u.role; CAN_SAL=u.sal;
+  ROLE=u.role; CAN_SAL=u.sal; CURRENT_USER=user;
 
   setTimeout(function(){
     btn.textContent='دخول ←';
@@ -617,12 +748,13 @@ function doLogin(){
     ALL_IDS.forEach(function(id){ LOCAL[id]=[]; listenSec(id); });
     listenVio();
     listenMonths();
+    listenPerms();
   },400);
 }
 
 function doLogout(){
   if(!confirm('هل تريد تسجيل الخروج؟')) return;
-  ROLE=null; CAN_SAL=false;
+  ROLE=null; CAN_SAL=false; CURRENT_USER=null; PERM_DATA={};
   document.getElementById('app').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('l-user').value='';
@@ -637,6 +769,36 @@ function doLogout(){
 // ═══════════════════════════════════
 function applyPerms(){
   var isV=(ROLE==='viewer');
+  var isDev=(CURRENT_USER==='dev');
+  // Apply user-specific permissions for non-admin users
+  var perms=getUserPerms(CURRENT_USER);
+  // Show/hide perm tab for dev
+  var permNav=document.getElementById('nt-p');
+  var permBb=document.getElementById('bb-p');
+  if(permNav) permNav.style.display=isDev?'':'none';
+  if(permBb) permBb.style.display=isDev?'':'none';
+  // For viewer accounts, apply their specific perms from PERM_DATA
+  if(isV && perms){
+    // Violations page
+    var ntV=document.getElementById('nt-v'); var bbV=document.getElementById('bb-v');
+    if(ntV) ntV.style.display=perms.canViewVio?'':'none';
+    if(bbV) bbV.style.display=perms.canViewVio?'':'none';
+    // Delay page
+    var ntD=document.getElementById('nt-d'); var bbD=document.getElementById('bb-d');
+    if(ntD) ntD.style.display=perms.canViewDelay?'':'none';
+    if(bbD) bbD.style.display=perms.canViewDelay?'':'none';
+    // Reports page
+    var ntR=document.getElementById('nt-r'); var bbR=document.getElementById('bb-r');
+    if(ntR) ntR.style.display=perms.canViewReports?'':'none';
+    if(bbR) bbR.style.display=perms.canViewReports?'':'none';
+    // Salary
+    CAN_SAL=perms.canViewSal||false;
+  } else {
+    // Admin: show all tabs
+    ['nt-v','nt-d','nt-r','bb-v','bb-d','bb-r'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.style.display='';
+    });
+  }
   document.getElementById('vbar').style.display=isV?'flex':'none';
   document.getElementById('btn-newvio').style.display=isV?'none':'';
   document.getElementById('btn-newmonth').style.display=isV?'none':'';
@@ -723,6 +885,186 @@ function listenVio(){
     renderVios(); updateVioStats(); updateStats();
   });
 }
+
+function listenPerms(){
+  if(!DB) return;
+  DB.ref('user_perms').on('value',function(snap){
+    PERM_DATA={};
+    if(snap.exists()) snap.forEach(function(c){ PERM_DATA[c.key]=c.val(); });
+    applyPerms();
+    // Re-render all nodes to apply dept filtering
+    ALL_IDS.forEach(function(id){ renderNode(id); });
+  });
+}
+
+function buildPermsPage(){
+  var list=document.getElementById('perm-list');
+  if(!list) return;
+  list.innerHTML='';
+  var accounts=Object.keys(USERS).filter(function(u){ return u!=='dev'; });
+  accounts.forEach(function(username){
+    var u=USERS[username];
+    var perms=getUserPerms(username);
+    var card=document.createElement('div');
+    card.className='perm-card';
+
+    // Header
+    var head=document.createElement('div');
+    head.className='perm-card-head';
+    var initials=username.substring(0,2).toUpperCase();
+    var roleLabel=u.role==='admin'?'مدير':'مشاهد';
+    var badgeCls=u.role==='admin'?'perm-badge':'perm-badge viewer';
+    head.innerHTML=
+      '<div class="perm-user-info">'+
+        '<div class="perm-avatar">'+initials+'</div>'+
+        '<div><div class="perm-user-name">'+username+'</div>'+
+        '<div class="perm-user-role">'+u.label+'</div></div>'+
+      '</div>'+
+      '<span class="'+badgeCls+'">'+roleLabel+'</span>';
+    card.appendChild(head);
+
+    if(u.role==='admin'){
+      var info=document.createElement('div');
+      info.style.cssText='font-size:11px;color:var(--t3);padding:6px 0;font-weight:600';
+      info.textContent='✅ حساب مدير — صلاحيات كاملة تلقائياً';
+      card.appendChild(info);
+    } else {
+      // General perms section
+      var sec=document.createElement('div');
+      sec.className='perm-section';
+      var secTitle=document.createElement('div');
+      secTitle.className='perm-section-title';
+      secTitle.textContent='الصلاحيات العامة';
+      sec.appendChild(secTitle);
+
+      var togglesDiv=document.createElement('div');
+      togglesDiv.className='perm-toggles';
+
+      var toggleDefs=[
+        {key:'canViewVio', label:'عرض صفحة المخالفات', sub:'يمكن للحساب رؤية العقوبات الإدارية'},
+        {key:'canViewDelay', label:'عرض تأخير البصمة', sub:'يمكن للحساب رؤية سجلات التأخير'},
+        {key:'canViewReports', label:'عرض التقارير', sub:'يمكن للحساب رؤية صفحة التقارير'},
+        {key:'canEditStaff', label:'تعديل الموظفين', sub:'يمكن للحساب إضافة وتعديل وحذف الموظفين'},
+        {key:'canViewSal', label:'عرض الرواتب', sub:'يمكن للحساب رؤية بيانات الرواتب'},
+        {key:'canManageUsers', label:'إضافة وتعديل المستخدمين', sub:'يمكن للحساب إضافة مستخدمين جدد وتعديل بياناتهم'}
+      ];
+
+      toggleDefs.forEach(function(def){
+        var row=document.createElement('div');
+        row.className='perm-toggle-row';
+        var labelDiv=document.createElement('div');
+        labelDiv.innerHTML='<div class="perm-toggle-label">'+def.label+'</div><div class="perm-toggle-sub">'+def.sub+'</div>';
+        var sw=document.createElement('label');
+        sw.className='toggle-switch';
+        var inp=document.createElement('input');
+        inp.type='checkbox';
+        inp.id='tog_'+username+'_'+def.key;
+        inp.checked=perms[def.key]||false;
+        var slider=document.createElement('span');
+        slider.className='toggle-slider';
+        sw.appendChild(inp);
+        sw.appendChild(slider);
+        row.appendChild(labelDiv);
+        row.appendChild(sw);
+        togglesDiv.appendChild(row);
+      });
+      sec.appendChild(togglesDiv);
+      card.appendChild(sec);
+
+      // Dept section
+      var deptSec=document.createElement('div');
+      deptSec.className='perm-section';
+      var deptTitle=document.createElement('div');
+      deptTitle.className='perm-section-title';
+      deptTitle.textContent='الأقسام المسموح برؤيتها';
+      deptSec.appendChild(deptTitle);
+
+      // All depts toggle row
+      var allRow=document.createElement('div');
+      allRow.className='perm-toggle-row';
+      allRow.style.marginBottom='8px';
+      var allLabel=document.createElement('div');
+      allLabel.innerHTML='<div class="perm-toggle-label">السماح بجميع الأقسام</div><div class="perm-toggle-sub">عند التفعيل يرى الحساب كل الأقسام</div>';
+      var allSw=document.createElement('label');
+      allSw.className='toggle-switch';
+      var allInp=document.createElement('input');
+      allInp.type='checkbox';
+      allInp.id='allDepts_'+username;
+      allInp.checked=perms.allDepts||false;
+      var allSlider=document.createElement('span');
+      allSlider.className='toggle-slider';
+      allSw.appendChild(allInp);
+      allSw.appendChild(allSlider);
+      allRow.appendChild(allLabel);
+      allRow.appendChild(allSw);
+      deptSec.appendChild(allRow);
+
+      // Dept grid
+      var deptGrid=document.createElement('div');
+      deptGrid.className='perm-dept-grid';
+      deptGrid.id='deptgrid_'+username;
+      deptGrid.style.display=perms.allDepts?'none':'grid';
+
+      // Wire allDepts toggle
+      allInp.addEventListener('change',function(){
+        deptGrid.style.display=this.checked?'none':'grid';
+      });
+
+      ALL_DEPT_NAMES.forEach(function(dname){
+        var isAllowed=perms.allowedDepts&&perms.allowedDepts.indexOf(dname)!==-1;
+        var item=document.createElement('div');
+        item.className='perm-dept-item'+(isAllowed?' allowed':'');
+        var check=document.createElement('div');
+        check.className='perm-dept-check';
+        check.textContent=isAllowed?'✓':'';
+        var nameDiv=document.createElement('div');
+        nameDiv.className='perm-dept-name';
+        nameDiv.textContent=dname;
+        item.appendChild(check);
+        item.appendChild(nameDiv);
+        item.addEventListener('click',function(){
+          var allowed=item.classList.contains('allowed');
+          if(allowed){ item.classList.remove('allowed'); check.textContent=''; }
+          else { item.classList.add('allowed'); check.textContent='✓'; }
+        });
+        deptGrid.appendChild(item);
+      });
+
+      deptSec.appendChild(deptGrid);
+      card.appendChild(deptSec);
+
+      // Save button
+      var saveBtn=document.createElement('button');
+      saveBtn.className='perm-save-btn';
+      saveBtn.textContent='💾 حفظ صلاحيات '+username;
+      saveBtn.addEventListener('click',function(){ saveUserPerms(username,card); });
+      card.appendChild(saveBtn);
+    }
+    list.appendChild(card);
+  });
+}
+
+function saveUserPerms(username,card){
+  if(!DB) return;
+  var allDeptsEl=document.getElementById('allDepts_'+username);
+  var allDepts=allDeptsEl&&allDeptsEl.checked;
+  var allowedDepts=[];
+  if(!allDepts){
+    var items=card.querySelectorAll('.perm-dept-item.allowed .perm-dept-name');
+    items.forEach(function(el){ allowedDepts.push(el.textContent); });
+  }
+  var keys=['canViewVio','canViewDelay','canViewReports','canEditStaff','canViewSal','canManageUsers'];
+  var newPerms={allDepts:allDepts||false,allowedDepts:allowedDepts};
+  keys.forEach(function(k){
+    var el=document.getElementById('tog_'+username+'_'+k);
+    newPerms[k]=el?el.checked:false;
+  });
+  DB.ref('user_perms/'+username).set(newPerms,function(err){
+    if(!err){ alert('✅ تم حفظ صلاحيات '+username+' بنجاح!'); }
+    else { alert('❌ خطأ في الحفظ'); }
+  });
+}
+
 function listenMonths(){
   DB.ref('delay_months').on('value',function(snap){
     MONTHS={};
@@ -763,6 +1105,23 @@ function renderNode(id){
   var subEl=document.getElementById('ns_'+id);
   var npEl=document.getElementById('np_'+id);
   if(!listEl) return;
+  // Hide dept node if viewer with dept restrictions
+  if(ROLE==='viewer' && CURRENT_USER){
+    var perms=getUserPerms(CURRENT_USER);
+    if(perms && !perms.allDepts){
+      var nodeEl=document.getElementById(id);
+      // Get dept title
+      var titleEl=nodeEl?nodeEl.querySelector('.nt2'):null;
+      var deptTitle=titleEl?titleEl.textContent:'';
+      if(nodeEl && perms.allowedDepts && perms.allowedDepts.indexOf(deptTitle)===-1){
+        nodeEl.style.display='none'; return;
+      } else if(nodeEl){ nodeEl.style.display=''; }
+    }
+    // Hide edit staff if no permission
+    if(perms && !perms.canEditStaff){
+      var eac=listEl.querySelectorAll('.eac'); eac.forEach(function(e){e.style.display='none';});
+    }
+  }
   if(badgeEl) badgeEl.textContent=emps.length;
   if(npEl){
     if(!emps.length){npEl.innerHTML='';if(subEl)subEl.textContent='لا يوجد موظفون';}
@@ -933,11 +1292,12 @@ function showPage(id){
   document.querySelectorAll('.nt').forEach(function(b){b.classList.remove('active');});
   document.querySelectorAll('.bb').forEach(function(b){b.classList.remove('active');});
   document.getElementById(id).classList.add('active');
-  var nm={'pg-s':'nt-s','pg-v':'nt-v','pg-d':'nt-d','pg-r':'nt-r'};
-  var bm={'pg-s':'bb-s','pg-v':'bb-v','pg-d':'bb-d','pg-r':'bb-r'};
+  var nm={'pg-s':'nt-s','pg-v':'nt-v','pg-d':'nt-d','pg-r':'nt-r','pg-p':'nt-p'};
+  var bm={'pg-s':'bb-s','pg-v':'bb-v','pg-d':'bb-d','pg-r':'bb-r','pg-p':'bb-p'};
   if(nm[id]){var e=document.getElementById(nm[id]);if(e)e.classList.add('active');}
   if(bm[id]){var e2=document.getElementById(bm[id]);if(e2)e2.classList.add('active');}
   if(id==='pg-r') buildReport();
+  if(id==='pg-p'){ buildPermsPage(); renderUsersListDisplay(); }
 }
 
 function hideForm(id){
@@ -1123,6 +1483,75 @@ function buildReport(){
     }
   });
   c.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;padding:0 0 12px;border-bottom:2px solid var(--bd);margin-bottom:4px"><span style="font-size:14px;font-weight:900">إجمالي الموظفين</span><span style="font-size:24px;font-weight:900;color:var(--pr)">'+tot+'</span></div>'+(rows||'<div class="ee">لا يوجد موظفون مسجلون</div>');
+}
+function renderUsersListDisplay(){
+  var el=document.getElementById('users-list-display');
+  var sel=document.getElementById('edit-user-sel');
+  if(!el||!sel) return;
+  sel.innerHTML='<option value="">— اختر المستخدم —</option>';
+  var html='';
+  Object.keys(USERS).forEach(function(u){
+    var d=USERS[u];
+    var roleLabel=d.role==='admin'?'مدير':'مشاهد';
+    var salLabel=d.sal?'✅':'❌';
+    html+='<div class="perm-toggle-row" style="margin-bottom:6px">'+
+      '<div><div class="perm-toggle-label">'+u+'</div>'+
+      '<div class="perm-toggle-sub">'+d.label+' — '+roleLabel+' — رواتب: '+salLabel+'</div></div>'+
+      '</div>';
+    sel.innerHTML+='<option value="'+u+'">'+u+' ('+roleLabel+')</option>';
+  });
+  el.innerHTML=html||'<div class="ee">لا يوجد مستخدمون</div>';
+}
+
+function onEditUserChange(){
+  var u=document.getElementById('edit-user-sel').value;
+  var fields=document.getElementById('edit-user-fields');
+  if(!u){fields.style.display='none'; return;}
+  var d=USERS[u];
+  if(!d){fields.style.display='none'; return;}
+  document.getElementById('edit-user-pass').value='';
+  document.getElementById('edit-user-role').value=d.role||'viewer';
+  document.getElementById('edit-user-sal').value=d.sal?'true':'false';
+  document.getElementById('edit-user-label').value=d.label||'';
+  fields.style.display='block';
+}
+
+function addNewUser(){
+  var name=document.getElementById('new-user-name').value.trim().toLowerCase();
+  var pass=document.getElementById('new-user-pass').value.trim();
+  var role=document.getElementById('new-user-role').value;
+  var sal=document.getElementById('new-user-sal').value==='true';
+  var label=document.getElementById('new-user-label').value.trim();
+  if(!name||!pass){alert('⚠️ يرجى إدخال اسم المستخدم وكلمة المرور'); return;}
+  if(USERS[name]){alert('⚠️ اسم المستخدم موجود مسبقاً'); return;}
+  if(!label) label=(role==='admin'?'🔑 مدير':'👁️ مشاهدة فقط');
+  var cls=role==='admin'?'hbdg hbdg-a':'hbdg hbdg-v';
+  USERS[name]={pass:pass,role:role,sal:sal,label:label,cls:cls};
+  document.getElementById('new-user-name').value='';
+  document.getElementById('new-user-pass').value='';
+  document.getElementById('new-user-label').value='';
+  renderUsersListDisplay();
+  buildPermsPage();
+  alert('✅ تم إضافة المستخدم "'+name+'" بنجاح!');
+}
+
+function saveEditUser(){
+  var u=document.getElementById('edit-user-sel').value;
+  if(!u||!USERS[u]){alert('⚠️ يرجى اختيار مستخدم'); return;}
+  var newPass=document.getElementById('edit-user-pass').value.trim();
+  var role=document.getElementById('edit-user-role').value;
+  var sal=document.getElementById('edit-user-sal').value==='true';
+  var label=document.getElementById('edit-user-label').value.trim();
+  if(newPass) USERS[u].pass=newPass;
+  USERS[u].role=role;
+  USERS[u].sal=sal;
+  if(label) USERS[u].label=label;
+  USERS[u].cls=role==='admin'?'hbdg hbdg-a':'hbdg hbdg-v';
+  document.getElementById('edit-user-fields').style.display='none';
+  document.getElementById('edit-user-sel').value='';
+  renderUsersListDisplay();
+  buildPermsPage();
+  alert('✅ تم حفظ تعديلات المستخدم "'+u+'" بنجاح!');
 }
 </script>
 </body>
