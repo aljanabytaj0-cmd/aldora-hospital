@@ -478,7 +478,7 @@ input:checked + .toggle-slider:before{transform:translateX(18px)}
           <option value="">— اختر القسم —</option>
           <option>رئيس مجلس الإدارة</option><option>معاون رئيس مجلس الإدارة</option>
           <option>المدير الفني</option><option>المدير الإداري</option>
-          <option>قسم التمريض</option><option>قسم العناية المركزة</option><option>قسم الطوارئ</option>
+          <option>صالة الولادة</option><option>قسم العناية المركزة</option><option>قسم الطوارئ</option>
           <option>قسم العمليات</option><option>قسم التخدير</option><option>الأطباء المقيمون</option>
           <option>قسم الأشعة</option><option>قسم المختبر</option><option>قسم الصيدلية</option>
           <option>قسم الخدج</option><option>تمريض الطابق</option><option>قسم العلاج الطبيعي</option>
@@ -517,7 +517,7 @@ input:checked + .toggle-slider:before{transform:translateX(18px)}
           <option value="">— اختر القسم —</option>
           <option>رئيس مجلس الإدارة</option><option>معاون رئيس مجلس الإدارة</option>
           <option>المدير الفني</option><option>المدير الإداري</option>
-          <option>قسم التمريض</option><option>قسم العناية المركزة</option>
+          <option>صالة الولادة</option><option>قسم العناية المركزة</option>
           <option>قسم الطوارئ</option><option>قسم العمليات</option>
           <option>قسم التخدير</option><option>الأطباء المقيمون</option>
           <option>قسم الأشعة</option><option>قسم المختبر</option>
@@ -599,7 +599,7 @@ var PERM_DATA={}; // Loaded from Firebase: {username: {canViewVio:bool, canViewD
 
 var ALL_DEPT_NAMES=[
   'رئيس مجلس الإدارة','معاون رئيس مجلس الإدارة','المدير الفني','المدير الإداري',
-  'قسم التمريض','قسم العناية المركزة','قسم الطوارئ','قسم العمليات','قسم التخدير',
+  'صالة الولادة','قسم العناية المركزة','قسم الطوارئ','قسم العمليات','قسم التخدير',
   'الأطباء المقيمون','قسم الأشعة','قسم المختبر','قسم الصيدلية','قسم الخدج',
   'تمريض الطابق','قسم العلاج الطبيعي','قسم الأسنان','قسم الحسابات','قسم IT',
   'قسم الصيانة','قسم الاستعلامات','قسم الأمنية','الكافتيريا','موظفو الخدمات'
@@ -625,7 +625,7 @@ var TOP_CFG=[
   {id:'top_admin',   icon:'📋', title:'المدير الإداري',          cls:'nad',color:'#FFF4E0',tc:'#D4800A'}
 ];
 var DMED=[
-  {id:'dept_nursing',    icon:'👩‍⚕️',title:'قسم التمريض',        color:'#EEF3FF',tc:'#1B4FD8'},
+  {id:'dept_nursing',    icon:'👩‍⚕️',title:'صالة الولادة',        color:'#EEF3FF',tc:'#1B4FD8'},
   {id:'dept_icu',        icon:'💉',  title:'قسم العناية المركزة', color:'#FFEDEF',tc:'#E63946'},
   {id:'dept_emergency',  icon:'🚨',  title:'قسم الطوارئ',         color:'#FFEDEF',tc:'#C0392B'},
   {id:'dept_surgery',    icon:'🔪',  title:'قسم العمليات',        color:'#EEF3FF',tc:'#1340B0'},
@@ -1077,7 +1077,7 @@ function listenMonths(){
 var DEPT_ICONS = {
   'رئيس مجلس الإدارة':'👩‍💼','معاون رئيس مجلس الإدارة':'🤝',
   'المدير الفني':'🩺','المدير الإداري':'📋',
-  'قسم التمريض':'👩‍⚕️','قسم العناية المركزة':'💉','قسم الطوارئ':'🚨',
+  'صالة الولادة':'👩‍⚕️','قسم العناية المركزة':'💉','قسم الطوارئ':'🚨',
   'قسم العمليات':'🔪','قسم التخدير':'😴','الأطباء المقيمون':'👨‍⚕️',
   'قسم الأشعة':'🩻','قسم المختبر':'🔬','قسم الصيدلية':'💊',
   'قسم الخدج':'🍼','تمريض الطابق':'🏥','قسم العلاج الطبيعي':'🦴',
@@ -1086,7 +1086,7 @@ var DEPT_ICONS = {
   'الكافتيريا':'🍽️','موظفو الخدمات':'🧹'
 };
 var DEPT_COLORS = {
-  'قسم التمريض':'#EEF3FF','قسم العناية المركزة':'#FFEDEF','قسم الطوارئ':'#FFEDEF',
+  'صالة الولادة':'#EEF3FF','قسم العناية المركزة':'#FFEDEF','قسم الطوارئ':'#FFEDEF',
   'قسم العمليات':'#EEF3FF','قسم التخدير':'#F0EAFF','الأطباء المقيمون':'#EEF3FF',
   'قسم الأشعة':'#F0EAFF','قسم المختبر':'#E6F7F0','قسم الصيدلية':'#E6F7F0',
   'قسم الخدج':'#FFF4E0','تمريض الطابق':'#EEF3FF','قسم العلاج الطبيعي':'#F0EAFF',
