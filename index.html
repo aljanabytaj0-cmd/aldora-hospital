@@ -265,6 +265,23 @@ input:checked + .toggle-slider:before{transform:translateX(18px)}
 .perm-info-box{background:#EEF3FF;border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:#1B4FD8;font-weight:700;line-height:1.6}
 .fs2{width:100%;border:1.5px solid var(--bd);border-radius:10px;padding:9px 12px;font-family:"Tajawal",sans-serif;font-size:13px;font-weight:600;background:#fff;color:var(--tx);outline:none}
 .fs2:focus{border-color:var(--pr)}
+
+/* ══ CONSULTANT DOCTORS ══ */
+.doc-dept-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.doc-dept-btn{background:#fff;border:1.5px solid var(--bd);border-radius:var(--rd);padding:14px 10px;text-align:center;font-family:"Tajawal",sans-serif;font-size:13px;font-weight:800;color:var(--tx);cursor:pointer;box-shadow:var(--sh);transition:all .15s}
+.doc-dept-btn:active{background:var(--prl);border-color:var(--pr);color:var(--pr)}
+.doc-dept-btn .doc-dept-icon{font-size:22px;display:block;margin-bottom:4px}
+.doc-back-btn{display:flex;align-items:center;gap:6px;background:none;border:none;font-family:"Tajawal",sans-serif;font-size:14px;font-weight:800;color:var(--pr);cursor:pointer;margin-bottom:10px;padding:0}
+.doc-week-table{width:100%;border-collapse:collapse;background:#fff;border-radius:var(--rd);overflow:hidden;box-shadow:var(--sh);border:1.5px solid var(--bd)}
+.doc-week-table th{background:var(--pr);color:#fff;font-family:"Tajawal",sans-serif;font-size:12px;font-weight:800;padding:10px 6px;text-align:center}
+.doc-week-table td{font-family:"Tajawal",sans-serif;font-size:11px;font-weight:600;color:var(--tx);padding:9px 6px;text-align:center;border-bottom:1px solid #F1F5F9;vertical-align:middle}
+.doc-week-table tr:last-child td{border-bottom:none}
+.doc-week-table tr:nth-child(even) td{background:#FAFBFF}
+.doc-day-label{font-weight:800;color:var(--pr);font-size:12px}
+.doc-input{width:100%;border:1.2px solid var(--bd);border-radius:8px;padding:5px 7px;font-family:"Tajawal",sans-serif;font-size:11px;font-weight:600;color:var(--tx);background:#fff;outline:none;text-align:center;min-width:70px}
+.doc-input:focus{border-color:var(--pr)}
+.doc-save-btn{width:100%;margin-top:12px;background:var(--pr);color:#fff;border:none;border-radius:13px;padding:12px;font-family:"Tajawal",sans-serif;font-size:14px;font-weight:800;cursor:pointer}
+.doc-save-btn:active{opacity:.85}
 </style>
 </head>
 <body>
@@ -380,6 +397,43 @@ input:checked + .toggle-slider:before{transform:translateX(18px)}
   </div>
 
 
+  <!-- CONSULTANT DOCTORS PAGE -->
+  <div class="page" id="pg-doc">
+    <div style="margin-top:14px">
+      <div id="doc-dept-view">
+        <div class="ph"><span class="pt">🩺 جدول أطباء الاستشاريين</span></div>
+        <div class="doc-dept-grid">
+          <button class="doc-dept-btn" onclick="openDocDept('مسالك')"><span class="doc-dept-icon">🫘</span>مسالك</button>
+          <button class="doc-dept-btn" onclick="openDocDept('مفاصل وكسور')"><span class="doc-dept-icon">🦴</span>مفاصل وكسور</button>
+          <button class="doc-dept-btn" onclick="openDocDept('نسائية')"><span class="doc-dept-icon">👩‍⚕️</span>نسائية</button>
+          <button class="doc-dept-btn" onclick="openDocDept('أطفال')"><span class="doc-dept-icon">👶</span>أطفال</button>
+          <button class="doc-dept-btn" onclick="openDocDept('أنف أذن حنجرة')"><span class="doc-dept-icon">👂</span>أنف أذن حنجرة</button>
+          <button class="doc-dept-btn" onclick="openDocDept('ايكو وقلبية')"><span class="doc-dept-icon">❤️</span>ايكو وقلبية</button>
+          <button class="doc-dept-btn" onclick="openDocDept('باطنية')"><span class="doc-dept-icon">🩺</span>باطنية</button>
+          <button class="doc-dept-btn" onclick="openDocDept('جملة عصبية')"><span class="doc-dept-icon">🧠</span>جملة عصبية</button>
+          <button class="doc-dept-btn" onclick="openDocDept('جراحة عامة')"><span class="doc-dept-icon">🔪</span>جراحة عامة</button>
+        </div>
+      </div>
+      <div id="doc-schedule-view" style="display:none">
+        <button class="doc-back-btn" onclick="closeDocDept()">&#8594; رجوع</button>
+        <div class="ph"><span class="pt" id="doc-dept-title"></span></div>
+        <div style="overflow-x:auto">
+          <table class="doc-week-table" id="doc-table">
+            <thead>
+              <tr>
+                <th>اليوم</th>
+                <th>الطبيب الصباحي</th>
+                <th>الطبيب المسائي</th>
+              </tr>
+            </thead>
+            <tbody id="doc-table-body"></tbody>
+          </table>
+        </div>
+        <button class="doc-save-btn" onclick="saveDocSchedule()">💾 حفظ الجدول</button>
+      </div>
+    </div>
+  </div>
+
   <!-- PERMISSIONS PAGE (dev only) -->
   <div class="page" id="pg-p">
     <div style="margin-top:14px" id="perm-content">
@@ -456,6 +510,7 @@ input:checked + .toggle-slider:before{transform:translateX(18px)}
     <button class="bb" id="bb-v" onclick="showPage('pg-v')"><span class="bi">⚠️</span>العقوبات</button>
     <button class="bb" id="bb-d" onclick="showPage('pg-d')"><span class="bi">⏰</span>التأخير</button>
     <button class="bb" id="bb-r" onclick="showPage('pg-r')"><span class="bi">📊</span>التقارير</button>
+    <button class="bb" id="bb-doc" onclick="showPage('pg-doc')"><span class="bi">🩺</span>الاستشاريون</button>
     <button class="bb" id="bb-p" onclick="showPage('pg-p')" style="display:none"><span class="bi">⚙️</span>الصلاحيات</button>
   </div>
 </div>
@@ -1292,8 +1347,8 @@ function showPage(id){
   document.querySelectorAll('.nt').forEach(function(b){b.classList.remove('active');});
   document.querySelectorAll('.bb').forEach(function(b){b.classList.remove('active');});
   document.getElementById(id).classList.add('active');
-  var nm={'pg-s':'nt-s','pg-v':'nt-v','pg-d':'nt-d','pg-r':'nt-r','pg-p':'nt-p'};
-  var bm={'pg-s':'bb-s','pg-v':'bb-v','pg-d':'bb-d','pg-r':'bb-r','pg-p':'bb-p'};
+  var nm={'pg-s':'nt-s','pg-v':'nt-v','pg-d':'nt-d','pg-r':'nt-r','pg-p':'nt-p','pg-doc':'bb-doc'};
+  var bm={'pg-s':'bb-s','pg-v':'bb-v','pg-d':'bb-d','pg-r':'bb-r','pg-p':'bb-p','pg-doc':'bb-doc'};
   if(nm[id]){var e=document.getElementById(nm[id]);if(e)e.classList.add('active');}
   if(bm[id]){var e2=document.getElementById(bm[id]);if(e2)e2.classList.add('active');}
   if(id==='pg-r') buildReport();
