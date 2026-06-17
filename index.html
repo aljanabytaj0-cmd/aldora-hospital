@@ -804,6 +804,7 @@ function doLogin(){
     listenVio();
     listenMonths();
     listenPerms();
+    listenDocSchedule();
   },400);
 }
 
@@ -846,11 +847,14 @@ function applyPerms(){
     var ntR=document.getElementById('nt-r'); var bbR=document.getElementById('bb-r');
     if(ntR) ntR.style.display=perms.canViewReports?'':'none';
     if(bbR) bbR.style.display=perms.canViewReports?'':'none';
+    // Doctors page
+    var bbDoc=document.getElementById('bb-doc');
+    if(bbDoc) bbDoc.style.display=perms.canViewDoctors?'':'none';
     // Salary
     CAN_SAL=perms.canViewSal||false;
   } else {
     // Admin: show all tabs
-    ['nt-v','nt-d','nt-r','bb-v','bb-d','bb-r'].forEach(function(id){
+    ['nt-v','nt-d','nt-r','bb-v','bb-d','bb-r','bb-doc'].forEach(function(id){
       var el=document.getElementById(id); if(el) el.style.display='';
     });
   }
@@ -1001,7 +1005,8 @@ function buildPermsPage(){
         {key:'canViewReports', label:'عرض التقارير', sub:'يمكن للحساب رؤية صفحة التقارير'},
         {key:'canEditStaff', label:'تعديل الموظفين', sub:'يمكن للحساب إضافة وتعديل وحذف الموظفين'},
         {key:'canViewSal', label:'عرض الرواتب', sub:'يمكن للحساب رؤية بيانات الرواتب'},
-        {key:'canManageUsers', label:'إضافة وتعديل المستخدمين', sub:'يمكن للحساب إضافة مستخدمين جدد وتعديل بياناتهم'}
+        {key:'canManageUsers', label:'إضافة وتعديل المستخدمين', sub:'يمكن للحساب إضافة مستخدمين جدد وتعديل بياناتهم'},
+        {key:'canViewDoctors', label:'عرض جدول الاستشاريين', sub:'يمكن للحساب رؤية جدول أطباء الاستشاريين (التعديل للمدير وdora1 فقط)'}
       ];
 
       toggleDefs.forEach(function(def){
@@ -1108,7 +1113,7 @@ function saveUserPerms(username,card){
     var items=card.querySelectorAll('.perm-dept-item.allowed .perm-dept-name');
     items.forEach(function(el){ allowedDepts.push(el.textContent); });
   }
-  var keys=['canViewVio','canViewDelay','canViewReports','canEditStaff','canViewSal','canManageUsers'];
+  var keys=['canViewVio','canViewDelay','canViewReports','canEditStaff','canViewSal','canManageUsers','canViewDoctors'];
   var newPerms={allDepts:allDepts||false,allowedDepts:allowedDepts};
   keys.forEach(function(k){
     var el=document.getElementById('tog_'+username+'_'+k);
@@ -1607,6 +1612,86 @@ function saveEditUser(){
   renderUsersListDisplay();
   buildPermsPage();
   alert('✅ تم حفظ تعديلات المستخدم "'+u+'" بنجاح!');
+}
+
+// ══════════════════════════════════════════
+//  CONSULTANT DOCTORS SCHEDULE
+// ══════════════════════════════════════════
+var DOC_DAYS=['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+var DOC_CURRENT_DEPT=null;
+var DOC_DATA={};
+
+function docCanEdit(){
+  return (CURRENT_USER==='dev'||CURRENT_USER==='dora1'||ROLE==='admin');
+}
+
+function listenDocSchedule(){
+  if(!DB) return;
+  DB.ref('doc_schedule').on('value',function(snap){
+    DOC_DATA={};
+    if(snap.exists()) snap.forEach(function(c){ DOC_DATA[c.key]=c.val(); });
+    if(DOC_CURRENT_DEPT) renderDocTable(DOC_CURRENT_DEPT);
+  });
+}
+
+function openDocDept(dept){
+  DOC_CURRENT_DEPT=dept;
+  document.getElementById('doc-dept-view').style.display='none';
+  document.getElementById('doc-schedule-view').style.display='block';
+  document.getElementById('doc-dept-title').textContent='🗓️ '+dept;
+  renderDocTable(dept);
+  var saveBtn=document.querySelector('.doc-save-btn');
+  if(saveBtn) saveBtn.style.display=docCanEdit()?'block':'none';
+}
+
+function closeDocDept(){
+  DOC_CURRENT_DEPT=null;
+  document.getElementById('doc-schedule-view').style.display='none';
+  document.getElementById('doc-dept-view').style.display='block';
+}
+
+function renderDocTable(dept){
+  var canEdit=docCanEdit();
+  var key=dept.replace(/\s+/g,'_');
+  var saved=DOC_DATA[key]||{};
+  var tbody=document.getElementById('doc-table-body');
+  if(!tbody) return;
+  tbody.innerHTML='';
+  DOC_DAYS.forEach(function(day){
+    var dayKey=day.replace(/\s+/g,'_');
+    var morning=(saved[dayKey]&&saved[dayKey].morning)||'';
+    var evening=(saved[dayKey]&&saved[dayKey].evening)||'';
+    var tr=document.createElement('tr');
+    if(canEdit){
+      tr.innerHTML=
+        '<td><span class="doc-day-label">'+day+'</span></td>'+
+        '<td><input class="doc-input" id="doc_'+dayKey+'_m" type="text" value="'+morning+'" placeholder="اسم الطبيب الصباحي"></td>'+
+        '<td><input class="doc-input" id="doc_'+dayKey+'_e" type="text" value="'+evening+'" placeholder="اسم الطبيب المسائي"></td>';
+    } else {
+      tr.innerHTML=
+        '<td><span class="doc-day-label">'+day+'</span></td>'+
+        '<td>'+(morning||'—')+'</td>'+
+        '<td>'+(evening||'—')+'</td>';
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+function saveDocSchedule(){
+  if(!docCanEdit()){alert('⚠️ ليس لديك صلاحية التعديل');return;}
+  if(!DB||!DOC_CURRENT_DEPT){return;}
+  var key=DOC_CURRENT_DEPT.replace(/\s+/g,'_');
+  var data={};
+  DOC_DAYS.forEach(function(day){
+    var dayKey=day.replace(/\s+/g,'_');
+    var mEl=document.getElementById('doc_'+dayKey+'_m');
+    var eEl=document.getElementById('doc_'+dayKey+'_e');
+    data[dayKey]={morning:mEl?mEl.value.trim():'',evening:eEl?eEl.value.trim():''};
+  });
+  DB.ref('doc_schedule/'+key).set(data,function(err){
+    if(!err){alert('✅ تم حفظ جدول '+DOC_CURRENT_DEPT+' بنجاح!');}
+    else{alert('❌ خطأ في الحفظ: '+err.message);}
+  });
 }
 </script>
 </body>
