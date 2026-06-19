@@ -571,7 +571,25 @@ input:checked + .toggle-slider:before{transform:translateX(18px)}
   <div class="mo">
     <div class="moh"><h3>➕ إضافة شهر جديد</h3><button class="moc" id="close-month">✕</button></div>
     <div class="mob">
-      <div class="fg"><label class="fl">اسم الشهر</label><input class="fi" type="text" id="m-name" placeholder="مثال: مايو 2025"></div>
+      <div class="fg"><label class="fl">الشهر</label>
+        <select class="fs2" id="m-month">
+          <option value="1">يناير</option>
+          <option value="2">فبراير</option>
+          <option value="3">مارس</option>
+          <option value="4">أبريل</option>
+          <option value="5">مايو</option>
+          <option value="6">يونيو</option>
+          <option value="7">يوليو</option>
+          <option value="8">أغسطس</option>
+          <option value="9">سبتمبر</option>
+          <option value="10">أكتوبر</option>
+          <option value="11">نوفمبر</option>
+          <option value="12">ديسمبر</option>
+        </select>
+      </div>
+      <div class="fg"><label class="fl">السنة</label>
+        <select class="fs2" id="m-year"></select>
+      </div>
       <div class="btr"><button class="btp" id="save-month">حفظ الشهر</button><button class="btg" id="cancel-month">إلغاء</button></div>
     </div>
   </div>
@@ -755,7 +773,22 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('save-vio').addEventListener('click', saveVio);
   document.getElementById('vio-type').addEventListener('change', toggleVioX);
   // Month
-  document.getElementById('btn-newmonth').addEventListener('click', function(){ if(ROLE==='admin') document.getElementById('month-modal').classList.add('show'); });
+  document.getElementById('btn-newmonth').addEventListener('click', function(){
+    if(ROLE!=='admin') return;
+    // بناء قائمة السنوات
+    var yrSel=document.getElementById('m-year');
+    yrSel.innerHTML='';
+    var now=new Date(); var cy=now.getFullYear();
+    for(var y=cy+1;y>=cy-3;y--){
+      var op=document.createElement('option');
+      op.value=y; op.textContent=y;
+      if(y===cy) op.selected=true;
+      yrSel.appendChild(op);
+    }
+    // تحديد الشهر الحالي
+    document.getElementById('m-month').value=(now.getMonth()+1).toString();
+    document.getElementById('month-modal').classList.add('show');
+  });
   document.getElementById('close-month').addEventListener('click', function(){ document.getElementById('month-modal').classList.remove('show'); });
   document.getElementById('cancel-month').addEventListener('click', function(){ document.getElementById('month-modal').classList.remove('show'); });
   document.getElementById('save-month').addEventListener('click', saveMonth);
@@ -1322,6 +1355,24 @@ function updateVioStats(){
   document.getElementById('cp').textContent=c.praise;
 }
 
+function buildMonthIcon(name){
+  // name مثل "مايو / 2026" أو "مايو 2025"
+  var monthNums={'يناير':'01','فبراير':'02','مارس':'03','أبريل':'04','مايو':'05','يونيو':'06','يوليو':'07','أغسطس':'08','سبتمبر':'09','أكتوبر':'10','نوفمبر':'11','ديسمبر':'12'};
+  var parts=name.replace('/',' ').split(/\s+/).filter(Boolean);
+  var mNum=''; var yr='';
+  parts.forEach(function(p){
+    if(monthNums[p]) mNum=monthNums[p];
+    else if(/^\d{4}$/.test(p)) yr=p.slice(2);
+  });
+  if(mNum||yr){
+    return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;line-height:1">'+
+      '<span style="font-size:15px;font-weight:900;color:var(--pr)">'+(mNum||'')+'</span>'+
+      (yr?'<span style="font-size:10px;font-weight:700;color:var(--t3)">'+yr+'</span>':'')+
+    '</div>';
+  }
+  return '📅';
+}
+
 function renderMonths(){
   var list=document.getElementById('months-list'), empty=document.getElementById('months-empty');
   var keys=Object.keys(MONTHS);
@@ -1341,7 +1392,7 @@ function renderMonths(){
     // رأس الشهر
     var mHead=document.createElement('div');
     mHead.className='month-head';
-    mHead.innerHTML='<div class="month-icon">📅</div><div class="month-info"><div class="month-title">'+m.name+'</div><div class="month-meta">'+depts.length+' قسم — '+totalDelays+' حالة تأخير</div></div><div class="chv">›</div>';
+    mHead.innerHTML='<div class="month-icon" id="micon_'+mk+'">'+buildMonthIcon(m.name)+'</div><div class="month-info"><div class="month-title">'+m.name+'</div><div class="month-meta">'+depts.length+' قسم — '+totalDelays+' حالة تأخير</div></div><div class="chv">›</div>';
     mHead.addEventListener('click',function(){card.classList.toggle('open');});
     // أزرار الشهر
     var mActs=document.createElement('div');
@@ -1546,10 +1597,12 @@ function delVio(key){
 }
 function saveMonth(){
   if(ROLE!=='admin') return;
-  var name=document.getElementById('m-name').value.trim();
-  if(!name){alert('أدخل اسم الشهر');return;}
+  var monthNames=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  var mIdx=parseInt(document.getElementById('m-month').value)||1;
+  var yr=document.getElementById('m-year').value.trim();
+  if(!yr){alert('اختر السنة');return;}
+  var name=monthNames[mIdx-1]+' / '+yr;
   DB.ref('delay_months').push({name:name,ts:Date.now()});
-  document.getElementById('m-name').value='';
   document.getElementById('month-modal').classList.remove('show');
 }
 function delMonth(key){
