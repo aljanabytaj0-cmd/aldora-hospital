@@ -341,6 +341,7 @@ input:checked + .toggle-slider:before{transform:translateX(18px)}
     <div class="nt" id="nt-v" onclick="showPage('pg-v')"><span class="ti">⚠️</span>المخالفات</div>
     <div class="nt" id="nt-d" onclick="showPage('pg-d')"><span class="ti">⏰</span>تأخير البصمة</div>
     <div class="nt" id="nt-r" onclick="showPage('pg-r')"><span class="ti">📊</span>التقارير</div>
+    <div class="nt" id="nt-doc" onclick="showPage('pg-doc')"><span class="ti">🩺</span>الاستشاريون</div>
     <div class="nt" id="nt-p" onclick="showPage('pg-p')" style="display:none"><span class="ti">⚙️</span>الصلاحيات</div>
   </div></div>
 
@@ -826,42 +827,75 @@ function doLogout(){
 function applyPerms(){
   var isV=(ROLE==='viewer');
   var isDev=(CURRENT_USER==='dev');
-  // Apply user-specific permissions for non-admin users
   var perms=getUserPerms(CURRENT_USER);
-  // Show/hide perm tab for dev
+
+  // Show/hide perm tab — dev only
   var permNav=document.getElementById('nt-p');
   var permBb=document.getElementById('bb-p');
   if(permNav) permNav.style.display=isDev?'':'none';
   if(permBb) permBb.style.display=isDev?'':'none';
-  // For viewer accounts, apply their specific perms from PERM_DATA
-  if(isV && perms){
-    // Violations page
+
+  // dev → full access, ignore Firebase perms
+  if(isDev){
+    ['nt-v','nt-d','nt-r','nt-doc','bb-v','bb-d','bb-r','bb-doc'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.style.display='';
+    });
+    document.getElementById('vbar').style.display='none';
+    document.getElementById('btn-newvio').style.display='';
+    document.getElementById('btn-newmonth').style.display='';
+    document.querySelectorAll('.btna').forEach(function(b){b.style.display='';});
+    document.querySelectorAll('.sal-inp').forEach(function(i){i.style.display='';});
+    document.getElementById('sal-grp').style.display='block';
+    CAN_SAL=true;
+    return;
+  }
+
+  // All other accounts: use Firebase perms if saved, else defaults
+  if(perms){
+    // Navigation tabs
     var ntV=document.getElementById('nt-v'); var bbV=document.getElementById('bb-v');
     if(ntV) ntV.style.display=perms.canViewVio?'':'none';
     if(bbV) bbV.style.display=perms.canViewVio?'':'none';
-    // Delay page
     var ntD=document.getElementById('nt-d'); var bbD=document.getElementById('bb-d');
     if(ntD) ntD.style.display=perms.canViewDelay?'':'none';
     if(bbD) bbD.style.display=perms.canViewDelay?'':'none';
-    // Reports page
     var ntR=document.getElementById('nt-r'); var bbR=document.getElementById('bb-r');
     if(ntR) ntR.style.display=perms.canViewReports?'':'none';
     if(bbR) bbR.style.display=perms.canViewReports?'':'none';
-    // Doctors page
-    var bbDoc=document.getElementById('bb-doc');
+    var ntDoc=document.getElementById('nt-doc'); var bbDoc=document.getElementById('bb-doc');
+    if(ntDoc) ntDoc.style.display=perms.canViewDoctors?'':'none';
     if(bbDoc) bbDoc.style.display=perms.canViewDoctors?'':'none';
-    // Salary
     CAN_SAL=perms.canViewSal||false;
+
+    // Edit buttons — based on canEditStaff
+    document.getElementById('vbar').style.display=isV?'flex':'none';
+    document.getElementById('btn-newvio').style.display=perms.canEditStaff?'':'none';
+    document.getElementById('btn-newmonth').style.display=perms.canEditStaff?'':'none';
+    document.querySelectorAll('.btna').forEach(function(b){b.style.display=perms.canEditStaff?'':'none';});
   } else {
-    // Admin: show all tabs
-    ['nt-v','nt-d','nt-r','bb-v','bb-d','bb-r','bb-doc'].forEach(function(id){
-      var el=document.getElementById(id); if(el) el.style.display='';
-    });
+    // No Firebase perms saved yet → use role defaults
+    if(isV){
+      // viewer with no perms = no access
+      ['nt-v','nt-d','nt-r','nt-doc','bb-v','bb-d','bb-r','bb-doc'].forEach(function(id){
+        var el=document.getElementById(id); if(el) el.style.display='none';
+      });
+      document.getElementById('btn-newvio').style.display='none';
+      document.getElementById('btn-newmonth').style.display='none';
+      document.querySelectorAll('.btna').forEach(function(b){b.style.display='none';});
+      CAN_SAL=false;
+    } else {
+      // admin with no perms saved = full access
+      ['nt-v','nt-d','nt-r','nt-doc','bb-v','bb-d','bb-r','bb-doc'].forEach(function(id){
+        var el=document.getElementById(id); if(el) el.style.display='';
+      });
+      document.getElementById('btn-newvio').style.display='';
+      document.getElementById('btn-newmonth').style.display='';
+      document.querySelectorAll('.btna').forEach(function(b){b.style.display='';});
+      CAN_SAL=USERS[CURRENT_USER]?USERS[CURRENT_USER].sal:false;
+    }
+    document.getElementById('vbar').style.display=isV?'flex':'none';
   }
-  document.getElementById('vbar').style.display=isV?'flex':'none';
-  document.getElementById('btn-newvio').style.display=isV?'none':'';
-  document.getElementById('btn-newmonth').style.display=isV?'none':'';
-  document.querySelectorAll('.btna').forEach(function(b){b.style.display=isV?'none':'';});
+
   document.querySelectorAll('.sal-inp').forEach(function(i){i.style.display=CAN_SAL?'':'none';});
   document.getElementById('sal-grp').style.display=CAN_SAL?'block':'none';
 }
@@ -915,7 +949,8 @@ function buildNode(cfg,container,hasNP){
   d.querySelector('.nh').addEventListener('click',function(){ d.classList.toggle('open'); });
   d.querySelector('.btna').addEventListener('click',function(e){
     e.stopPropagation();
-    if(ROLE!=='admin') return;
+    var _p=getUserPerms(CURRENT_USER);
+    if(ROLE!=='admin' && !(_p&&_p.canEditStaff)) return;
     d.classList.add('open');
     var af=document.getElementById('af_'+cfg.id); af.classList.add('show');
     var fn=document.getElementById('fn_'+cfg.id); if(fn) fn.focus();
@@ -982,12 +1017,6 @@ function buildPermsPage(){
       '<span class="'+badgeCls+'">'+roleLabel+'</span>';
     card.appendChild(head);
 
-    if(u.role==='admin'){
-      var info=document.createElement('div');
-      info.style.cssText='font-size:11px;color:var(--t3);padding:6px 0;font-weight:600';
-      info.textContent='✅ حساب مدير — صلاحيات كاملة تلقائياً';
-      card.appendChild(info);
-    } else {
       // General perms section
       var sec=document.createElement('div');
       sec.className='perm-section';
@@ -1099,7 +1128,6 @@ function buildPermsPage(){
       saveBtn.textContent='💾 حفظ صلاحيات '+username;
       saveBtn.addEventListener('click',function(){ saveUserPerms(username,card); });
       card.appendChild(saveBtn);
-    }
     list.appendChild(card);
   });
 }
@@ -1206,8 +1234,8 @@ function renderNode(id){
           '<span class="eshift">'+shiftTxt+'</span>'+
         '</div>'+
       '</div>'+
-      '<div class="eac">'+(ROLE==='admin'?'<button class="bte">تعديل</button><button class="btd">حذف</button>':'')+'</div>';
-    if(ROLE==='admin'){
+      '<div class="eac">'+((ROLE==='admin'||(getUserPerms(CURRENT_USER)&&getUserPerms(CURRENT_USER).canEditStaff))?'<button class="bte">تعديل</button><button class="btd">حذف</button>':'')+'</div>';
+    if(ROLE==='admin'||(getUserPerms(CURRENT_USER)&&getUserPerms(CURRENT_USER).canEditStaff)){
       div.querySelector('.bte').addEventListener('click',function(){ openEdit(id,e.key,e.name,e.role,e.shift,e.salary); });
       div.querySelector('.btd').addEventListener('click',function(){ delEmp(id,e.key); });
     }
@@ -1352,7 +1380,7 @@ function showPage(id){
   document.querySelectorAll('.nt').forEach(function(b){b.classList.remove('active');});
   document.querySelectorAll('.bb').forEach(function(b){b.classList.remove('active');});
   document.getElementById(id).classList.add('active');
-  var nm={'pg-s':'nt-s','pg-v':'nt-v','pg-d':'nt-d','pg-r':'nt-r','pg-p':'nt-p','pg-doc':'bb-doc'};
+  var nm={'pg-s':'nt-s','pg-v':'nt-v','pg-d':'nt-d','pg-r':'nt-r','pg-p':'nt-p','pg-doc':'nt-doc'};
   var bm={'pg-s':'bb-s','pg-v':'bb-v','pg-d':'bb-d','pg-r':'bb-r','pg-p':'bb-p','pg-doc':'bb-doc'};
   if(nm[id]){var e=document.getElementById(nm[id]);if(e)e.classList.add('active');}
   if(bm[id]){var e2=document.getElementById(bm[id]);if(e2)e2.classList.add('active');}
@@ -1365,7 +1393,8 @@ function hideForm(id){
   ['fn_','fr_','ft_','fs_'].forEach(function(p){var e=document.getElementById(p+id);if(e)e.value='';});
 }
 function addEmp(id){
-  if(ROLE!=='admin') return;
+  var _p=getUserPerms(CURRENT_USER);
+  if(ROLE!=='admin' && !(_p&&_p.canEditStaff)) return;
   var fn=document.getElementById('fn_'+id);
   if(!fn) return;
   var name=fn.value.trim();
@@ -1383,12 +1412,14 @@ function addEmp(id){
   hideForm(id);
 }
 function delEmp(id,key){
-  if(ROLE!=='admin') return;
+  var _p=getUserPerms(CURRENT_USER);
+  if(ROLE!=='admin' && !(_p&&_p.canEditStaff)) return;
   if(!confirm('حذف الموظف؟')) return;
   DB.ref('hospital/'+id+'/'+key).remove();
 }
 function openEdit(sec,key,name,role,shift,sal){
-  if(ROLE!=='admin') return;
+  var _p=getUserPerms(CURRENT_USER);
+  if(ROLE!=='admin' && !(_p&&_p.canEditStaff)) return;
   document.getElementById('e-sec').value=sec;
   document.getElementById('e-key').value=key;
   document.getElementById('e-name').value=name||'';
@@ -1399,7 +1430,8 @@ function openEdit(sec,key,name,role,shift,sal){
   setTimeout(function(){document.getElementById('e-name').focus();},100);
 }
 function saveEdit(){
-  if(ROLE!=='admin') return;
+  var _p=getUserPerms(CURRENT_USER);
+  if(ROLE!=='admin' && !(_p&&_p.canEditStaff)) return;
   var sec=document.getElementById('e-sec').value;
   var key=document.getElementById('e-key').value;
   var name=document.getElementById('e-name').value.trim();
