@@ -431,6 +431,7 @@ input:checked + .toggle-slider:before{transform:translateX(18px)}
           </table>
         </div>
         <button class="doc-save-btn" onclick="saveDocSchedule()">💾 حفظ الجدول</button>
+        <button class="doc-save-btn" onclick="clearDocSchedule()" style="background:var(--ac);margin-top:10px">🗑️ حذف بيانات الجدول</button>
       </div>
     </div>
   </div>
@@ -455,24 +456,9 @@ input:checked + .toggle-slider:before{transform:translateX(18px)}
           <div class="fg"><label class="fl">اسم المستخدم (بالإنجليزية)</label><input class="fi" type="text" id="new-user-name" placeholder="مثال: dora6" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
           <div class="fg"><label class="fl">كلمة المرور</label><input class="fi" type="text" id="new-user-pass" placeholder="كلمة المرور"></div>
           <div class="fg"><label class="fl">نوع الحساب</label>
-            <select class="fs2" id="new-user-role" onchange="onNewUserRoleChange()">
+            <select class="fs2" id="new-user-role">
               <option value="viewer">👁️ مشاهدة فقط</option>
               <option value="admin">🔑 مدير</option>
-              <option value="dept_manager">🏢 مسؤول قسم</option>
-            </select>
-          </div>
-          <div class="fg" id="new-user-dept-fg" style="display:none"><label class="fl">القسم المسؤول عنه</label>
-            <select class="fs2" id="new-user-dept">
-              <option value="">— اختر القسم —</option>
-              <option>رئيس مجلس الإدارة</option><option>معاون رئيس مجلس الإدارة</option>
-              <option>المدير الفني</option><option>المدير الإداري</option>
-              <option>صالة الولادة</option><option>قسم العناية المركزة</option><option>قسم الطوارئ</option>
-              <option>قسم العمليات</option><option>قسم التخدير</option><option>الأطباء المقيمون</option>
-              <option>قسم الأشعة</option><option>قسم المختبر</option><option>قسم الصيدلية</option>
-              <option>قسم الخدج</option><option>تمريض الطابق</option><option>قسم العلاج الطبيعي</option>
-              <option>قسم الأسنان</option><option>قسم الحسابات</option><option>قسم IT</option>
-              <option>قسم الصيانة</option><option>قسم الاستعلامات</option><option>قسم الأمنية</option>
-              <option>الكافتيريا</option><option>موظفو الخدمات</option>
             </select>
           </div>
           <div class="fg"><label class="fl">عرض الرواتب</label>
@@ -571,25 +557,7 @@ input:checked + .toggle-slider:before{transform:translateX(18px)}
   <div class="mo">
     <div class="moh"><h3>➕ إضافة شهر جديد</h3><button class="moc" id="close-month">✕</button></div>
     <div class="mob">
-      <div class="fg"><label class="fl">الشهر</label>
-        <select class="fs2" id="m-month">
-          <option value="1">يناير</option>
-          <option value="2">فبراير</option>
-          <option value="3">مارس</option>
-          <option value="4">أبريل</option>
-          <option value="5">مايو</option>
-          <option value="6">يونيو</option>
-          <option value="7">يوليو</option>
-          <option value="8">أغسطس</option>
-          <option value="9">سبتمبر</option>
-          <option value="10">أكتوبر</option>
-          <option value="11">نوفمبر</option>
-          <option value="12">ديسمبر</option>
-        </select>
-      </div>
-      <div class="fg"><label class="fl">السنة</label>
-        <select class="fs2" id="m-year"></select>
-      </div>
+      <div class="fg"><label class="fl">اسم الشهر</label><input class="fi" type="text" id="m-name" placeholder="مثال: مايو 2025"></div>
       <div class="btr"><button class="btp" id="save-month">حفظ الشهر</button><button class="btg" id="cancel-month">إلغاء</button></div>
     </div>
   </div>
@@ -773,22 +741,7 @@ document.addEventListener('DOMContentLoaded', function(){
   document.getElementById('save-vio').addEventListener('click', saveVio);
   document.getElementById('vio-type').addEventListener('change', toggleVioX);
   // Month
-  document.getElementById('btn-newmonth').addEventListener('click', function(){
-    if(ROLE!=='admin') return;
-    // بناء قائمة السنوات
-    var yrSel=document.getElementById('m-year');
-    yrSel.innerHTML='';
-    var now=new Date(); var cy=now.getFullYear();
-    for(var y=cy+1;y>=cy-3;y--){
-      var op=document.createElement('option');
-      op.value=y; op.textContent=y;
-      if(y===cy) op.selected=true;
-      yrSel.appendChild(op);
-    }
-    // تحديد الشهر الحالي
-    document.getElementById('m-month').value=(now.getMonth()+1).toString();
-    document.getElementById('month-modal').classList.add('show');
-  });
+  document.getElementById('btn-newmonth').addEventListener('click', function(){ if(ROLE==='admin') document.getElementById('month-modal').classList.add('show'); });
   document.getElementById('close-month').addEventListener('click', function(){ document.getElementById('month-modal').classList.remove('show'); });
   document.getElementById('cancel-month').addEventListener('click', function(){ document.getElementById('month-modal').classList.remove('show'); });
   document.getElementById('save-month').addEventListener('click', saveMonth);
@@ -915,28 +868,11 @@ function applyPerms(){
     if(bbDoc) bbDoc.style.display=perms.canViewDoctors?'':'none';
     CAN_SAL=perms.canViewSal||false;
 
-    // مسؤول القسم: يرى أزرار الإضافة لكن فقط على قسمه — يُعالج في renderNode
-    // بقية الحسابات: إظهار/إخفاء أزرار التعديل حسب canEditStaff
-    if(perms.isDeptManager){
-      // مسؤول القسم لا يرى شريط المشاهدة ولا أزرار الإضافة العامة
-      document.getElementById('vbar').style.display='none';
-      document.getElementById('btn-newvio').style.display='none';
-      document.getElementById('btn-newmonth').style.display='none';
-      // أزرار الإضافة تُظهر فقط على القسم المعين — renderNode يتولى ذلك
-      document.querySelectorAll('.btna').forEach(function(b){
-        // اعثر على معرف القسم الخاص بهذا الزر
-        var secId=b.getAttribute('data-sec');
-        var nodeEl=secId?document.getElementById(secId):null;
-        var titleEl=nodeEl?nodeEl.querySelector('.nt2'):null;
-        var deptTitle=titleEl?titleEl.textContent:'';
-        b.style.display=(deptTitle===perms.managedDept)?'':'none';
-      });
-    } else {
-      document.getElementById('vbar').style.display=isV?'flex':'none';
-      document.getElementById('btn-newvio').style.display=perms.canEditStaff?'':'none';
-      document.getElementById('btn-newmonth').style.display=perms.canEditStaff?'':'none';
-      document.querySelectorAll('.btna').forEach(function(b){b.style.display=perms.canEditStaff?'':'none';});
-    }
+    // Edit buttons — based on canEditStaff
+    document.getElementById('vbar').style.display=isV?'flex':'none';
+    document.getElementById('btn-newvio').style.display=perms.canEditStaff?'':'none';
+    document.getElementById('btn-newmonth').style.display=perms.canEditStaff?'':'none';
+    document.querySelectorAll('.btna').forEach(function(b){b.style.display=perms.canEditStaff?'':'none';});
   } else {
     // No Firebase perms saved yet → use role defaults
     if(isV){
@@ -1053,11 +989,6 @@ function listenPerms(){
     applyPerms();
     // Re-render all nodes to apply dept filtering
     ALL_IDS.forEach(function(id){ renderNode(id); });
-    // تحديث عرض الرواتب بعد تطبيق الصلاحيات
-    document.querySelectorAll('.sal-inp').forEach(function(i){i.style.display=CAN_SAL?'':'none';});
-    document.querySelectorAll('.ei').forEach(function(ei){
-      if(CAN_SAL) ei.classList.add('show-sal'); else ei.classList.remove('show-sal');
-    });
   });
 }
 
@@ -1263,9 +1194,9 @@ function renderNode(id){
   var subEl=document.getElementById('ns_'+id);
   var npEl=document.getElementById('np_'+id);
   if(!listEl) return;
-  var perms=getUserPerms(CURRENT_USER);
   // Hide dept node if viewer with dept restrictions
   if(ROLE==='viewer' && CURRENT_USER){
+    var perms=getUserPerms(CURRENT_USER);
     if(perms && !perms.allDepts){
       var nodeEl=document.getElementById(id);
       // Get dept title
@@ -1276,7 +1207,7 @@ function renderNode(id){
       } else if(nodeEl){ nodeEl.style.display=''; }
     }
     // Hide edit staff if no permission
-    if(perms && !perms.canEditStaff && !perms.isDeptManager){
+    if(perms && !perms.canEditStaff){
       var eac=listEl.querySelectorAll('.eac'); eac.forEach(function(e){e.style.display='none';});
     }
   }
@@ -1289,16 +1220,6 @@ function renderNode(id){
   }
   listEl.innerHTML='';
   if(!emps.length){listEl.innerHTML='<div class="ee">لا يوجد موظفون في هذا القسم</div>';return;}
-
-  // تحديد ما إذا كان المستخدم الحالي لديه صلاحية تعديل هذا القسم
-  var nodeEl2=document.getElementById(id);
-  var titleEl2=nodeEl2?nodeEl2.querySelector('.nt2'):null;
-  var thisDeptTitle=titleEl2?titleEl2.textContent:'';
-  var canEditThisDept=false;
-  if(ROLE==='admin') canEditThisDept=true;
-  else if(perms && perms.isDeptManager && perms.managedDept===thisDeptTitle) canEditThisDept=true;
-  else if(perms && perms.canEditStaff) canEditThisDept=true;
-
   emps.forEach(function(e){
     var div=document.createElement('div');
     div.className='ei'+(CAN_SAL?' show-sal':'');
@@ -1314,8 +1235,8 @@ function renderNode(id){
           '<span class="eshift">'+shiftTxt+'</span>'+
         '</div>'+
       '</div>'+
-      '<div class="eac">'+(canEditThisDept?'<button class="bte">تعديل</button><button class="btd">حذف</button>':'')+'</div>';
-    if(canEditThisDept){
+      '<div class="eac">'+((ROLE==='admin'||(getUserPerms(CURRENT_USER)&&getUserPerms(CURRENT_USER).canEditStaff))?'<button class="bte">تعديل</button><button class="btd">حذف</button>':'')+'</div>';
+    if(ROLE==='admin'||(getUserPerms(CURRENT_USER)&&getUserPerms(CURRENT_USER).canEditStaff)){
       div.querySelector('.bte').addEventListener('click',function(){ openEdit(id,e.key,e.name,e.role,e.shift,e.salary); });
       div.querySelector('.btd').addEventListener('click',function(){ delEmp(id,e.key); });
     }
@@ -1355,24 +1276,6 @@ function updateVioStats(){
   document.getElementById('cp').textContent=c.praise;
 }
 
-function buildMonthIcon(name){
-  // name مثل "مايو / 2026" أو "مايو 2025"
-  var monthNums={'يناير':'01','فبراير':'02','مارس':'03','أبريل':'04','مايو':'05','يونيو':'06','يوليو':'07','أغسطس':'08','سبتمبر':'09','أكتوبر':'10','نوفمبر':'11','ديسمبر':'12'};
-  var parts=name.replace('/',' ').split(/\s+/).filter(Boolean);
-  var mNum=''; var yr='';
-  parts.forEach(function(p){
-    if(monthNums[p]) mNum=monthNums[p];
-    else if(/^\d{4}$/.test(p)) yr=p.slice(2);
-  });
-  if(mNum||yr){
-    return '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;line-height:1">'+
-      '<span style="font-size:15px;font-weight:900;color:var(--pr)">'+(mNum||'')+'</span>'+
-      (yr?'<span style="font-size:10px;font-weight:700;color:var(--t3)">'+yr+'</span>':'')+
-    '</div>';
-  }
-  return '📅';
-}
-
 function renderMonths(){
   var list=document.getElementById('months-list'), empty=document.getElementById('months-empty');
   var keys=Object.keys(MONTHS);
@@ -1392,7 +1295,7 @@ function renderMonths(){
     // رأس الشهر
     var mHead=document.createElement('div');
     mHead.className='month-head';
-    mHead.innerHTML='<div class="month-icon" id="micon_'+mk+'">'+buildMonthIcon(m.name)+'</div><div class="month-info"><div class="month-title">'+m.name+'</div><div class="month-meta">'+depts.length+' قسم — '+totalDelays+' حالة تأخير</div></div><div class="chv">›</div>';
+    mHead.innerHTML='<div class="month-icon">📅</div><div class="month-info"><div class="month-title">'+m.name+'</div><div class="month-meta">'+depts.length+' قسم — '+totalDelays+' حالة تأخير</div></div><div class="chv">›</div>';
     mHead.addEventListener('click',function(){card.classList.toggle('open');});
     // أزرار الشهر
     var mActs=document.createElement('div');
@@ -1492,11 +1395,7 @@ function hideForm(id){
 }
 function addEmp(id){
   var _p=getUserPerms(CURRENT_USER);
-  var nodeEl=document.getElementById(id);
-  var titleEl=nodeEl?nodeEl.querySelector('.nt2'):null;
-  var thisDeptTitle=titleEl?titleEl.textContent:'';
-  var canAdd=ROLE==='admin'||(_p&&_p.canEditStaff)||(_p&&_p.isDeptManager&&_p.managedDept===thisDeptTitle);
-  if(!canAdd) return;
+  if(ROLE!=='admin' && !(_p&&_p.canEditStaff)) return;
   var fn=document.getElementById('fn_'+id);
   if(!fn) return;
   var name=fn.value.trim();
@@ -1515,21 +1414,13 @@ function addEmp(id){
 }
 function delEmp(id,key){
   var _p=getUserPerms(CURRENT_USER);
-  var nodeEl=document.getElementById(id);
-  var titleEl=nodeEl?nodeEl.querySelector('.nt2'):null;
-  var thisDeptTitle=titleEl?titleEl.textContent:'';
-  var canDel=ROLE==='admin'||(_p&&_p.canEditStaff)||(_p&&_p.isDeptManager&&_p.managedDept===thisDeptTitle);
-  if(!canDel) return;
+  if(ROLE!=='admin' && !(_p&&_p.canEditStaff)) return;
   if(!confirm('حذف الموظف؟')) return;
   DB.ref('hospital/'+id+'/'+key).remove();
 }
 function openEdit(sec,key,name,role,shift,sal){
   var _p=getUserPerms(CURRENT_USER);
-  var nodeEl=document.getElementById(sec);
-  var titleEl=nodeEl?nodeEl.querySelector('.nt2'):null;
-  var thisDeptTitle=titleEl?titleEl.textContent:'';
-  var canEdit=ROLE==='admin'||(_p&&_p.canEditStaff)||(_p&&_p.isDeptManager&&_p.managedDept===thisDeptTitle);
-  if(!canEdit) return;
+  if(ROLE!=='admin' && !(_p&&_p.canEditStaff)) return;
   document.getElementById('e-sec').value=sec;
   document.getElementById('e-key').value=key;
   document.getElementById('e-name').value=name||'';
@@ -1541,12 +1432,8 @@ function openEdit(sec,key,name,role,shift,sal){
 }
 function saveEdit(){
   var _p=getUserPerms(CURRENT_USER);
+  if(ROLE!=='admin' && !(_p&&_p.canEditStaff)) return;
   var sec=document.getElementById('e-sec').value;
-  var nodeEl=document.getElementById(sec);
-  var titleEl=nodeEl?nodeEl.querySelector('.nt2'):null;
-  var thisDeptTitle=titleEl?titleEl.textContent:'';
-  var canEdit=ROLE==='admin'||(_p&&_p.canEditStaff)||(_p&&_p.isDeptManager&&_p.managedDept===thisDeptTitle);
-  if(!canEdit) return;
   var key=document.getElementById('e-key').value;
   var name=document.getElementById('e-name').value.trim();
   if(!name){document.getElementById('e-name').style.borderColor='var(--ac)';return;}
@@ -1597,12 +1484,10 @@ function delVio(key){
 }
 function saveMonth(){
   if(ROLE!=='admin') return;
-  var monthNames=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-  var mIdx=parseInt(document.getElementById('m-month').value)||1;
-  var yr=document.getElementById('m-year').value.trim();
-  if(!yr){alert('اختر السنة');return;}
-  var name=monthNames[mIdx-1]+' / '+yr;
+  var name=document.getElementById('m-name').value.trim();
+  if(!name){alert('أدخل اسم الشهر');return;}
   DB.ref('delay_months').push({name:name,ts:Date.now()});
+  document.getElementById('m-name').value='';
   document.getElementById('month-modal').classList.remove('show');
 }
 function delMonth(key){
@@ -1724,12 +1609,6 @@ function onEditUserChange(){
   fields.style.display='block';
 }
 
-function onNewUserRoleChange(){
-  var role=document.getElementById('new-user-role').value;
-  var deptFg=document.getElementById('new-user-dept-fg');
-  if(deptFg) deptFg.style.display=(role==='dept_manager')?'block':'none';
-}
-
 function addNewUser(){
   var name=document.getElementById('new-user-name').value.trim().toLowerCase();
   var pass=document.getElementById('new-user-pass').value.trim();
@@ -1738,41 +1617,12 @@ function addNewUser(){
   var label=document.getElementById('new-user-label').value.trim();
   if(!name||!pass){alert('⚠️ يرجى إدخال اسم المستخدم وكلمة المرور'); return;}
   if(USERS[name]){alert('⚠️ اسم المستخدم موجود مسبقاً'); return;}
-  var deptName='';
-  if(role==='dept_manager'){
-    deptName=document.getElementById('new-user-dept').value;
-    if(!deptName){alert('⚠️ يرجى اختيار القسم المسؤول عنه'); return;}
-    if(!label) label='🏢 مسؤول قسم: '+deptName;
-    var cls='hbdg hbdg-v';
-    USERS[name]={pass:pass,role:'viewer',sal:sal,label:label,cls:cls,deptManaged:deptName};
-    // حفظ صلاحيات مسؤول القسم تلقائياً في Firebase
-    if(DB){
-      var deptPerms={
-        allDepts:false,
-        allowedDepts:[deptName],
-        canViewVio:false,
-        canViewDelay:false,
-        canViewReports:false,
-        canEditStaff:true,
-        canViewSal:sal,
-        canManageUsers:false,
-        canViewDoctors:false,
-        isDeptManager:true,
-        managedDept:deptName
-      };
-      DB.ref('user_perms/'+name).set(deptPerms);
-    }
-  } else {
-    if(!label) label=(role==='admin'?'🔑 مدير':'👁️ مشاهدة فقط');
-    var cls=role==='admin'?'hbdg hbdg-a':'hbdg hbdg-v';
-    USERS[name]={pass:pass,role:role,sal:sal,label:label,cls:cls};
-  }
+  if(!label) label=(role==='admin'?'🔑 مدير':'👁️ مشاهدة فقط');
+  var cls=role==='admin'?'hbdg hbdg-a':'hbdg hbdg-v';
+  USERS[name]={pass:pass,role:role,sal:sal,label:label,cls:cls};
   document.getElementById('new-user-name').value='';
   document.getElementById('new-user-pass').value='';
   document.getElementById('new-user-label').value='';
-  document.getElementById('new-user-dept').value='';
-  document.getElementById('new-user-dept-fg').style.display='none';
-  document.getElementById('new-user-role').value='viewer';
   renderUsersListDisplay();
   buildPermsPage();
   alert('✅ تم إضافة المستخدم "'+name+'" بنجاح!');
@@ -1874,6 +1724,21 @@ function saveDocSchedule(){
   DB.ref('doc_schedule/'+key).set(data,function(err){
     if(!err){alert('✅ تم حفظ جدول '+DOC_CURRENT_DEPT+' بنجاح!');}
     else{alert('❌ خطأ في الحفظ: '+err.message);}
+  });
+}
+function clearDocSchedule(){
+  if(!docCanEdit()){alert('⚠️ ليس لديك صلاحية التعديل');return;}
+  if(!DB||!DOC_CURRENT_DEPT){return;}
+  if(!confirm('هل تريد حذف جميع بيانات جدول '+DOC_CURRENT_DEPT+'؟')) return;
+  var key=DOC_CURRENT_DEPT.replace(/\s+/g,'_');
+  var data={};
+  DOC_DAYS.forEach(function(day){
+    var dayKey=day.replace(/\s+/g,'_');
+    data[dayKey]={morning:'',evening:''};
+  });
+  DB.ref('doc_schedule/'+key).set(data,function(err){
+    if(!err){renderDocTable({});alert('✅ تم حذف بيانات جدول '+DOC_CURRENT_DEPT+' بنجاح!');}
+    else{alert('❌ خطأ في الحذف: '+err.message);}
   });
 }
 </script>
