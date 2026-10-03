@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>تهيئة مستشفى الدورة — Firebase وGitHub</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#f3f6fc;color:#172746;font:16px/1.8 Tahoma,Arial,sans-serif}main{max-width:850px;margin:32px auto;padding:26px;background:#fff;border-radius:18px;box-shadow:0 8px 40px #223e6812}h1{font-size:25px;margin:0 0 8px}h2{font-size:19px;margin-top:26px}p{margin:8px 0}ol{padding-right:24px}li{margin-bottom:10px}.notice{padding:14px;background:#fff7e4;border-right:4px solid #d49419;border-radius:8px}.local{color:#477050;background:#edf8f0;padding:12px;border-radius:8px}label{display:block;font-weight:bold;margin-top:18px}input{width:100%;padding:12px;border:1px solid #c7d3e7;border-radius:8px;font:inherit;margin-top:6px}button,a.download{display:inline-block;background:#1b4fd8;color:white;border:0;border-radius:9px;padding:12px 18px;margin-top:18px;font:inherit;cursor:pointer;text-decoration:none}button:disabled{opacity:.5;cursor:default}#feedback{white-space:pre-wrap;margin-top:18px}.error{color:#ae2530}#result{border-top:1px solid #e4e9f2;margin-top:22px;padding-top:16px}pre{direction:ltr;text-align:left;background:#eef2f8;padding:12px;border-radius:8px;overflow:auto;font-size:13px}code{direction:ltr;unicode-bidi:embed}a{color:#1b4fd8}small{color:#536580}#notes{max-height:240px;overflow:auto;white-space:pre-wrap}.muted{color:#536580}@media(max-width:600px){main{margin:12px;padding:18px}h1{font-size:22px}}</style>
+</head><body><main>
+<h1>تهيئة النظام من المتصفح</h1>
+<p>إعداد مجاني باستخدام GitHub وFirebase فقط. لا تثبيت برامج، ولا أوامر، ولا مفتاح إداري.</p>
+<p class="local">تُعالج البيانات داخل متصفحك ولا تُرسلها هذه الصفحة إلى أي خادم. لا تضع هنا كلمة مرور أو مفتاح حساب خدمة.</p>
+<h2>قبل تجهيز الملف</h2>
+<ol>
+<li>في Firebase فعّل <b>Authentication → Sign-in method → Email/Password</b>.</li>
+<li>من <b>Authentication → Users → Add user</b> أنشئ البريد <code>dev@users.aldora.invalid</code> وكلمة مرور خاصة قوية من 12 حرفًا على الأقل. إذا كان موجودًا استخدم الحساب الحالي. انسخ <b>UID</b> الخاص به.</li>
+<li>أوقف الإدخال أثناء النقل. احفظ قواعد القاعدة السابقة ثم انشر قواعد الصيانة التالية في <b>Realtime Database → Rules</b>:</li>
+</ol>
+<pre>{"rules":{".read":false,".write":false}}</pre>
+<p>بعد إيقاف الإدخال، من <b>Realtime Database → Data</b> اختر جذر القاعدة ثم قائمة ⋮ → <b>Export JSON</b>. احتفظ بهذا الملف الأصلي نسخة احتياطية. لا تختَر قسمًا منفردًا.</p>
+<form id="setup-form">
+<label for="data-file">ملف بيانات Realtime Database الأصلي</label><input id="data-file" type="file" accept=".json,application/json" required>
+<label for="dev-uid">UID حساب المطور</label><input id="dev-uid" type="text" dir="ltr" autocomplete="off" spellcheck="false" required maxlength="128" placeholder="انسخه من Authentication → Users">
+<button id="prepare-btn" type="submit">تجهيز ملف الاستيراد</button>
+</form>
+<div id="feedback" role="status" aria-live="polite"></div>
+<section id="result" hidden>
+<h2>ملف البيانات جاهز</h2><p id="counts"></p><p id="source" class="muted"></p><p>يحتفظ الملف بالمسارات الأصلية، ويضيف بيانات النسخة الجديدة وملف صلاحيات حساب المطور. لا يحتوي كلمة مرور الحساب ولا يغيّر حسابات Authentication.</p>
+<p class="notice">الاستيراد إلى جذر Firebase يستبدل محتوى الجذر بهذا الملف. استخدمه مباشرة بعد تصدير البيانات مع بقاء الإدخال متوقفًا، حتى لا تفقد تغييرات أُدخلت بعد التصدير. لا ترفع ملف البيانات إلى GitHub.</p>
+<a id="download-file" class="download" download="aldora-firebase-ready.json">تنزيل ملف Firebase الجاهز</a>
+<p id="notes"></p>
+<h2>أكمل التفعيل</h2>
+<ol>
+<li>في <b>Realtime Database → Data</b> اختر <b>جذر القاعدة</b> ثم ⋮ → <b>Import JSON</b>، واختر الملف الجديد <code>aldora-firebase-ready.json</code>.</li>
+<li>افتح ملف <code>database.rules.json</code> المرفق بالمشروع، وانسخ محتواه كاملًا إلى <b>Realtime Database → Rules</b> ثم <b>Publish</b>. هذه القواعد تستبدل قواعد الصيانة.</li>
+<li>افتح <a href="index.html">صفحة النظام</a> وسجّل الدخول باسم <b>dev</b> وكلمة المرور التي اخترتها في Authentication. من صفحة الحسابات أنشئ المدير المالي والمستخدمين وامنح صلاحياتهم.</li>
+<li>جرّب طلب تعيين واعتماده والجرس والتقرير المالي، وتحقق من حدود حساب عادي قبل استئناف العمل.</li>
+</ol>
+</section>
+<p class="muted">الصفحة لا تنفّذ أي تغيير في Firebase بنفسها؛ أنت تستورد الملف وتنشر القواعد من Console. النطاق المعتمد وخطة Spark وإعداد GitHub Pages تبقى كما هي.</p>
+</main><script src="spark-core.js"></script><script src="setup.js"></script></body></html>
