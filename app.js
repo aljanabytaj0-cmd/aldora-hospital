@@ -8,12 +8,12 @@ var ALL_DEPT_NAMES=ALL_CFG.map(function(d){return d.title;});
 var DOC_DAYS=['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
 var BUSY=new Set();
 var PERM_FLAGS=[
-  ['canViewVio','عرض المخالفات'],['canEditVio','إضافة وحذف العقوبات'],
-  ['canViewDelay','عرض تأخير البصمة'],['canEditDelay','إدارة سجلات التأخير'],
-  ['canViewReports','عرض التقارير'],['canEditStaff','تقديم طلب تعيين وتعديل الموظفين'],
-  ['canViewSal','عرض وتعديل الرواتب'],['canManageUsers','إدارة حسابات المشاهدة'],
+  ['canViewVio','عرض المخالفات'],['canEditVio','إضافة وإلغاء العقوبات'],
+  ['canViewDelay','عرض تأخير البصمة'],['canEditDelay','إضافة وتعديل وإلغاء مبلغ التأخير'],
+  ['canViewReports','عرض وطباعة وتصدير التقارير'],['canEditStaff','تقديم طلب تعيين وتعديل الموظفين'],
+  ['canViewSal','عرض الرواتب'],['canManageUsers','إدارة حسابات المشاهدة'],
   ['canViewDoctors','عرض جدول الاستشاريين'],['canEditDoctors','تعديل جدول الاستشاريين'],
-  ['canApproveHires','الموافقة على طلبات التعيين'],['canTerminateStaff','تقديم طلب إنهاء خدمات'],['canApproveTerminations','الموافقة أو الرفض على إنهاء الخدمات'],
+  ['canApproveHires','اعتماد أو رفض طلبات التعيين'],['canTerminateStaff','تقديم طلب إنهاء خدمات'],['canApproveTerminations','الموافقة أو الرفض على إنهاء الخدمات'],
   ['canViewNotifications','عرض الإشعارات'],['canViewFinance','عرض المالية (يتطلب عرض الرواتب)'],['canManageFinance','إدارة الرواتب والخصومات اليدوية']
 ];
 function el(id){return document.getElementById(id);}
@@ -31,6 +31,8 @@ function today(){return new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Baghdad'
 function errorMessage(e){
   var code=e&&e.code||'';
   if(/invalid-login-credentials|wrong-password|user-not-found|invalid-credential/.test(code))return 'اسم المستخدم أو كلمة المرور غير صحيحة';
+  if(/weak-password|password-does-not-meet-requirements/.test(code))return 'كلمة المرور لا توافق سياسة Firebase. الحد الافتراضي 6 أحرف؛ راجع Password policy في إعدادات Authentication.';
+  if(/email-already-in-use/.test(code))return 'اسم المستخدم مسجل بالفعل.';
   if(/too-many-requests/.test(code))return 'محاولات كثيرة. انتظر قليلاً ثم حاول مجدداً.';
   if(/network-request-failed|unavailable/.test(code))return 'تعذّر الاتصال. تحقق من الإنترنت ثم حاول مجدداً.';
   if(/user-disabled/.test(code))return 'الحساب معطّل. تواصل مع مسؤول النظام.';
@@ -52,7 +54,7 @@ function watch(ref,callback,list,epoch){
 function stopList(list){list.splice(0).forEach(function(stop){stop();});}
 function wipeData(){
   DATA_EPOCH++;stopList(DATA_LISTENERS);DELAY_WATCHES={};
-  LOCAL={};SALARIES={};VIOS={};MONTHS={};DOC_DATA={};USERS={};PERM_DATA={};
+  LOCAL={};SALARIES={};VIOS={};MONTHS={};DOC_DATA={};USERS={};PERM_DATA={};['new-account-access','edit-account-access'].forEach(function(id){el(id).replaceChildren();});
 }
 function resetSession(){
   SESSION++;SESSION_READY=false;stopList(AUTH_LISTENERS);wipeData();
@@ -301,7 +303,7 @@ function renderMonths(){
   var openDepts=new Set(Array.from(list.querySelectorAll('.dept-card.open')).map(function(c){return c.dataset.path;}));
   list.replaceChildren();var keys=allowed('canViewDelay')?Object.keys(MONTHS):[];keys.sort(function(a,b){return (MONTHS[b].ts||0)-(MONTHS[a].ts||0);});el('months-empty').style.display=keys.length?'none':'block';
   keys.forEach(function(mk){
-    var m=MONTHS[mk],depts=Object.keys(m.depts||{}).filter(function(id){return deptAllowed(id)&&!isBoard(id);}),total=depts.reduce(function(n,id){return n+Object.keys(m.depts[id].employees||{}).length;},0);
+    var m=MONTHS[mk],depts=Object.keys(m.depts||{}).filter(function(id){return deptAllowed(id)&&!isBoard(id);}),total=depts.reduce(function(n,id){return n+Object.values(m.depts[id].employees||{}).filter(function(e){return e.status!=='cancelled';}).length;},0);
     var card=document.createElement('div');card.className='month-card'+(openMonths.has(mk)?' open':'');card.dataset.month=mk;
     var head=document.createElement('div');head.className='month-head';head.innerHTML='<div class="month-icon">📅</div><div class="month-info"><div class="month-title">'+esc(m.name)+'</div><div class="month-meta">'+depts.length+' قسم — '+total+' حالة تأخير</div></div><div class="chv">›</div>';head.onclick=function(){card.classList.toggle('open');};
     var body=document.createElement('div');body.className='month-body';var exports=document.createElement('div');exports.className='fx-actions';[['طباعة التقرير','print'],['تصدير التقرير','export']].forEach(function(pair){var b=document.createElement('button');b.className='btg';b.textContent=pair[0];b.onclick=function(){monthlyDelayReport(mk,pair[1]);};exports.appendChild(b);});body.appendChild(exports);
@@ -311,7 +313,7 @@ function renderMonths(){
     }
     if(!depts.length){var empty=document.createElement('div');empty.className='ee';empty.textContent='لا توجد أقسام متاحة في هذا الشهر';body.appendChild(empty);}
     depts.forEach(function(id){
-      var d=m.depts[id],emps=Object.entries(d.employees||{});var cfg=ALL_CFG.find(function(c){return c.id===id;});
+      var d=m.depts[id],emps=Object.entries(d.employees||{}).filter(function(p){return p[1].status!=='cancelled';});var cfg=ALL_CFG.find(function(c){return c.id===id;});
       var dc=document.createElement('div');dc.className='dept-card'+(openDepts.has(mk+'/'+id)?' open':'');dc.dataset.path=mk+'/'+id;
       var dh=document.createElement('div');dh.className='dept-head';dh.innerHTML='<div class="dept-icon-sm" style="background:'+cfg.color+'">'+cfg.icon+'</div><div class="dept-name-sm">'+esc(cfg.title)+'</div><span class="dept-count-badge">'+emps.length+'</span><div class="chv">›</div>';dh.onclick=function(){dc.classList.toggle('open');};
       var db=document.createElement('div');db.className='dept-body';var bar=document.createElement('div');bar.className='dept-emp-bar';bar.innerHTML='<span>المتأخرون</span>';
@@ -320,8 +322,8 @@ function renderMonths(){
         var addE=document.createElement('button');addE.className='btna';addE.textContent='＋ إضافة موظف';addE.onclick=function(){openDelayEmpModal(mk,id);};bar.append(delD,addE);
       }db.appendChild(bar);
       if(!emps.length){var no=document.createElement('div');no.className='ee';no.textContent='لا توجد حالات تأخير';db.appendChild(no);}
-      emps.forEach(function(pair){var key=pair[0],e=pair[1],row=document.createElement('div');row.className='delay-item';row.innerHTML='<div class="delay-av">'+esc(String(e.name||'').trim().charAt(0)||'؟')+'</div><div class="delay-info"><div class="delay-name">'+esc(e.name)+'</div><div class="delay-sub">⏰ '+esc(e.mins)+(e.note?' | '+esc(e.note):'')+'</div></div><div class="delay-date">'+esc(e.date)+'</div>';
-        if(allowed('canEditDelay')){var delE=document.createElement('button');delE.className='btd';delE.textContent='حذف';delE.onclick=function(){delDelayEmp(mk,id,key);};row.appendChild(delE);}db.appendChild(row);
+      emps.forEach(function(pair){var key=pair[0],e=pair[1],row=document.createElement('div');row.className='delay-item';row.innerHTML='<div class="delay-av">'+esc(String(e.name||'').trim().charAt(0)||'؟')+'</div><div class="delay-info"><div class="delay-name">'+esc(e.name)+'</div><div class="delay-sub">💰 '+esc(e.deductionConfirmed===true?iq(e.deductionAmount):'لم يحدد مبلغ لهذا السجل القديم')+(e.note?' | '+esc(e.note):'')+'</div></div><div class="delay-date">'+esc(e.date)+'</div>';
+        if(allowed('canEditDelay')){var editE=document.createElement('button');editE.className='btg';editE.textContent='تعديل المبلغ';editE.onclick=function(){openDelayEmpModal(mk,id,key);};row.appendChild(editE);var delE=document.createElement('button');delE.className='btd';delE.textContent='إلغاء';delE.onclick=function(){delDelayEmp(mk,id,key);};row.appendChild(delE);}db.appendChild(row);
       });dc.append(dh,db);body.appendChild(dc);
     });card.append(head,body);list.appendChild(card);
   });
@@ -331,9 +333,12 @@ function delMonth(mk){if(!allowed('canEditDelay')||!(developer()||USER_PERMS.all
 function openAddDeptModal(mk){if(!allowed('canEditDelay'))return;el('adddept-mk').value=mk;fillDeptSelects();el('adddept-sel').value='';el('adddept-modal').classList.add('show');}
 function saveAddDept(){var mk=el('adddept-mk').value,id=el('adddept-sel').value;if(!allowed('canEditDelay')||!deptAllowed(id)){alert('اختر قسماً مسموحاً');return;}return saveAction('delay-dept',function(){return call('hrMutate',{op:'delayDeptAdd',month:mk,dept:id});},function(){el('adddept-modal').classList.remove('show');});}
 function delDept(mk,id){if(!allowed('canEditDelay')||!deptAllowed(id)||!confirm('حذف القسم وجميع سجلات التأخير فيه؟'))return;return saveAction('delay-dept:'+mk+'/'+id,function(){return call('hrMutate',{op:'delayDeptDelete',month:mk,dept:id});});}
-function openDelayEmpModal(mk,id){if(!allowed('canEditDelay')||!deptAllowed(id))return;el('delay-mk').value=mk;el('delay-dk').value=id;el('d-date').value=today();['d-name','d-mins','d-note'].forEach(function(x){el(x).value='';});fillEmployees('d-name',id);el('delay-modal').classList.add('show');el('d-name').focus();}
-function saveDelay(){var data={op:'delayAdd',month:el('delay-mk').value,dept:el('delay-dk').value,employeeKey:el('d-name').value,minutes:el('d-mins').value,date:el('d-date').value,note:el('d-note').value};if(!allowed('canEditDelay')||!deptAllowed(data.dept))return;return saveAction('delay',function(){return call('hrMutate',data);},function(){el('delay-modal').classList.remove('show');});}
-function delDelayEmp(mk,id,key){if(!allowed('canEditDelay')||!deptAllowed(id)||!confirm('حذف حالة التأخير؟'))return;return saveAction('delay:'+key,function(){return call('hrMutate',{op:'delayDelete',month:mk,dept:id,key:key});});}
+function openDelayEmpModal(mk,id,key){
+  if(!allowed('canEditDelay')||!deptAllowed(id)||isBoard(id))return;var record=key&&MONTHS[mk]?.depts[id]?.employees[key];if(key&&(!record||record.status==='cancelled'))return;
+  el('delay-mk').value=mk;el('delay-dk').value=id;el('d-key').value=key||'';el('delay-title').textContent=key?'تعديل مبلغ التأخير':'إضافة مبلغ تأخير';el('d-date').value=record?record.date:today();el('d-date').readOnly=!!record;el('d-amount').value=record&&record.deductionConfirmed===true?record.deductionAmount:'';el('d-note').value=record?record.note||'':'';fillEmployees('d-name',id,record&&record.employeeKey);el('delay-modal').classList.add('show');el('d-name').focus();
+}
+function saveDelay(){var key=el('d-key').value,data={op:key?'delayAmountSet':'delayAdd',month:el('delay-mk').value,dept:el('delay-dk').value,employeeKey:el('d-name').value,amount:el('d-amount').value,date:el('d-date').value,note:el('d-note').value};if(key)data.key=key;if(!allowed('canEditDelay')||!deptAllowed(data.dept))return;return saveAction('delay',function(){return call('hrMutate',data);},function(){el('delay-modal').classList.remove('show');status('تم حفظ مبلغ التأخير؛ يُخصم من راتب شهر '+data.date.slice(0,7)+'.');});}
+function delDelayEmp(mk,id,key){if(!allowed('canEditDelay')||!deptAllowed(id)||!confirm('إلغاء سجل التأخير وإزالة خصمه من راتب الشهر؟'))return;return saveAction('delay:'+key,function(){return call('hrMutate',{op:'delayDelete',month:mk,dept:id,key:key});});}
 function buildReport(){
   if(!allowed('canViewReports')){el('rep-body').replaceChildren();return;}
   var tot=0,rows='';employeeDeptIds().forEach(function(id){var cfg=ALL_CFG.find(function(d){return d.id===id;}),count=(LOCAL[id]||[]).filter(function(e){return e.status!=='terminated';}).length;tot+=count;if(!count)return;var vc=Object.values(VIOS).filter(function(v){return v.deptId===id;}).length;
@@ -342,27 +347,35 @@ function buildReport(){
 }
 async function refreshUsers(){
   if(!canManage())return;var session=SESSION;status('جاري تحميل الحسابات...');
-  try{var result=await call('hrUsers',{action:'list'});if(session!==SESSION||!canManage())return;USERS={};PERM_DATA={};result.users.forEach(function(u){USERS[u.username]=u;PERM_DATA[u.username]=u.perms||{};});renderUsersListDisplay();buildPermsPage();status('تم تحميل الحسابات');}
+  try{var result=await call('hrUsers',{action:'list'});if(session!==SESSION||!canManage())return;USERS={};PERM_DATA={};result.users.forEach(function(u){USERS[u.username]=u;PERM_DATA[u.username]=u.perms||{};});renderUsersListDisplay();buildPermsPage();if(!el('new-account-access').children.length)accountRoleChanged('new');status('تم تحميل الحسابات');}
   catch(e){if(session===SESSION)status(errorMessage(e),true);}
 }
 function renderUsersListDisplay(){
   var select=el('edit-user-sel'),old=select.value;select.innerHTML='<option value="">— اختر المستخدم —</option>';el('users-list-display').replaceChildren();
-  Object.keys(USERS).sort().forEach(function(name){var u=USERS[name],option=document.createElement('option');option.value=name;option.textContent=name+' ('+(u.role==='viewer'?'مشاهد':u.role==='developer'?'مطور':u.role==='finance'?'مدير مالي':'مدير')+')';select.appendChild(option);var row=document.createElement('div');row.className='perm-toggle-row';var desc=document.createElement('div');desc.innerHTML='<div class="perm-toggle-label">'+esc(name)+'</div><div class="perm-toggle-sub">'+esc(u.label)+' — '+(u.enabled?'مفعّل':'معطّل')+'</div>';row.appendChild(desc);el('users-list-display').appendChild(row);});
+  Object.keys(USERS).sort().forEach(function(name){var u=USERS[name],option=document.createElement('option');option.value=name;option.textContent=name+' ('+accountLabel(u.role)+')';select.appendChild(option);var row=document.createElement('div');row.className='perm-toggle-row';var desc=document.createElement('div');desc.innerHTML='<div class="perm-toggle-label">'+esc(name)+'</div><div class="perm-toggle-sub">'+esc(u.label)+' — '+(u.enabled?'مفعّل':'معطّل')+'</div>';row.appendChild(desc);el('users-list-display').appendChild(row);});
   if(USERS[old])select.value=old;else el('edit-user-fields').style.display='none';
 }
-function onEditUserChange(){var u=USERS[el('edit-user-sel').value];el('edit-user-fields').style.display=u?'block':'none';if(!u)return;el('edit-user-pass').value='';el('edit-user-role').value=u.role==='developer'?'admin':u.role;el('edit-user-sal').value=u.perms.canViewSal?'true':'false';el('edit-user-label').value=u.label||'';el('edit-user-enabled').value=u.enabled?'true':'false';el('edit-user-role').disabled=!developer()||u.role==='developer';el('edit-user-enabled').disabled=u.role==='developer';el('edit-user-sal').disabled=!developer()||u.role==='developer';}
-function addNewUser(){if(!canManage())return;var data={action:'create',username:el('new-user-name').value,password:el('new-user-pass').value,role:el('new-user-role').value,salary:el('new-user-sal').value==='true',label:el('new-user-label').value};return saveAction('new-user',function(){return call('hrUsers',data);},function(){['new-user-name','new-user-pass','new-user-label'].forEach(function(id){el(id).value='';});refreshUsers();alert('تم إنشاء الحساب وحفظه دائماً');});}
-function saveEditUser(){var u=USERS[el('edit-user-sel').value];if(!canManage()||!u)return;var data={action:'update',uid:u.uid,password:el('edit-user-pass').value,role:el('edit-user-role').value,salary:el('edit-user-sal').value==='true',label:el('edit-user-label').value,enabled:el('edit-user-enabled').value==='true'};return saveAction('edit-user',function(){return call('hrUsers',data);},function(){el('edit-user-pass').value='';el('edit-user-fields').style.display='none';refreshUsers();alert('تم حفظ تعديلات الحساب');});}
+function onEditUserChange(){var u=USERS[el('edit-user-sel').value];el('edit-user-fields').style.display=u?'block':'none';if(!u)return;el('edit-user-pass').value='';el('edit-user-role').value=u.role==='developer'?'admin':u.role;el('edit-user-sal').value=u.perms.canViewSal?'true':'false';el('edit-user-label').value=u.label||'';el('edit-user-enabled').value=u.enabled?'true':'false';el('edit-user-role').disabled=!developer()||u.role==='developer';el('edit-user-enabled').disabled=u.role==='developer';el('edit-user-sal').disabled=!developer()||u.role==='developer';renderAccountAccess(el('edit-account-access'),u.perms||{},u.role,developer()&&u.role!=='developer');}
+function addNewUser(){if(!canManage())return;var data={action:'create',username:el('new-user-name').value,password:el('new-user-pass').value,role:el('new-user-role').value,perms:accessValues(el('new-account-access')),label:el('new-user-label').value};return saveAction('new-user',function(){return call('hrUsers',data);},function(){['new-user-name','new-user-pass','new-user-label'].forEach(function(id){el(id).value='';});renderAccountAccess(el('new-account-access'),{},el('new-user-role').value,true);refreshUsers();alert('تم إنشاء الحساب وحفظه دائماً');});}
+function saveEditUser(){var u=USERS[el('edit-user-sel').value];if(!canManage()||!u)return;var data={action:'update',uid:u.uid,password:el('edit-user-pass').value,role:el('edit-user-role').value,salary:el('edit-user-sal').value==='true',label:el('edit-user-label').value,enabled:el('edit-user-enabled').value==='true'};if(developer()&&u.role!=='developer')data.perms=accessValues(el('edit-account-access'));return saveAction('edit-user',function(){return call('hrUsers',data);},function(){el('edit-user-pass').value='';el('edit-user-fields').style.display='none';refreshUsers();alert('تم حفظ تعديلات الحساب');});}
+var ACCOUNT_GROUPS=[['العقوبات',['canViewVio','canEditVio']],['التأخير',['canViewDelay','canEditDelay']],['التقارير',['canViewReports']],['الاستشاريون',['canViewDoctors','canEditDoctors']],['التعيينات وإنهاء الخدمات',['canEditStaff','canApproveHires','canTerminateStaff','canApproveTerminations','canViewNotifications']],['المالية',['canViewSal','canViewFinance','canManageFinance']]];
+function accountLabel(role){return HR_CORE.P.ROLE_LABELS[role]||role;}
+function accessValues(box){var p={allDepts:!!box.querySelector('[data-all]:checked'),allowedDepts:{}};box.querySelectorAll('[data-flag]').forEach(function(i){p[i.dataset.flag]=i.checked;});box.querySelectorAll('[data-dept]:checked').forEach(function(i){p.allowedDepts[i.dataset.dept]=true;});return p;}
+function permissionDependencies(box,input){var deps={canEditVio:['canViewVio'],canEditDelay:['canViewDelay'],canEditDoctors:['canViewDoctors'],canViewFinance:['canViewSal'],canManageFinance:['canViewFinance','canViewSal']};if(input.checked)(deps[input.dataset.flag]||[]).forEach(function(f){box.querySelector('[data-flag="'+f+'"]').checked=true;});else Object.keys(deps).forEach(function(f){if(deps[f].includes(input.dataset.flag))box.querySelector('[data-flag="'+f+'"]').checked=false;});}
+function renderAccountAccess(box,p,role,editable){
+ box.replaceChildren();var title=document.createElement('h4');title.textContent='صلاحيات القوائم والإجراءات';box.appendChild(title);var note=document.createElement('p');note.className='fx-note';note.textContent='اختر الإجراءات المسموحة. نوع الحساب لا يمنح صلاحيات إضافية. «كامل الإجراءات» يفعّل المجموعة المحددة.';box.appendChild(note);
+ ACCOUNT_GROUPS.concat([['إدارة الحسابات',['canManageUsers']]]).forEach(function(group){var section=document.createElement('div');section.className='perm-section';var head=document.createElement('div');head.className='fx-actions';var label=document.createElement('strong');label.textContent=group[0];head.appendChild(label);var shortcut=document.createElement('button');shortcut.type='button';shortcut.className='btg';shortcut.textContent='كامل الإجراءات';shortcut.disabled=!editable||(!developer()&&group[1].some(function(f){return !allowed(f);}));shortcut.onclick=function(){var turnOn=group[1].some(function(f){return !box.querySelector('[data-flag="'+f+'"]').checked;});group[1].forEach(function(f){var i=box.querySelector('[data-flag="'+f+'"]');i.checked=turnOn;permissionDependencies(box,i);});};head.appendChild(shortcut);section.appendChild(head);
+ group[1].forEach(function(f){var def=PERM_FLAGS.find(function(d){return d[0]===f;}),row=document.createElement('label');row.className='perm-toggle-row';row.textContent=def[1];var sw=document.createElement('span');sw.className='toggle-switch';var input=document.createElement('input');input.type='checkbox';input.dataset.flag=f;input.checked=p[f]===true;input.disabled=!editable||(!developer()&&!allowed(f));input.onchange=function(){permissionDependencies(box,input);};var slider=document.createElement('span');slider.className='toggle-slider';sw.append(input,slider);row.appendChild(sw);section.appendChild(row);});box.appendChild(section);});
+ var title=document.createElement('h4');title.textContent=role==='department_head'?'الأقسام المسؤول عنها (يمكن اختيار أكثر من قسم)':'الأقسام المسموحة';box.appendChild(title);var all=document.createElement('label');all.className='perm-toggle-row';all.textContent='جميع الأقسام';var ai=document.createElement('input');ai.type='checkbox';ai.dataset.all='true';ai.checked=role!=='department_head'&&p.allDepts===true;ai.disabled=!editable||role==='department_head'||(!developer()&&!USER_PERMS.allDepts);all.appendChild(ai);box.appendChild(all);if(role==='department_head')all.style.display='none';
+ var grid=document.createElement('div');grid.className='perm-dept-grid';grid.style.display=ai.checked?'none':'grid';ai.onchange=function(){grid.style.display=ai.checked?'none':'grid';};ALL_CFG.filter(function(cfg){return developer()||deptAllowed(cfg.id);}).forEach(function(cfg){var label=document.createElement('label');label.className='perm-dept-item';var input=document.createElement('input');input.type='checkbox';input.dataset.dept=cfg.id;input.checked=(p.allowedDepts||{})[cfg.id]===true;input.disabled=!editable;var text=document.createElement('span');text.className='perm-dept-name';text.textContent=cfg.title;label.append(input,text);grid.appendChild(label);});box.appendChild(grid);
+}
+function accountRoleChanged(prefix){var box=el(prefix+'-account-access'),p=accessValues(box),u=prefix==='edit'&&USERS[el('edit-user-sel').value];renderAccountAccess(box,p,el(prefix+'-user-role').value,canManage()&&(!u||developer()&&u.role!=='developer'));}
 function buildPermsPage(){
   var list=el('perm-list');list.replaceChildren();if(!developer())return;
   Object.keys(USERS).sort().filter(function(name){return USERS[name].role!=='developer';}).forEach(function(name){
     var u=USERS[name],p=u.perms||{},card=document.createElement('div');card.className='perm-card';card.dataset.username=name;
     var head=document.createElement('div');head.className='perm-card-head';head.innerHTML='<div class="perm-user-name">'+esc(name)+'</div><div class="perm-user-role">'+esc(u.label)+'</div>';card.appendChild(head);
-    var section=document.createElement('div');section.className='perm-section';
-    PERM_FLAGS.forEach(function(def){var row=document.createElement('div');row.className='perm-toggle-row';var label=document.createElement('div');label.className='perm-toggle-label';label.textContent=def[1];var sw=document.createElement('label');sw.className='toggle-switch';var input=document.createElement('input');input.type='checkbox';input.dataset.flag=def[0];input.checked=p[def[0]]===true;var slider=document.createElement('span');slider.className='toggle-slider';sw.append(input,slider);row.append(label,sw);section.appendChild(row);});card.appendChild(section);
-    var all=document.createElement('label');all.className='perm-toggle-row';all.textContent='السماح بجميع الأقسام';var allInput=document.createElement('input');allInput.type='checkbox';allInput.dataset.all='true';allInput.checked=p.allDepts===true;all.appendChild(allInput);card.appendChild(all);
-    var grid=document.createElement('div');grid.className='perm-dept-grid';grid.style.display=allInput.checked?'none':'grid';allInput.onchange=function(){grid.style.display=allInput.checked?'none':'grid';};
-    ALL_CFG.forEach(function(cfg){var label=document.createElement('label');label.className='perm-dept-item';var input=document.createElement('input');input.type='checkbox';input.dataset.dept=cfg.id;input.checked=(p.allowedDepts||{})[cfg.id]===true;var text=document.createElement('span');text.className='perm-dept-name';text.textContent=cfg.title;label.append(input,text);grid.appendChild(label);});card.appendChild(grid);
+    var access=document.createElement('div');renderAccountAccess(access,p,u.role,true);card.appendChild(access);
     var button=document.createElement('button');button.className='perm-save-btn';button.textContent='💾 حفظ صلاحيات '+name;button.onclick=function(){saveUserPerms(name,card);};card.appendChild(button);list.appendChild(card);
   });
 }

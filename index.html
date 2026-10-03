@@ -448,7 +448,7 @@ button:disabled{opacity:.55;cursor:wait}
 
   <!-- PERMISSIONS PAGE (dev only) -->
   <div class="page" id="pg-h"><div style="padding:16px"><h3>✅ طلبات التعيين</h3><p class="fx-note">لا يدخل الموظف قائمة العاملين أو الرواتب حتى موافقة شخص يملك صلاحية اعتماد التعيين.</p><h4>طلبات التعيين المعلقة</h4><div id="hires-list"></div><h4>طلبات إنهاء الخدمات المعلقة</h4><div id="terminations-list"></div></div></div>
-  <div class="page" id="pg-f"><div style="padding:16px"><h3>💰 التقرير المالي الشهري</h3><div id="finance-controls"><label class="fl">الشهر</label><input class="fi" type="month" id="finance-month"><label class="fl">القسم</label><select class="fs2" id="finance-dept" onchange="renderFinance()"></select><label class="fl" for="finance-search">البحث عن موظف</label><input class="fi" id="finance-search" type="search" placeholder="اكتب اسم الموظف..."><label class="fl">الموظف</label><select class="fs2" id="finance-employee" onchange="renderFinance()"></select><div class="fx-actions"><button class="btp" onclick="loadFinance()">تحديث التقرير</button><button class="btg" onclick="printFinance()">طباعة التقرير</button><button class="btg" onclick="financeReport('export')">تصدير التقرير</button></div><p class="fx-note">المبالغ بالدينار العراقي. البصمة للعرض فقط؛ جميع الخصومات المالية تُدخل يدويًا.</p></div><div id="finance-body"></div></div></div>
+  <div class="page" id="pg-f"><div style="padding:16px"><h3>💰 التقرير المالي الشهري</h3><div id="finance-controls"><label class="fl">الشهر</label><input class="fi" type="month" id="finance-month"><label class="fl">القسم</label><select class="fs2" id="finance-dept" onchange="renderFinance()"></select><label class="fl" for="finance-search">البحث عن موظف</label><input class="fi" id="finance-search" type="search" placeholder="اكتب اسم الموظف..."><label class="fl">الموظف</label><select class="fs2" id="finance-employee" onchange="renderFinance()"></select><div class="fx-actions"><button class="btp" onclick="loadFinance()">تحديث التقرير</button><button class="btg" onclick="printFinance()">طباعة التقرير</button><button class="btg" onclick="financeReport('export')">تصدير التقرير</button></div><p class="fx-note">المبالغ بالدينار العراقي. مبلغ التأخير المحفوظ يُخصم تلقائيًا من راتب شهر تاريخه، ويظهر منفصلًا عن العقوبات والخصومات الأخرى.</p></div><div id="finance-body"></div></div></div>
   <div class="page" id="pg-p">
     <div style="margin-top:14px" id="perm-content">
       <div class="ph"><span class="pt">⚙️ إدارة الصلاحيات</span></div>
@@ -466,19 +466,14 @@ button:disabled{opacity:.55;cursor:wait}
         <div class="perm-section">
           <div class="perm-section-title">➕ إضافة مستخدم جديد</div>
           <div class="fg"><label class="fl">اسم المستخدم (بالإنجليزية)</label><input class="fi" type="text" id="new-user-name" placeholder="مثال: dora6" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
-          <div class="fg"><label class="fl">كلمة المرور</label><input class="fi" type="password" id="new-user-pass" placeholder="كلمة مرور جديدة — 12 حرفاً على الأقل" autocomplete="new-password" minlength="12" maxlength="128"></div>
+          <div class="fg"><label class="fl">كلمة المرور</label><input class="fi" type="password" id="new-user-pass" placeholder="كلمة مرور جديدة — 6 أحرف على الأقل" autocomplete="new-password" minlength="6" maxlength="4096"></div>
           <div class="fg"><label class="fl">نوع الحساب</label>
-            <select class="fs2" id="new-user-role">
+            <select class="fs2" id="new-user-role" onchange="accountRoleChanged('new')">
               <option value="viewer">👁️ مشاهدة فقط</option>
-              <option value="admin">🔑 مدير</option><option value="finance">💰 المدير المالي</option>
+              <option value="admin">🔑 إداري</option><option value="department_head">🏥 مسؤول قسم</option><option value="chairman">رئيس مجلس الإدارة</option><option value="deputy_chairman">معاون رئيس مجلس الإدارة</option><option value="finance">💰 المدير المالي</option>
             </select>
           </div>
-          <div class="fg"><label class="fl">عرض الرواتب</label>
-            <select class="fs2" id="new-user-sal">
-              <option value="false">❌ لا</option>
-              <option value="true">✅ نعم</option>
-            </select>
-          </div>
+<input type="hidden" id="new-user-sal" value="false"><div id="new-account-access"></div>
           <div class="fg"><label class="fl">التسمية (تظهر بجانب الاسم)</label><input class="fi" type="text" id="new-user-label" placeholder="مثال: 👁️ مشاهدة فقط"></div>
           <button class="perm-save-btn" style="background:var(--ac)" onclick="addNewUser()">➕ إضافة المستخدم</button>
         </div>
@@ -491,19 +486,14 @@ button:disabled{opacity:.55;cursor:wait}
             </select>
           </div>
           <div id="edit-user-fields" style="display:none">
-            <p class="fx-note">يمكن إنشاء الحسابات وتعطيلها وتعديل صلاحياتها من النظام. تغيير كلمة مرور حساب آخر غير متاح من هذه الواجهة.</p><div class="fg"><label class="fl">كلمة المرور الجديدة</label><input class="fi" type="password" id="edit-user-pass" disabled placeholder="غير متاح من واجهة النظام" autocomplete="new-password" minlength="12" maxlength="128"></div>
+            <p class="fx-note">يمكن إنشاء الحسابات وتعطيلها وتعديل صلاحياتها من النظام. تغيير كلمة مرور حساب آخر غير متاح من هذه الواجهة.</p><div class="fg"><label class="fl">كلمة المرور الجديدة</label><input class="fi" type="password" id="edit-user-pass" disabled placeholder="غير متاح من واجهة النظام" autocomplete="new-password" minlength="6" maxlength="4096"></div>
             <div class="fg"><label class="fl">نوع الحساب</label>
-              <select class="fs2" id="edit-user-role">
+              <select class="fs2" id="edit-user-role" onchange="accountRoleChanged('edit')">
                 <option value="viewer">👁️ مشاهدة فقط</option>
-                <option value="admin">🔑 مدير</option><option value="finance">💰 المدير المالي</option>
+                <option value="admin">🔑 إداري</option><option value="department_head">🏥 مسؤول قسم</option><option value="chairman">رئيس مجلس الإدارة</option><option value="deputy_chairman">معاون رئيس مجلس الإدارة</option><option value="finance">💰 المدير المالي</option>
               </select>
             </div>
-            <div class="fg"><label class="fl">عرض الرواتب</label>
-              <select class="fs2" id="edit-user-sal">
-                <option value="false">❌ لا</option>
-                <option value="true">✅ نعم</option>
-              </select>
-            </div>
+<input type="hidden" id="edit-user-sal" value="false"><div id="edit-account-access"></div>
             <div class="fg"><label class="fl">التسمية</label><input class="fi" type="text" id="edit-user-label" placeholder="التسمية الظاهرة"></div>
             <div class="fg"><label class="fl">حالة الحساب</label><select class="fs2" id="edit-user-enabled"><option value="true">مفعّل</option><option value="false">معطّل</option></select></div>
             <button class="perm-save-btn" onclick="saveEditUser()">💾 حفظ التعديلات</button>
@@ -610,15 +600,15 @@ button:disabled{opacity:.55;cursor:wait}
 <!-- ADD DELAY EMPLOYEE MODAL -->
 <div class="ov" id="delay-modal">
   <div class="mo">
-    <div class="moh"><h3>⏰ إضافة موظف متأخر</h3><button class="moc" id="close-delay">✕</button></div>
+    <div class="moh"><h3 id="delay-title">إضافة مبلغ تأخير</h3><button class="moc" id="close-delay">✕</button></div>
     <div class="mob">
       <input type="hidden" id="delay-mk">
-      <input type="hidden" id="delay-dk">
+      <input type="hidden" id="delay-dk"><input type="hidden" id="d-key">
       <div class="fg"><label class="fl">اسم الموظف</label><select class="fs2" id="d-name"></select></div>
-      <div class="fg"><label class="fl">مدة التأخير</label><input class="fi" type="number" min="1" max="1440" step="1" id="d-mins" placeholder="عدد الدقائق"></div>
+      <div class="fg"><label class="fl">مبلغ التأخير (دينار عراقي)</label><input class="fi" type="text" inputmode="numeric" id="d-amount" placeholder="مثال: 15000" maxlength="30"></div>
       <div class="fg"><label class="fl">التاريخ</label><input class="fi" type="date" id="d-date"></div>
       <div class="fg"><label class="fl">ملاحظات (اختياري)</label><input class="fi" type="text" id="d-note" placeholder="أي ملاحظات إضافية"></div>
-      <div class="btr"><button class="btdg" id="save-delay">💾 حفظ</button><button class="btg" id="cancel-delay">إلغاء</button></div>
+      <p class="fx-note">يُخصم المبلغ من راتب الموظف في شهر التاريخ المحدد. لا تحتاج لإضافته مرة أخرى في المالية.</p><div class="btr"><button class="btdg" id="save-delay">💾 حفظ</button><button class="btg" id="cancel-delay">إلغاء</button></div>
     </div>
   </div>
 </div>

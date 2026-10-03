@@ -183,6 +183,14 @@ const TITLE_IDS = Object.fromEntries(departments.map(d => [d.title, d.id]));
 TITLE_IDS['قسم التمريض'] = 'dept_nursing';
 const DOCTORS = ['مسالك','مفاصل وكسور','نسائية','أطفال','أنف أذن حنجرة','ايكو وقلبية','باطنية','جملة عصبية','جراحة عامة'];
 const DAYS = ['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
+const ROLES = ['viewer','admin','finance','department_head','chairman','deputy_chairman'];
+const ROLE_LABELS = {viewer:'مشاهدة فقط',admin:'إداري',finance:'مدير مالي',department_head:'مسؤول قسم',chairman:'رئيس مجلس الإدارة',deputy_chairman:'معاون رئيس مجلس الإدارة',developer:'المطور'};
+function accountRole(value) { if (!ROLES.includes(value)) throw Object.assign(new Error('نوع الحساب غير صحيح'),{userMessage:'نوع الحساب غير صحيح'}); return value; }
+function accountPerms(role, input) {
+  const p=normalizePerms(input);
+  if (role==='department_head' && (p.allDepts || !Object.keys(p.allowedDepts).length)) throw Object.assign(new Error('اختر قسمًا واحدًا أو أكثر لمسؤول القسم؛ لا تستخدم جميع الأقسام.'),{userMessage:'اختر قسمًا واحدًا أو أكثر لمسؤول القسم؛ لا تستخدم جميع الأقسام.'});
+  return p;
+}
 const BOARD_IDS = ['top_chairman','top_deputy'];
 function isBoard(id) { return BOARD_IDS.includes(id); }
 const FLAGS = ['canViewVio','canViewDelay','canViewReports','canEditStaff','canViewSal','canManageUsers','canViewDoctors','canEditVio','canEditDelay','canEditDoctors','canApproveHires','canTerminateStaff','canApproveTerminations','canViewNotifications','canViewFinance','canManageFinance'];
@@ -275,7 +283,7 @@ function legacyPerms(saved, role, name) {
   }
   return normalizePerms(p);
 }
-module.exports = {departments,DEPT_IDS,TITLE_IDS,DOCTORS,DAYS,BOARD_IDS,isBoard,FLAGS,username,email,defaults,normalizePerms,canDept,canManage,canManageTarget,migrateLegacy,legacyPerms};
+module.exports = {departments,DEPT_IDS,TITLE_IDS,DOCTORS,DAYS,ROLES,ROLE_LABELS,accountRole,accountPerms,BOARD_IDS,isBoard,FLAGS,username,email,defaults,normalizePerms,canDept,canManage,canManageTarget,migrateLegacy,legacyPerms};
 
 });
 define("./finance",function(module,exports,require){
@@ -313,10 +321,10 @@ function report(hr,perms,m) {
     if(P.isBoard(dept))continue;
     const vios=Object.entries(hr.violations?.[dept]||{}).filter(([,v])=>v.status!=='cancelled'&&(v.payrollMonth||String(v.date||'').slice(0,7))===m);
     const delays=[];
-    for(const [mk,depts] of Object.entries(hr.delays||{}))for(const [k,r]of Object.entries(depts[dept]?.employees||{}))if(String(r.date||'').slice(0,7)===m)delays.push({...r,recordKey:k,monthKey:mk});
+    for(const [mk,depts] of Object.entries(hr.delays||{}))for(const [k,r]of Object.entries(depts[dept]?.employees||{}))if(r.status!=='cancelled'&&(r.payrollMonth||String(r.date||'').slice(0,7))===m)delays.push({...r,recordKey:k,monthKey:mk});
     for(const [key,v]of vios){const employeeKey=resolveEmployee(hr,dept,v);if(!employeeKey)unlinked.push({kind:'violation',dept,key,name:v.empName||'',type:v.type,reason:v.reason,date:v.date,deduct:v.deduct||''});
       if(v.type!=='praise'&&v.deductionConfirmed!==true&&(v.type==='deduct'||v.deductionAmount>0))reviewPenalties.push({dept,key,employeeKey,name:v.empName||'',type:v.type,date:v.date,reason:v.reason,deduct:v.deduct||''});}
-    for(const r of delays)if(!resolveEmployee(hr,dept,r))unlinked.push({kind:'delay',dept,key:r.recordKey,monthKey:r.monthKey,name:r.name||'',date:r.date,mins:r.mins});
+    for(const r of delays)if(!resolveEmployee(hr,dept,r))unlinked.push({kind:'delay',dept,key:r.recordKey,monthKey:r.monthKey,name:r.name||'',date:r.date,mins:r.mins,deductionAmount:r.deductionAmount,deductionConfirmed:r.deductionConfirmed});
     for(const [key,e]of Object.entries(hr.staff?.[dept]||{})){
       if(e.hireDate&&e.hireDate>end)continue;if(e.terminationDate&&e.terminationDate<start)continue;
       const penalties=vios.filter(([,v])=>resolveEmployee(hr,dept,v)===key).map(([vk,v])=>({...v,recordKey:vk}));
@@ -326,13 +334,14 @@ function report(hr,perms,m) {
       const base=override?money(override.amount):salary;
       const partial=(!override)&&((e.hireDate&&e.hireDate>start&&e.hireDate<=end)||(e.terminationDate&&e.terminationDate>=start&&e.terminationDate<end));
       const penaltyAmount=penalties.reduce((n,v)=>n+(v.deductionConfirmed===true?money(v.deductionAmount)||0:0),0);
-      const manualAmount=adjustments.reduce((n,v)=>n+(money(v.amount)||0),0),deductions=penaltyAmount+manualAmount;
+      const fingerprintAmount=fingerprint.reduce((n,v)=>n+(v.deductionConfirmed===true?money(v.deductionAmount)||0:0),0);
+      const manualAmount=adjustments.reduce((n,v)=>n+(money(v.amount)||0),0),deductions=penaltyAmount+fingerprintAmount+manualAmount;
       const pendingPenalty=penalties.some(v=>v.type!=='praise'&&v.deductionConfirmed!==true&&(v.type==='deduct'||v.deductionAmount>0));
       const issues=[];if(base===null)issues.push('الراتب غير محدد رقمياً');if(partial)issues.push('حدد راتب هذا الشهر بسبب بدء أو انتهاء الخدمة خلال الشهر');if(pendingPenalty)issues.push('خصم قديم يحتاج اعتماد المبلغ');if(base!==null&&deductions>base)issues.push('الخصومات تتجاوز راتب الشهر');
-      rows.push({dept,employeeKey:key,name:e.name,role:e.role||'',status:e.status||'active',hireDate:e.hireDate||'',terminationDate:e.terminationDate||'',salary,baseAmount:base,penaltyAmount,manualAmount,deductions,netAmount:issues.length?null:base-deductions,issues,penalties,adjustments,fingerprint,delayMinutes:fingerprint.reduce((n,r)=>n+(Number.isInteger(r.minutes)?r.minutes:0),0),unknownDelayDurations:fingerprint.filter(r=>!Number.isInteger(r.minutes)).length,monthlySalarySet:!!override});
+      rows.push({dept,employeeKey:key,name:e.name,role:e.role||'',status:e.status||'active',hireDate:e.hireDate||'',terminationDate:e.terminationDate||'',salary,baseAmount:base,penaltyAmount,fingerprintAmount,manualAmount,deductions,netAmount:issues.length?null:base-deductions,issues,penalties,adjustments,fingerprint,delayMinutes:fingerprint.reduce((n,r)=>n+(Number.isInteger(r.minutes)?r.minutes:0),0),unknownDelayDurations:fingerprint.filter(r=>!Number.isInteger(r.minutes)).length,monthlySalarySet:!!override});
     }
   }
-  const totals=rows.reduce((s,r)=>{s.baseAmount+=r.baseAmount||0;s.penaltyAmount+=r.penaltyAmount;s.manualAmount+=r.manualAmount;s.deductions+=r.deductions;if(r.netAmount!==null)s.netAmount+=r.netAmount;else s.needsReview++;return s;},{baseAmount:0,penaltyAmount:0,manualAmount:0,deductions:0,netAmount:0,needsReview:0});
+  const totals=rows.reduce((s,r)=>{s.baseAmount+=r.baseAmount||0;s.penaltyAmount+=r.penaltyAmount;s.fingerprintAmount+=r.fingerprintAmount;s.manualAmount+=r.manualAmount;s.deductions+=r.deductions;if(r.netAmount!==null)s.netAmount+=r.netAmount;else s.needsReview++;return s;},{baseAmount:0,penaltyAmount:0,fingerprintAmount:0,manualAmount:0,deductions:0,netAmount:0,needsReview:0});
   return {month:m,rows,totals,unlinked,reviewPenalties,generatedAt:Date.now()};
 }
 function upgrade(hr){
@@ -467,7 +476,7 @@ function apply(hr,a,d,now,id){
     flag(a,'canViewDelay');flag(a,'canEditDelay');
     if(op==='monthAdd'){put(hr,['months',id],{name:str(d.name,'الشهر',100,true),ts:now});result.key=id;}
     else{if(!a.perms.allDepts)fail('permission-denied','حذف شهر كامل يتطلب صلاحية جميع الأقسام');const m=key(d.month);put(hr,['months',m],null);put(hr,['delays',m],null);}
-  }else if(['delayDeptAdd','delayDeptDelete','delayAdd','delayDelete','delayLink'].includes(op)){
+  }else if(['delayDeptAdd','delayDeptDelete','delayAdd','delayDelete','delayLink','delayAmountSet'].includes(op)){
     if(op==='delayLink')flag(a,'canManageFinance');else{flag(a,'canViewDelay');flag(a,'canEditDelay');}const config=['delayDeptDelete','delayDelete'].includes(op)?targetDept():staffDept(),m=key(d.month);
     if(!hr.months?.[m])fail('not-found','الشهر غير موجود');
     const section=hr.delays?.[m]?.[d.dept];
@@ -475,9 +484,10 @@ function apply(hr,a,d,now,id){
     else if(op==='delayDeptDelete')put(hr,['delays',m,d.dept],null);
     else{
       if(!section)fail('not-found','القسم غير موجود في الشهر');
-      if(op==='delayDelete')put(section,['employees',key(d.key)],null);
-      else if(op==='delayLink'){const r=section.employees?.[key(d.key)];if(!r)fail('not-found','السجل غير موجود');const k=key(d.employeeKey),e=employee(hr,d.dept,k);employed(e,validDate(r.date));r.employeeKey=k;r.name=e.name;}
-      else{const k=d.employeeKey||F.resolveEmployee(hr,d.dept,{name:d.name}),e=employee(hr,d.dept,k),date=validDate(d.date);employed(e,date);const minutes=Number(d.minutes??F.digits(d.mins).replace(/\s*(دقيقة|دقائق)\s*$/,''));if(!Number.isInteger(minutes)||minutes<1||minutes>1440)fail('invalid-argument','أدخل مدة التأخير بالدقائق');put(section,['employees',id],{employeeKey:k,name:e.name,minutes,mins:minutes+' دقيقة',date,note:str(d.note,'الملاحظات',500),ts:now});result.key=id;}
+      if(op==='delayDelete'){const r=section.employees?.[key(d.key)];if(!r||r.status==='cancelled')fail('not-found','السجل غير موجود');Object.assign(r,{status:'cancelled',cancelledBy:a.uid,cancelledAt:now});}
+      else if(op==='delayLink'){const r=section.employees?.[key(d.key)];if(!r||r.status==='cancelled')fail('not-found','السجل غير موجود');const k=key(d.employeeKey),e=employee(hr,d.dept,k);employed(e,validDate(r.date));r.employeeKey=k;r.name=e.name;}
+      else if(op==='delayAmountSet'){const r=section.employees?.[key(d.key)];if(!r||r.status==='cancelled')fail('not-found','السجل غير موجود');const k=key(d.employeeKey),e=employee(hr,d.dept,k);employed(e,validDate(r.date));Object.assign(r,{employeeKey:k,name:e.name,deductionAmount:amount(d.amount,true),deductionConfirmed:true,payrollMonth:r.date.slice(0,7),note:str(d.note,'الملاحظات',500),financialUpdatedBy:a.uid,financialUpdatedAt:now});}
+      else{const k=key(d.employeeKey),e=employee(hr,d.dept,k),date=validDate(d.date);employed(e,date);put(section,['employees',id],{employeeKey:k,name:e.name,deductionAmount:amount(d.amount,true),deductionConfirmed:true,payrollMonth:date.slice(0,7),date,note:str(d.note,'الملاحظات',500),ts:now,createdBy:a.uid});result.key=id;}
     }
   }else if(op==='docSave'||op==='docClear'){
     flag(a,'canViewDoctors');flag(a,'canEditDoctors');if(!P.DOCTORS.includes(d.dept))fail('invalid-argument','الاختصاص غير صالح');const data={};for(const day of P.DAYS)data[day]={morning:op==='docClear'?'':str(d.schedule?.[day]?.morning,'الطبيب'),evening:op==='docClear'?'':str(d.schedule?.[day]?.evening,'الطبيب')};put(hr,['doc_schedule',d.dept.replace(/\s+/g,'_')],data);

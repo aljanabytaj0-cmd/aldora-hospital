@@ -9,7 +9,7 @@
 <h2>قبل تجهيز الملف</h2>
 <ol>
 <li>في Firebase فعّل <b>Authentication → Sign-in method → Email/Password</b>.</li>
-<li>من <b>Authentication → Users → Add user</b> أنشئ البريد <code>dev@users.aldora.invalid</code> وكلمة مرور خاصة قوية من 12 حرفًا على الأقل. إذا كان موجودًا استخدم الحساب الحالي. انسخ <b>UID</b> الخاص به.</li>
+<li>من <b>Authentication → Users → Add user</b> أنشئ البريد <code>dev@users.aldora.invalid</code> وكلمة مرور خاصة قوية من 6 أحرف على الأقل وفق سياسة Firebase. إذا كان موجودًا استخدم الحساب الحالي. انسخ <b>UID</b> الخاص به.</li>
 <li>أوقف الإدخال أثناء النقل. احفظ قواعد القاعدة السابقة ثم انشر قواعد الصيانة التالية في <b>Realtime Database → Rules</b>:</li>
 </ol>
 <pre>{"rules":{".read":false,".write":false}}</pre>

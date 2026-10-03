@@ -70,22 +70,23 @@ var SPARK=(function(){
     requireSession();const a=actor();if(!P.canManage(a.profile,a.perms))throw {userMessage:'ليس لديك صلاحية إدارة الحسابات'};
     if(d.action==='list'){const [profiles,perms]=await Promise.all([read('user_profiles'),read('user_perms')]);return {users:Object.entries(profiles||{}).filter(([uid,p])=>P.canManageTarget(a.profile,a.perms,p,P.normalizePerms(perms?.[uid]||{}))).map(([uid,p])=>({uid,...p,perms:P.normalizePerms(perms?.[uid]||{})}))};}
     if(d.action==='create'){
-      const name=P.username(d.username),role=['admin','finance'].includes(d.role)?d.role:'viewer';if(name==='dev')throw {userMessage:'حساب المطور يُنشأ بأداة الإعداد'};
+      const name=P.username(d.username),role=P.accountRole(d.role||'viewer');if(name==='dev')throw {userMessage:'حساب المطور يُنشأ بأداة الإعداد'};
       if(!developer()&&(role!=='viewer'||d.salary===true))throw {userMessage:'إنشاء الحسابات المرتفعة متاح للمطور فقط'};
-      if(typeof d.password!=='string'||d.password.length<12||d.password.length>128)throw {userMessage:'كلمة المرور يجب أن تكون 12–128 حرفًا'};
+      if(typeof d.password!=='string'||d.password.length<6||d.password.length>4096)throw {userMessage:'اختر كلمة مرور من 6 أحرف على الأقل وفق سياسة Firebase'};
+      const selected=P.accountPerms(role,d.perms||{});if(!developer()&&(P.FLAGS.some(f=>selected[f]&&!a.perms[f])||selected.allDepts&&!a.perms.allDepts||P.DEPT_IDS.some(id=>P.canDept(selected,id)&&!P.canDept(a.perms,id))))throw {userMessage:'الصلاحيات المطلوبة تتجاوز صلاحيات حسابك'};
       const app=firebase.initializeApp(FB,'hr-create-'+crypto.randomUUID()),secondary=app.auth();let user=null,saved=false;
-      try{user=(await secondary.createUserWithEmailAndPassword(P.email(name),d.password)).user;const perms=P.defaults(role);perms.canViewSal=role==='finance'||(developer()&&d.salary===true);if(!developer())for(const f of P.FLAGS)perms[f]=perms[f]&&a.perms[f];
-        await DB.ref().update({['user_profiles/'+user.uid]:{username:name,role,label:String(d.label||'').trim().slice(0,150)||(role==='finance'?'💰 المدير المالي':name),enabled:true,sessionAfter:0,createdAt:marker()},['user_perms/'+user.uid]:P.normalizePerms(perms),['username_index/'+name]:user.uid});saved=true;return {uid:user.uid};
+      try{user=(await secondary.createUserWithEmailAndPassword(P.email(name),d.password)).user;const perms=selected;if(!d.perms)perms.canViewSal=developer()&&d.salary===true;
+        await DB.ref().update({['user_profiles/'+user.uid]:{username:name,role,label:String(d.label||'').trim().slice(0,150)||P.ROLE_LABELS[role],enabled:true,sessionAfter:0,createdAt:marker()},['user_perms/'+user.uid]:P.normalizePerms(perms),['username_index/'+name]:user.uid});saved=true;return {uid:user.uid};
       }finally{if(user&&!saved)try{await user.delete();}catch(e){/* orphan has no profile and no data access */}await secondary.signOut();await app.delete();}
     }
     const uid=W.key(d.uid),profile=await read('user_profiles/'+uid),perms=P.normalizePerms(await read('user_perms/'+uid)||{});if(!profile||!P.canManageTarget(a.profile,a.perms,profile,perms))throw {userMessage:'لا يمكنك إدارة هذا الحساب'};
-    if(d.action==='permissions'){if(!developer()||profile.role==='developer')throw {userMessage:'تعديل الصلاحيات متاح للمطور فقط'};await DB.ref('user_perms/'+uid).set(P.normalizePerms(d.perms));return {ok:true};}
+    if(d.action==='permissions'){if(!developer()||profile.role==='developer')throw {userMessage:'تعديل الصلاحيات متاح للمطور فقط'};await DB.ref('user_perms/'+uid).set(P.accountPerms(profile.role,d.perms));return {ok:true};}
     if(d.action!=='update')throw {userMessage:'عملية غير معروفة'};
     if(d.password)throw {userMessage:'تغيير كلمة مرور حساب آخر يتم من Firebase Console أو أداة الإعداد المحلية في النسخة المجانية'};
-    const role=profile.role==='developer'?'developer':(['admin','finance'].includes(d.role)?d.role:'viewer');if(!developer()&&(role!==profile.role||(d.salary===true)!==perms.canViewSal))throw {userMessage:'تغيير الدور والرواتب متاح للمطور فقط'};
+    const role=profile.role==='developer'?'developer':P.accountRole(d.role||profile.role);if(!developer()&&(role!==profile.role||(d.salary===true)!==perms.canViewSal))throw {userMessage:'تغيير الدور والرواتب متاح للمطور فقط'};
     if(profile.role==='developer'&&d.enabled===false)throw {userMessage:'لا يمكن تعطيل المطور من هذه الصفحة'};
     const next={...profile,role,label:String(d.label||profile.label||'').trim().slice(0,150),enabled:d.enabled!==false,updatedAt:marker()};if(!next.enabled||role!==profile.role)next.sessionAfter=marker();
-    let nextPerms=role==='finance'&&profile.role!==role?P.defaults('finance'):{...perms};if(developer()&&role!=='developer')nextPerms.canViewSal=role==='finance'||d.salary===true;
+    let nextPerms=developer()&&role!=='developer'?P.accountPerms(role,d.perms||perms):perms;if(developer()&&role!=='developer'&&!d.perms)nextPerms.canViewSal=d.salary===true;
     const updates={['user_profiles/'+uid]:next};if(developer()&&role!=='developer')updates['user_perms/'+uid]=P.normalizePerms(nextPerms);await DB.ref().update(updates);return {ok:true};
   }
   async function call(name,data){try{if(name==='hrMutate')return await mutate(data);if(name==='hrFinance')return await report(data);if(name==='hrNotifications')return await notifications(data);if(name==='hrUsers')return await users(data);throw {userMessage:'عملية غير معروفة'};}catch(e){if(e.hrDomain)throw {code:'functions/'+e.code,message:e.message};throw e;}}
