@@ -305,8 +305,8 @@ button:disabled{opacity:.55;cursor:wait}
     <div class="l-card-h">🔐 تسجيل الدخول</div>
     <div class="l-card-s">أدخل بيانات حسابك للمتابعة</div>
     <div class="lg">
-      <label class="ll">👤 اسم المستخدم</label>
-      <div class="iw"><input class="li" type="text" id="l-user" placeholder="اسم المستخدم" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+      <label class="ll">👤 رمز المستخدم</label>
+      <div class="iw"><input class="li" type="text" id="l-user" placeholder="رمز المستخدم" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
     </div>
     <div class="lg">
       <label class="ll">🔑 كلمة المرور</label>
@@ -371,7 +371,7 @@ button:disabled{opacity:.55;cursor:wait}
   <div class="page" id="pg-v">
     <div style="margin-top:14px">
       <div class="ph"><span class="pt">العقوبات الإدارية</span><button class="btnew" id="btn-newvio">＋ إضافة عقوبة</button></div>
-      <div class="report-controls"><label class="fl" for="vio-report-month">شهر التقرير</label><input class="fi" type="month" id="vio-report-month" onchange="renderVios()"><div class="fx-actions"><button class="btg" onclick="el('vio-report-month').value='';renderVios()">عرض جميع الأشهر</button><button class="btg" onclick="monthlyViolationReport('print')">طباعة التقرير الشهري</button><button class="btg" onclick="monthlyViolationReport('export')">تصدير التقرير الشهري</button></div></div><div class="vstats">
+      <div class="report-controls"><label class="fl" for="vio-report-month">شهر التقرير</label><input class="fi" type="month" lang="en" id="vio-report-month" onchange="renderVios()"><div class="fx-actions"><button class="btg" onclick="el('vio-report-month').value='';renderVios()">عرض جميع الأشهر</button><button class="btg" onclick="monthlyViolationReport('print')">طباعة التقرير الشهري</button><button class="btg" onclick="monthlyViolationReport('export')">تصدير التقرير الشهري</button></div></div><div class="vstats">
         <div class="vc vw"><div class="vn" id="cw">0</div><div class="vl">⚠️ إنذار</div></div>
         <div class="vc vd"><div class="vn" id="cd">0</div><div class="vl">💸 خصم</div></div>
         <div class="vc vs2"><div class="vn" id="cs">0</div><div class="vl">🚫 إيقاف</div></div>
@@ -403,7 +403,7 @@ button:disabled{opacity:.55;cursor:wait}
     <div style="margin-top:14px">
       <div class="ph"><span class="pt">التقارير</span></div>
       <div class="rcard" id="rep-body"><div class="ee">اضغط تحديث لعرض التقرير</div></div>
-      <button class="btnref" onclick="buildReport()">🔄 تحديث التقرير</button><div class="fx-actions report-controls"><button class="btp" onclick="staffSummaryReport('print')">طباعة ملخص الموظفين والأسماء</button><button class="btg" onclick="staffSummaryReport('export')">تصدير ملخص الموظفين والأسماء</button></div>
+      <div class="report-controls"><label class="fl" for="staff-report-dept">نطاق تقرير الموظفين</label><select class="fs2" id="staff-report-dept" onchange="buildReport()"><option value="">جميع الأقسام المسموحة</option></select><p class="fx-note">اختر جميع الأقسام أو قسمًا محددًا. تُطبّق الخيارات على العرض والطباعة والتصدير.</p></div><button class="btnref" onclick="buildReport()">🔄 تحديث التقرير</button><div class="fx-actions report-controls"><button class="btp" onclick="staffSummaryReport('print')">طباعة ملخص الموظفين والأسماء</button><button class="btg" onclick="staffSummaryReport('export')">تصدير ملخص الموظفين والأسماء</button></div>
     </div>
   </div>
 
@@ -448,7 +448,7 @@ button:disabled{opacity:.55;cursor:wait}
 
   <!-- PERMISSIONS PAGE (dev only) -->
   <div class="page" id="pg-h"><div style="padding:16px"><h3>✅ طلبات التعيين</h3><p class="fx-note">لا يدخل الموظف قائمة العاملين أو الرواتب حتى موافقة شخص يملك صلاحية اعتماد التعيين.</p><h4>طلبات التعيين المعلقة</h4><div id="hires-list"></div><h4>طلبات إنهاء الخدمات المعلقة</h4><div id="terminations-list"></div></div></div>
-  <div class="page" id="pg-f"><div style="padding:16px"><h3>💰 التقرير المالي الشهري</h3><div id="finance-controls"><label class="fl">الشهر</label><input class="fi" type="month" id="finance-month"><label class="fl">القسم</label><select class="fs2" id="finance-dept" onchange="renderFinance()"></select><label class="fl" for="finance-search">البحث عن موظف</label><input class="fi" id="finance-search" type="search" placeholder="اكتب اسم الموظف..."><label class="fl">الموظف</label><select class="fs2" id="finance-employee" onchange="renderFinance()"></select><div class="fx-actions"><button class="btp" onclick="loadFinance()">تحديث التقرير</button><button class="btg" onclick="printFinance()">طباعة التقرير</button><button class="btg" onclick="financeReport('export')">تصدير التقرير</button></div><p class="fx-note">المبالغ بالدينار العراقي. مبلغ التأخير المحفوظ يُخصم تلقائيًا من راتب شهر تاريخه، ويظهر منفصلًا عن العقوبات والخصومات الأخرى.</p></div><div id="finance-body"></div></div></div>
+  <div class="page" id="pg-f"><div style="padding:16px"><h3>💰 التقرير المالي الشهري</h3><div id="finance-controls"><label class="fl">الشهر</label><input class="fi" type="month" lang="en" id="finance-month"><label class="fl">القسم</label><select class="fs2" id="finance-dept" onchange="renderFinance()"></select><label class="fl" for="finance-search">البحث عن موظف</label><input class="fi" id="finance-search" type="search" placeholder="اكتب اسم الموظف..."><label class="fl">الموظف</label><select class="fs2" id="finance-employee" onchange="renderFinance()"></select><div class="fx-actions"><button class="btp" onclick="loadFinance()">تحديث التقرير</button><button class="btg" onclick="printFinance()">طباعة التقرير</button><button class="btg" onclick="financeReport('export')">تصدير التقرير</button></div><p class="fx-note">المبالغ بالدينار العراقي. مبلغ التأخير المحفوظ يُخصم تلقائيًا من راتب شهر تاريخه، ويظهر منفصلًا عن العقوبات والخصومات الأخرى.</p></div><div id="finance-body"></div></div></div>
   <div class="page" id="pg-p">
     <div style="margin-top:14px" id="perm-content">
       <div class="ph"><span class="pt">⚙️ إدارة الصلاحيات</span></div>
@@ -465,7 +465,8 @@ button:disabled{opacity:.55;cursor:wait}
         <!-- نموذج إضافة مستخدم جديد -->
         <div class="perm-section">
           <div class="perm-section-title">➕ إضافة مستخدم جديد</div>
-          <div class="fg"><label class="fl">اسم المستخدم (بالإنجليزية)</label><input class="fi" type="text" id="new-user-name" placeholder="مثال: dora6" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+          <div class="fg"><label class="fl">اسم المستخدم (اسم الموظف أو الإداري)</label><input class="fi" type="text" id="new-user-fullname" placeholder="مثال: أحمد محمد علي" maxlength="150" autocomplete="name" required></div>
+          <div class="fg"><label class="fl">رمز المستخدم (بالإنجليزية، لتسجيل الدخول)</label><input class="fi" type="text" id="new-user-name" placeholder="مثال: dora6" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
           <div class="fg"><label class="fl">كلمة المرور</label><input class="fi" type="password" id="new-user-pass" placeholder="كلمة مرور جديدة — 6 أحرف على الأقل" autocomplete="new-password" minlength="6" maxlength="4096"></div>
           <div class="fg"><label class="fl">نوع الحساب</label>
             <select class="fs2" id="new-user-role" onchange="accountRoleChanged('new')">
@@ -486,7 +487,7 @@ button:disabled{opacity:.55;cursor:wait}
             </select>
           </div>
           <div id="edit-user-fields" style="display:none">
-            <p class="fx-note">يمكن إنشاء الحسابات وتعطيلها وتعديل صلاحياتها من النظام. تغيير كلمة مرور حساب آخر غير متاح من هذه الواجهة.</p><div class="fg"><label class="fl">كلمة المرور الجديدة</label><input class="fi" type="password" id="edit-user-pass" disabled placeholder="غير متاح من واجهة النظام" autocomplete="new-password" minlength="6" maxlength="4096"></div>
+            <div class="fg"><label class="fl">اسم المستخدم (اسم الموظف أو الإداري)</label><input class="fi" type="text" id="edit-user-fullname" maxlength="150" placeholder="الاسم الكامل"></div><div class="fg"><label class="fl">رمز المستخدم (لتسجيل الدخول)</label><input class="fi" type="text" id="edit-user-code" readonly dir="ltr"></div><p class="fx-note">يمكن إنشاء الحسابات وتعطيلها وتعديل صلاحياتها من النظام. تغيير كلمة مرور حساب آخر غير متاح من هذه الواجهة.</p><div class="fg"><label class="fl">كلمة المرور الجديدة</label><input class="fi" type="password" id="edit-user-pass" disabled placeholder="غير متاح من واجهة النظام" autocomplete="new-password" minlength="6" maxlength="4096"></div>
             <div class="fg"><label class="fl">نوع الحساب</label>
               <select class="fs2" id="edit-user-role" onchange="accountRoleChanged('edit')">
                 <option value="viewer">👁️ مشاهدة فقط</option>
@@ -546,9 +547,9 @@ button:disabled{opacity:.55;cursor:wait}
           <option>قسم الصيانة</option><option>قسم الاستعلامات</option><option>قسم الأمنية</option>
           <option>الكافتيريا</option><option>موظفو الخدمات</option>
         </select></div>
-      <div class="fg"><label class="fl">التاريخ</label><input class="fi" type="date" id="vio-date"></div>
+      <div class="fg"><label class="fl">التاريخ</label><input class="fi" type="date" lang="en" id="vio-date"></div>
       <div class="fg"><label class="fl">السبب والتفاصيل</label><textarea class="ft" id="vio-reason" placeholder="اكتب تفاصيل العقوبة..."></textarea></div>
-      <div class="fg" id="gd" style="display:none"><label class="fl">مبلغ الخصم اليدوي بالدينار (0 إذا لا يوجد خصم)</label><input class="fi" type="number" min="0" step="1" id="vio-deduct" placeholder="مثال: 25000"><label class="fl">شهر خصم العقوبة</label><input class="fi" type="month" id="vio-payroll"></div>
+      <div class="fg" id="gd" style="display:none"><label class="fl">مبلغ الخصم اليدوي بالدينار (0 إذا لا يوجد خصم)</label><input class="fi" type="number" lang="en" min="0" step="1" id="vio-deduct" placeholder="مثال: 25000"><label class="fl">شهر خصم العقوبة</label><input class="fi" type="month" lang="en" id="vio-payroll"></div>
       <div class="fg" id="gs" style="display:none"><label class="fl">مدة الإيقاف</label><input class="fi" type="text" id="vio-suspend" placeholder="مثال: 3 أيام"></div>
       <div class="btr"><button class="btdg" id="save-vio">💾 حفظ العقوبة</button><button class="btg" id="cancel-vio">إلغاء</button></div>
     </div>
@@ -556,7 +557,7 @@ button:disabled{opacity:.55;cursor:wait}
 </div>
 
 <div class="ov" id="notifications-modal"><div class="mo"><div class="moh"><h3>🔔 مركز الإشعارات</h3><button class="moc" onclick="el('notifications-modal').classList.remove('show')">✕</button></div><div class="mob"><button class="btp" onclick="markNotifications()">تحديد الكل كمقروء</button><p class="fx-note">آخر 100 إشعار لكل قسم مسموح. لا تتضمن الإشعارات مبالغ الرواتب.</p><div id="notifications-list"></div></div></div></div>
-<div class="ov" id="terminate-modal"><div class="mo"><div class="moh"><h3>طلب إنهاء الخدمات</h3><button class="moc" onclick="el('terminate-modal').classList.remove('show')">✕</button></div><div class="mob"><input type="hidden" id="term-dept"><input type="hidden" id="term-key"><p id="term-name"></p><label class="fl">تاريخ انتهاء الخدمة</label><input class="fi" type="date" id="term-date"><label class="fl">السبب</label><textarea class="ft" id="term-reason" maxlength="500"></textarea><div class="fx-actions"><button class="btdg" onclick="saveTermination()">إرسال طلب إنهاء الخدمات</button></div><p class="fx-note">يبقى الموظف على رأس العمل حتى موافقة المسؤول الذي يمتلك صلاحية اعتماد إنهاء الخدمات. تبقى السجلات محفوظة للتقارير السابقة.</p></div></div></div>
+<div class="ov" id="terminate-modal"><div class="mo"><div class="moh"><h3>طلب إنهاء الخدمات</h3><button class="moc" onclick="el('terminate-modal').classList.remove('show')">✕</button></div><div class="mob"><input type="hidden" id="term-dept"><input type="hidden" id="term-key"><p id="term-name"></p><label class="fl">تاريخ انتهاء الخدمة</label><input class="fi" type="date" lang="en" id="term-date"><label class="fl">السبب</label><textarea class="ft" id="term-reason" maxlength="500"></textarea><div class="fx-actions"><button class="btdg" onclick="saveTermination()">إرسال طلب إنهاء الخدمات</button></div><p class="fx-note">يبقى الموظف على رأس العمل حتى موافقة المسؤول الذي يمتلك صلاحية اعتماد إنهاء الخدمات. تبقى السجلات محفوظة للتقارير السابقة.</p></div></div></div>
 <div class="ov" id="finance-modal"><div class="mo"><div class="moh"><h3 id="finance-title">تفاصيل الموظف</h3><button class="moc" onclick="el('finance-modal').classList.remove('show')">✕</button></div><div class="mob" id="finance-detail"></div></div></div>
 <!-- ADD MONTH MODAL -->
 <div class="ov" id="month-modal">
@@ -606,7 +607,7 @@ button:disabled{opacity:.55;cursor:wait}
       <input type="hidden" id="delay-dk"><input type="hidden" id="d-key">
       <div class="fg"><label class="fl">اسم الموظف</label><select class="fs2" id="d-name"></select></div>
       <div class="fg"><label class="fl">مبلغ التأخير (دينار عراقي)</label><input class="fi" type="text" inputmode="numeric" id="d-amount" placeholder="مثال: 15000" maxlength="30"></div>
-      <div class="fg"><label class="fl">التاريخ</label><input class="fi" type="date" id="d-date"></div>
+      <div class="fg"><label class="fl">التاريخ</label><input class="fi" type="date" lang="en" id="d-date"></div>
       <div class="fg"><label class="fl">ملاحظات (اختياري)</label><input class="fi" type="text" id="d-note" placeholder="أي ملاحظات إضافية"></div>
       <p class="fx-note">يُخصم المبلغ من راتب الموظف في شهر التاريخ المحدد. لا تحتاج لإضافته مرة أخرى في المالية.</p><div class="btr"><button class="btdg" id="save-delay">💾 حفظ</button><button class="btg" id="cancel-delay">إلغاء</button></div>
     </div>
@@ -622,7 +623,7 @@ button:disabled{opacity:.55;cursor:wait}
     <div class="fg"><label class="fl">المسمى الوظيفي</label><input class="fi" type="text" id="e-role" placeholder="المسمى الوظيفي"></div>
     <div class="fg"><label class="fl">⏰ أوقات الدوام</label><input class="fi" type="text" id="e-shift" placeholder="مثال: 8ص - 4م"></div>
     <div class="fg" id="sal-grp"><label class="fl">💰 الراتب الشهري</label><input class="fi" type="text" id="e-sal" placeholder="مثال: 850,000 د.ع"></div>
-    <div class="fg"><label class="fl">شهر سريان تعديل الراتب</label><input class="fi" type="month" id="e-salary-month"></div><div class="btr" style="margin-top:8px"><button class="btp" id="save-edit">💾 حفظ</button><button class="btg" id="cancel-edit">إلغاء</button></div>
+    <div class="fg"><label class="fl">شهر سريان تعديل الراتب</label><input class="fi" type="month" lang="en" id="e-salary-month"></div><div class="btr" style="margin-top:8px"><button class="btp" id="save-edit">💾 حفظ</button><button class="btg" id="cancel-edit">إلغاء</button></div>
   </div>
 </div>
 

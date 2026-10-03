@@ -196,7 +196,7 @@ function isBoard(id) { return BOARD_IDS.includes(id); }
 const FLAGS = ['canViewVio','canViewDelay','canViewReports','canEditStaff','canViewSal','canManageUsers','canViewDoctors','canEditVio','canEditDelay','canEditDoctors','canApproveHires','canTerminateStaff','canApproveTerminations','canViewNotifications','canViewFinance','canManageFinance'];
 function username(value) {
   const name = String(value || '').trim().toLowerCase();
-  if (!/^[a-z][a-z0-9_-]{2,31}$/.test(name)) throw new Error('اسم المستخدم يجب أن يكون 3–32 حرفاً إنجليزياً أو رقماً أو _ أو -، ويبدأ بحرف.');
+  if (!/^[a-z][a-z0-9_-]{2,31}$/.test(name)) throw new Error('رمز المستخدم يجب أن يكون 3–32 حرفاً إنجليزياً أو رقماً أو _ أو -، ويبدأ بحرف.');
   return name;
 }
 function email(name) { return username(name) + '@users.aldora.invalid'; }
