@@ -25,8 +25,9 @@ var SPARK=(function(){
     async function get(parts,path){const value=await read(path);if(value!==null){let at=hr;parts.slice(0,-1).forEach(k=>at=at[k]||={});at[parts.at(-1)]=value;}}
     const op=d.op,isDept=P.DEPT_IDS.includes(d.dept);
     if(isDept){jobs.push(get(['staff',d.dept],ROOT+'/staff/'+d.dept));
-      if(a.perms.canViewSal&&['staffEdit','salarySet'].includes(op)){jobs.push(get(['salaries',d.dept],ROOT+'/salaries/'+d.dept),get(['salary_history',d.dept],ROOT+'/salary_history/'+d.dept),get(['hire_request_salaries',d.dept],ROOT+'/hire_request_salaries/'+d.dept));}
+      if(a.perms.canViewSal&&!P.isBoard(d.dept)&&['staffEdit','salarySet'].includes(op)){jobs.push(get(['salaries',d.dept],ROOT+'/salaries/'+d.dept),get(['salary_history',d.dept],ROOT+'/salary_history/'+d.dept),get(['hire_request_salaries',d.dept],ROOT+'/hire_request_salaries/'+d.dept));}
       if(['hireApprove','hireReject'].includes(op))jobs.push(get(['hire_requests',d.dept],ROOT+'/hire_requests/'+d.dept));
+      if(['staffDelete','staffTerminate','terminationSubmit','terminationApprove','terminationReject'].includes(op))jobs.push(get(['termination_requests',d.dept],ROOT+'/termination_requests/'+d.dept),get(['termination_pending',d.dept],ROOT+'/termination_pending/'+d.dept));
       if(['vioDelete','vioFinanceLink'].includes(op))jobs.push(get(['violations',d.dept],ROOT+'/violations/'+d.dept));
       if(op==='adjustmentCancel')jobs.push(get(['adjustments',d.dept],ROOT+'/adjustments/'+d.dept));
     }
@@ -38,7 +39,7 @@ var SPARK=(function(){
     // Approved proposals provide the initial base until a salary is explicitly set.
     if(['staffEdit','salarySet'].includes(op))for(const [key,e]of Object.entries(hr.staff?.[d.dept]||{}))if(e.requestKey&&hr.salaries?.[d.dept]?.[key]==null&&hr.hire_request_salaries?.[d.dept]?.[key]!=null){(hr.salaries||={})[d.dept]||={};hr.salaries[d.dept][key]=hr.hire_request_salaries[d.dept][key];}
     const before=clone(hr),result=W.apply(hr,a,d,Date.now(),id);
-    const recordMaps=['staff','hire_requests','violations','adjustments','monthly_salary'];
+    const recordMaps=['staff','hire_requests','termination_requests','violations','adjustments','monthly_salary'];
     function stamp(record,old={}){record.updatedBy=a.uid;record.updatedAt=marker();record.mutationId=id;for(const k of ['ts','createdAt','reviewedAt','approvedAt','terminatedAt','cancelledAt','financialUpdatedAt'])if(typeof record[k]==='number'&&record[k]!==old[k])record[k]=marker();}
     for(const root of recordMaps)for(const [dept,items]of Object.entries(hr[root]||{}))for(const [key,record]of Object.entries(items)){
       if(root==='monthly_salary'){for(const [month,value]of Object.entries(record))if(JSON.stringify(value)!==JSON.stringify(before[root]?.[dept]?.[key]?.[month]))stamp(value,before[root]?.[dept]?.[key]?.[month]);}
@@ -50,6 +51,7 @@ var SPARK=(function(){
       for(const [key,e]of Object.entries(r.employees||{}))if(JSON.stringify(e)!==JSON.stringify(before.delays?.[month]?.[dept]?.employees?.[key]))stamp(e,before.delays?.[month]?.[dept]?.employees?.[key]);
     }
     for(const dept of Object.keys(hr.notifications||{}))for(const event of Object.values(hr.notifications[dept])){event.actorUid=a.uid;event.createdAt=marker();}
+    for(const dept of Object.keys(hr.notification_resolutions||{}))for(const r of Object.values(hr.notification_resolutions[dept]))r.resolvedAt=marker();
     const changes=diff(before,hr);const updates={};for(const [path,value]of Object.entries(changes))updates[ROOT+'/'+path]=value;
     updates[receiptPath]={fingerprint,result,op,createdAt:marker()};
     try{await DB.ref().update(updates);}catch(e){const saved=await read(receiptPath);if(saved&&saved.fingerprint===fingerprint)return saved.result;throw e;}
@@ -57,7 +59,7 @@ var SPARK=(function(){
   }
   async function report(data){
     requireSession();if(!allowed('canViewFinance')||!allowed('canViewSal'))throw {userMessage:'ليس لديك صلاحية المالية'};
-    if(!F.month(data.month))throw {userMessage:'حدد الشهر'};const hr={};const a=actor(),ids=P.DEPT_IDS.filter(id=>P.canDept(a.perms,id));
+    if(!F.month(data.month))throw {userMessage:'حدد الشهر'};const hr={};const a=actor(),ids=P.DEPT_IDS.filter(id=>P.canDept(a.perms,id)&&!P.isBoard(id));
     await Promise.all(ids.flatMap(dept=>['staff','salaries','hire_request_salaries','salary_history','monthly_salary','adjustments','violations'].map(async root=>{const value=await read(ROOT+'/'+root+'/'+dept);if(value!==null)(hr[root]||={})[dept]=value;})));
     const months=await read(ROOT+'/months')||{};
     await Promise.all(Object.keys(months).flatMap(m=>ids.map(async dept=>{const value=await read(ROOT+'/delays/'+m+'/'+dept);if(value!==null)((hr.delays||={})[m]||={})[dept]=value;})));

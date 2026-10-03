@@ -13,7 +13,7 @@ var PERM_FLAGS=[
   ['canViewReports','عرض التقارير'],['canEditStaff','تقديم طلب تعيين وتعديل الموظفين'],
   ['canViewSal','عرض وتعديل الرواتب'],['canManageUsers','إدارة حسابات المشاهدة'],
   ['canViewDoctors','عرض جدول الاستشاريين'],['canEditDoctors','تعديل جدول الاستشاريين'],
-  ['canApproveHires','الموافقة على طلبات التعيين'],['canTerminateStaff','إنهاء خدمات الموظفين'],
+  ['canApproveHires','الموافقة على طلبات التعيين'],['canTerminateStaff','تقديم طلب إنهاء خدمات'],['canApproveTerminations','الموافقة أو الرفض على إنهاء الخدمات'],
   ['canViewNotifications','عرض الإشعارات'],['canViewFinance','عرض المالية (يتطلب عرض الرواتب)'],['canManageFinance','إدارة الرواتب والخصومات اليدوية']
 ];
 function el(id){return document.getElementById(id);}
@@ -22,6 +22,8 @@ function developer(){return !!PROFILE&&PROFILE.role==='developer';}
 function allowed(flag){return SESSION_READY&&(developer()||USER_PERMS[flag]===true);}
 function deptAllowed(id){return SESSION_READY&&ALL_IDS.indexOf(id)!==-1&&(developer()||USER_PERMS.allDepts===true||(USER_PERMS.allowedDepts||{})[id]===true);}
 function allowedIds(){return ALL_IDS.filter(deptAllowed);}
+function isBoard(id){return HR_CORE.P.isBoard(id);}
+function employeeDeptIds(){return allowedIds().filter(function(id){return !isBoard(id);});}
 function getUserPerms(){return USER_PERMS;}
 function docCanEdit(){return allowed('canViewDoctors')&&allowed('canEditDoctors');}
 function canManage(){return allowed('canManageUsers');}
@@ -156,7 +158,7 @@ function applyPerms(){
   el('btn-newmonth').style.display=allowed('canEditDelay')?'':'none';
   el('sal-grp').style.display=CAN_SAL?'block':'none';
   document.querySelectorAll('.btna').forEach(function(b){b.style.display=allowed('canEditStaff')?'':'none';});
-  document.querySelectorAll('.sal-inp').forEach(function(i){i.style.display=CAN_SAL&&allowed('canEditStaff')?'':'none';if(!CAN_SAL)i.value='';});
+  document.querySelectorAll('.sal-inp').forEach(function(i){i.style.display=CAN_SAL&&allowed('canEditStaff')&&!isBoard(i.closest('.node').id)?'':'none';if(!CAN_SAL)i.value='';});
   if(!CAN_SAL)el('e-sal').value='';
   ['new-user-role','new-user-sal','edit-user-role','edit-user-sal'].forEach(function(id){el(id).disabled=!developer();});
   el('perm-list').style.display=developer()?'':'none';
@@ -167,7 +169,7 @@ function applyPerms(){
 }
 function fillDeptSelects(){
   ['vio-dept','adddept-sel'].forEach(function(id){
-    var old=el(id).value;el(id).innerHTML='<option value="">— اختر القسم —</option>'+ALL_CFG.filter(function(d){return deptAllowed(d.id);}).map(function(d){return '<option value="'+d.id+'">'+esc(d.title)+'</option>';}).join('');
+    var old=el(id).value;el(id).innerHTML='<option value="">— اختر القسم —</option>'+ALL_CFG.filter(function(d){return deptAllowed(d.id)&&!isBoard(d.id);}).map(function(d){return '<option value="'+d.id+'">'+esc(d.title)+'</option>';}).join('');
     if(deptAllowed(old))el(id).value=old;
   });
 }
@@ -181,7 +183,7 @@ function buildNode(cfg,container,hasNP){
   node.querySelector('.nh').addEventListener('click',function(){node.classList.toggle('open');});
   node.querySelector('.btna').addEventListener('click',function(){if(!allowed('canEditStaff')||!deptAllowed(cfg.id))return;node.classList.add('open');el('af_'+cfg.id).classList.add('show');el('fh_'+cfg.id).value=today();el('fn_'+cfg.id).focus();});
   node.querySelector('.btp').addEventListener('click',function(){addEmp(cfg.id);});
-  node.querySelector('.btg').addEventListener('click',function(){hideForm(cfg.id);});container.appendChild(node);
+  node.querySelector('.btg').addEventListener('click',function(){hideForm(cfg.id);});if(isBoard(cfg.id)){['ft_','fs_'].forEach(function(prefix){node.querySelector('#'+prefix+cfg.id).style.display='none';});node.querySelector('.af .btp').textContent='إرسال طلب إضافة عضو';}container.appendChild(node);
 }
 function syncData(){
   wipeData();var epoch=DATA_EPOCH,ids=allowedIds();
@@ -194,7 +196,7 @@ function syncData(){
       LOCAL[id]=Object.entries(snap.val()||{}).map(function(pair){return {...pair[1],key:pair[0],name:pair[1].name||'',role:pair[1].role||'',shift:pair[1].shift||''};});
       renderNode(id);updateStats();if(el('pg-r').classList.contains('active'))buildReport();
     },DATA_LISTENERS,epoch);
-    if(CAN_SAL)watch(DB.ref('hr_spark/salaries/'+id),function(snap){SALARIES[id]=snap.val()||{};renderNode(id);},DATA_LISTENERS,epoch);
+    if(CAN_SAL&&!isBoard(id))watch(DB.ref('hr_spark/salaries/'+id),function(snap){SALARIES[id]=snap.val()||{};renderNode(id);},DATA_LISTENERS,epoch);
     if(allowed('canViewVio'))watch(DB.ref('hr_spark/violations/'+id),function(snap){
       Object.keys(VIOS).forEach(function(key){if(VIOS[key].deptId===id)delete VIOS[key];});
       Object.entries(snap.val()||{}).forEach(function(pair){if(pair[1].status!=='cancelled')VIOS[id+'/'+pair[0]]={...pair[1],deptId:id,key:pair[0]};});
@@ -230,19 +232,19 @@ function renderNode(id){
   var list=el('el_'+id);list.replaceChildren();
   if(!deptAllowed(id)){if(el('np_'+id))el('np_'+id).replaceChildren();el('ns_'+id).textContent='';el('nc_'+id).textContent='0';return;}
   var emps=(LOCAL[id]||[]).filter(function(e){return STAFF_FILTER==='all'||(STAFF_FILTER==='terminated'?e.status==='terminated':e.status!=='terminated');});el('nc_'+id).textContent=emps.length;
-  el('ns_'+id).textContent=emps.length?emps.length+' موظف':'لا يوجد موظفون';
+  el('ns_'+id).textContent=isBoard(id)?'':(emps.length?emps.length+' موظف':'لا يوجد موظفون');el('nc_'+id).style.display=isBoard(id)?'none':'';
   if(el('np_'+id)){el('np_'+id).innerHTML=emps.map(function(e){return '<span class="nc2">● '+esc(e.name)+(e.role?' — '+esc(e.role):'')+'</span>';}).join('');}
-  if(!emps.length){list.innerHTML='<div class="ee">لا يوجد موظفون في هذا القسم</div>';return;}
+  if(!emps.length){list.innerHTML='<div class="ee">'+(isBoard(id)?'لا توجد أسماء مسجلة':'لا يوجد موظفون في هذا القسم')+'</div>';return;}
   emps.forEach(function(e){
     var div=document.createElement('div');div.className='ei';
-    var salary=CAN_SAL?'<span class="esal">💰 '+esc(Object.hasOwn(SALARIES,id)?((SALARIES[id]||{})[e.key]??(HIRE_SALARIES[id]||{})[e.key]??'غير محدد'):'جاري التحميل...')+'</span>':'';
-    div.innerHTML='<div class="eav">'+esc(e.name.trim().charAt(0)||'؟')+'</div><div class="einfo"><div class="en">'+esc(e.name)+'</div><div class="er">'+esc(e.role||'موظف')+(e.status==='terminated'?' — منتهية الخدمات '+esc(e.terminationDate):'')+'</div><div style="display:flex;gap:4px;flex-wrap:wrap">'+salary+'<span class="eshift">⏰ '+esc(e.shift||'غير محدد')+'</span></div></div><div class="eac">'+(e.status!=='terminated'&&allowed('canEditStaff')?'<button class="bte">تعديل</button>':'')+(e.status!=='terminated'&&allowed('canTerminateStaff')?'<button class="btd">إنهاء الخدمات</button>':'')+'</div>';
-    if(div.querySelector('.bte')){div.querySelector('.bte').onclick=function(){openEdit(id,e.key,e.name,e.role,e.shift,(SALARIES[id]||{})[e.key]||'');};}if(div.querySelector('.btd'))div.querySelector('.btd').onclick=function(){delEmp(id,e.key);};
+    var salary=CAN_SAL&&!isBoard(id)?'<span class="esal">💰 '+esc(Object.hasOwn(SALARIES,id)?((SALARIES[id]||{})[e.key]??(HIRE_SALARIES[id]||{})[e.key]??'غير محدد'):'جاري التحميل...')+'</span>':'';
+    div.innerHTML='<div class="eav">'+esc(e.name.trim().charAt(0)||'؟')+'</div><div class="einfo"><div class="en">'+esc(e.name)+'</div><div class="er">'+esc(e.role||(isBoard(id)?'':'موظف'))+(!isBoard(id)&&e.status==='terminated'?' — منتهية الخدمات '+esc(e.terminationDate):'')+'</div><div style="display:flex;gap:4px;flex-wrap:wrap">'+salary+(isBoard(id)?'':'<span class="eshift">⏰ '+esc(e.shift||'غير محدد')+'</span>')+'</div></div><div class="eac">'+(e.status!=='terminated'&&allowed('canEditStaff')?'<button class="bte">تعديل</button>':'')+(!isBoard(id)&&e.status!=='terminated'&&allowed('canTerminateStaff')?'<button class="btd">طلب إنهاء الخدمات</button>':'')+'</div>';
+    if(div.querySelector('.bte')){div.querySelector('.bte').onclick=function(){openEdit(id,e.key,e.name,e.role,e.shift,(SALARIES[id]||{})[e.key]||'');};}if(div.querySelector('.btd')){var termButton=div.querySelector('.btd');termButton.onclick=function(){delEmp(id,e.key);};if(typeof TERM_PENDING!=='undefined'&&(TERM_PENDING[id]||{})[e.key]){termButton.textContent='طلب إنهاء معلق';termButton.disabled=true;}};
     list.appendChild(div);
   });
 }
 function updateStats(){
-  el('tot-emp').textContent=allowedIds().reduce(function(n,id){return n+(LOCAL[id]||[]).filter(function(e){return e.status!=='terminated';}).length;},0);
+  el('tot-emp').textContent=employeeDeptIds().reduce(function(n,id){return n+(LOCAL[id]||[]).filter(function(e){return e.status!=='terminated';}).length;},0);
   el('tot-dept').textContent=allowedIds().length;el('tot-vio').textContent=allowed('canViewVio')?Object.keys(VIOS).length:'—';
 }
 function doSearch(q){SEARCH_QUERY=String(q||'');ALL_IDS.forEach(function(id){var node=el(id);if(node)node.style.display=matchNode(id)?'':'none';});}
@@ -250,26 +252,26 @@ function hideForm(id){el('af_'+id).classList.remove('show');['fn_','fr_','ft_','
 function addEmp(id){
   if(!allowed('canEditStaff')||!deptAllowed(id))return;
   var name=el('fn_'+id).value.trim();if(!name){alert('أدخل اسم الموظف');return;}
-  var data={op:'hireSubmit',dept:id,hireDate:el('fh_'+id).value,name:name,role:el('fr_'+id).value,shift:el('ft_'+id).value};if(CAN_SAL)data.salary=el('fs_'+id).value;
+  var data={op:'hireSubmit',dept:id,hireDate:el('fh_'+id).value,name:name,role:el('fr_'+id).value,shift:el('ft_'+id).value};if(CAN_SAL&&!isBoard(id))data.salary=el('fs_'+id).value;if(isBoard(id))data.shift='';
   return saveAction('staff:'+id,function(){return call('hrMutate',data);},function(){hideForm(id);alert('تم إرسال طلب التعيين؛ ينتظر موافقة المسؤول.');});
 }
 function delEmp(id,key){if(!allowed('canEditStaff')||!deptAllowed(id)||!confirm('حذف الموظف؟'))return;return saveAction('staff:'+id+'/'+key,function(){return call('hrMutate',{op:'staffDelete',dept:id,key:key});});}
 function openEdit(sec,key,name,role,shift,sal){
   if(!allowed('canEditStaff')||!deptAllowed(sec))return;
-  if(CAN_SAL&&!Object.hasOwn(SALARIES,sec)){alert('انتظر تحميل بيانات الرواتب ثم حاول مجدداً.');return;}
-  ['sec','key','name','role','shift','sal'].forEach(function(k,i){el('e-'+k).value=[sec,key,name,role,shift,CAN_SAL?sal:''][i]||'';});el('e-salary-month').value=today().slice(0,7);el('edit-modal').classList.add('show');el('e-name').focus();
+  if(CAN_SAL&&!isBoard(sec)&&!Object.hasOwn(SALARIES,sec)){alert('انتظر تحميل بيانات الرواتب ثم حاول مجدداً.');return;}
+  ['sec','key','name','role','shift','sal'].forEach(function(k,i){el('e-'+k).value=[sec,key,name,role,shift,CAN_SAL?sal:''][i]||'';});el('e-shift').closest('.fg').style.display=isBoard(sec)?'none':'';el('sal-grp').style.display=CAN_SAL&&!isBoard(sec)?'':'none';el('e-salary-month').closest('.fg').style.display=CAN_SAL&&!isBoard(sec)?'':'none';el('e-salary-month').value=today().slice(0,7);el('edit-modal').classList.add('show');el('e-name').focus();
 }
 function saveEdit(){
   var id=el('e-sec').value;if(!allowed('canEditStaff')||!deptAllowed(id))return;
   var name=el('e-name').value.trim();if(!name){alert('أدخل اسم الموظف');return;}
-  var data={op:'staffEdit',dept:id,key:el('e-key').value,name:name,role:el('e-role').value,shift:el('e-shift').value,salaryMonth:el('e-salary-month').value};if(CAN_SAL&&el('e-sal').value.trim()!=='')data.salary=el('e-sal').value;
+  var data={op:'staffEdit',dept:id,key:el('e-key').value,name:name,role:el('e-role').value,shift:el('e-shift').value,salaryMonth:el('e-salary-month').value};if(CAN_SAL&&!isBoard(id)&&el('e-sal').value.trim()!=='')data.salary=el('e-sal').value;
   return saveAction('edit',function(){return call('hrMutate',data);},function(){el('edit-modal').classList.remove('show');});
 }
 function fvio(type,button){VFILTER=type;document.querySelectorAll('.fc').forEach(function(c){c.classList.toggle('active',c===button);});renderVios();}
 function renderVios(){
   var list=el('vio-list');list.replaceChildren();
   var counters={warning:0,deduct:0,suspend:0,praise:0};
-  var records=allowed('canViewVio')?Object.values(VIOS).filter(function(v){return deptAllowed(v.deptId);}):[];
+  var records=allowed('canViewVio')?Object.values(VIOS).filter(function(v){return deptAllowed(v.deptId)&&!isBoard(v.deptId)&&v.status!=='cancelled'&&(!el('vio-report-month').value||String(v.date||'').slice(0,7)===el('vio-report-month').value);}):[];
   records.forEach(function(v){if(Object.hasOwn(counters,v.type))counters[v.type]++;});
   [['cw','warning'],['cd','deduct'],['cs','suspend'],['cp','praise']].forEach(function(p){el(p[0]).textContent=counters[p[1]];});
   if(VFILTER!=='all')records=records.filter(function(v){return v.type===VFILTER;});
@@ -299,10 +301,10 @@ function renderMonths(){
   var openDepts=new Set(Array.from(list.querySelectorAll('.dept-card.open')).map(function(c){return c.dataset.path;}));
   list.replaceChildren();var keys=allowed('canViewDelay')?Object.keys(MONTHS):[];keys.sort(function(a,b){return (MONTHS[b].ts||0)-(MONTHS[a].ts||0);});el('months-empty').style.display=keys.length?'none':'block';
   keys.forEach(function(mk){
-    var m=MONTHS[mk],depts=Object.keys(m.depts||{}).filter(deptAllowed),total=depts.reduce(function(n,id){return n+Object.keys(m.depts[id].employees||{}).length;},0);
+    var m=MONTHS[mk],depts=Object.keys(m.depts||{}).filter(function(id){return deptAllowed(id)&&!isBoard(id);}),total=depts.reduce(function(n,id){return n+Object.keys(m.depts[id].employees||{}).length;},0);
     var card=document.createElement('div');card.className='month-card'+(openMonths.has(mk)?' open':'');card.dataset.month=mk;
     var head=document.createElement('div');head.className='month-head';head.innerHTML='<div class="month-icon">📅</div><div class="month-info"><div class="month-title">'+esc(m.name)+'</div><div class="month-meta">'+depts.length+' قسم — '+total+' حالة تأخير</div></div><div class="chv">›</div>';head.onclick=function(){card.classList.toggle('open');};
-    var body=document.createElement('div');body.className='month-body';
+    var body=document.createElement('div');body.className='month-body';var exports=document.createElement('div');exports.className='fx-actions';[['طباعة التقرير','print'],['تصدير التقرير','export']].forEach(function(pair){var b=document.createElement('button');b.className='btg';b.textContent=pair[0];b.onclick=function(){monthlyDelayReport(mk,pair[1]);};exports.appendChild(b);});body.appendChild(exports);
     if(allowed('canEditDelay')){
       var actions=document.createElement('div');actions.className='month-actions';var add=document.createElement('button');add.className='btp';add.textContent='＋ إضافة قسم';add.onclick=function(){openAddDeptModal(mk);};actions.appendChild(add);
       if(developer()||USER_PERMS.allDepts){var del=document.createElement('button');del.className='btg';del.textContent='🗑 حذف الشهر';del.onclick=function(){delMonth(mk);};actions.appendChild(del);}body.appendChild(actions);
@@ -334,7 +336,7 @@ function saveDelay(){var data={op:'delayAdd',month:el('delay-mk').value,dept:el(
 function delDelayEmp(mk,id,key){if(!allowed('canEditDelay')||!deptAllowed(id)||!confirm('حذف حالة التأخير؟'))return;return saveAction('delay:'+key,function(){return call('hrMutate',{op:'delayDelete',month:mk,dept:id,key:key});});}
 function buildReport(){
   if(!allowed('canViewReports')){el('rep-body').replaceChildren();return;}
-  var tot=0,rows='';allowedIds().forEach(function(id){var cfg=ALL_CFG.find(function(d){return d.id===id;}),count=(LOCAL[id]||[]).filter(function(e){return e.status!=='terminated';}).length;tot+=count;if(!count)return;var vc=Object.values(VIOS).filter(function(v){return v.deptId===id;}).length;
+  var tot=0,rows='';employeeDeptIds().forEach(function(id){var cfg=ALL_CFG.find(function(d){return d.id===id;}),count=(LOCAL[id]||[]).filter(function(e){return e.status!=='terminated';}).length;tot+=count;if(!count)return;var vc=Object.values(VIOS).filter(function(v){return v.deptId===id;}).length;
     rows+='<div class="rrow"><span class="rn">'+esc(cfg.title)+'</span><div class="rpills"><span class="rpill rpe">'+count+' موظف</span>'+(allowed('canViewVio')&&vc?'<span class="rpill rpv">'+vc+' عقوبة</span>':'')+'</div></div>';
   });el('rep-body').innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;padding-bottom:12px;border-bottom:2px solid var(--bd)"><span style="font-weight:900">إجمالي الموظفين في الأقسام المسموحة</span><span style="font-size:24px;font-weight:900;color:var(--pr)">'+tot+'</span></div>'+(rows||'<div class="ee">لا يوجد موظفون في الأقسام المسموحة</div>');
 }

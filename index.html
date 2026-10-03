@@ -289,6 +289,8 @@ button:disabled{opacity:.55;cursor:wait}
 .nav-inner{overflow-x:auto}.nt{flex-shrink:0}.bb{min-width:58px}.bottom-nav,.bnav{overflow-x:auto}
 .fx-card{background:white;border:1px solid var(--bd);border-radius:12px;padding:14px;margin:10px 0;overflow-wrap:anywhere}.fx-card h4{margin:0 0 8px}.fx-note{font-size:12px;color:var(--t2);line-height:1.8}.fx-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.fx-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.fx-unread{border-right:4px solid var(--pr)}.fx-warning{color:#aa342d}.fx-details{max-height:55vh;overflow:auto}.fx-money{font-weight:900;color:var(--pr)}.fx-input{margin:6px 0}.mo{max-height:88vh;overflow:auto}.hbdgs{flex-wrap:wrap}
 @media print{.header,.hdr,.nav,.bbar,.bnav,.bottom-nav,.ov,.eov,#sync-status,.vbar{display:none!important}.page{display:none!important}#pg-f{display:block!important}#finance-controls,.fx-actions{display:none!important}body{max-width:none!important}.fx-card{break-inside:avoid}}
+
+.report-controls{padding:12px;margin:8px 0;background:#fff;border:1px solid var(--bd);border-radius:14px}.report-controls .fi{max-width:260px}.table-scroll{overflow-x:auto;border:1px solid var(--bd);border-radius:14px;background:#fff;margin:12px 0}.fx-table{width:100%;border-collapse:collapse;font-size:13px;min-width:560px}.fx-table th,.fx-table td{padding:12px;text-align:right;border-bottom:1px solid var(--bd)}.fx-table th{background:#eef3ff;color:var(--pr)}.doc-dept-icon svg{width:40px;height:40px;padding:8px;color:#254db0;background:#edf2ff;border-radius:12px;box-sizing:content-box}.fx-actions{flex-wrap:wrap}.month-body>.fx-actions{padding:12px}
 </style>
 </head>
 <body>
@@ -369,7 +371,7 @@ button:disabled{opacity:.55;cursor:wait}
   <div class="page" id="pg-v">
     <div style="margin-top:14px">
       <div class="ph"><span class="pt">العقوبات الإدارية</span><button class="btnew" id="btn-newvio">＋ إضافة عقوبة</button></div>
-      <div class="vstats">
+      <div class="report-controls"><label class="fl" for="vio-report-month">شهر التقرير</label><input class="fi" type="month" id="vio-report-month" onchange="renderVios()"><div class="fx-actions"><button class="btg" onclick="el('vio-report-month').value='';renderVios()">عرض جميع الأشهر</button><button class="btg" onclick="monthlyViolationReport('print')">طباعة التقرير الشهري</button><button class="btg" onclick="monthlyViolationReport('export')">تصدير التقرير الشهري</button></div></div><div class="vstats">
         <div class="vc vw"><div class="vn" id="cw">0</div><div class="vl">⚠️ إنذار</div></div>
         <div class="vc vd"><div class="vn" id="cd">0</div><div class="vl">💸 خصم</div></div>
         <div class="vc vs2"><div class="vn" id="cs">0</div><div class="vl">🚫 إيقاف</div></div>
@@ -401,7 +403,7 @@ button:disabled{opacity:.55;cursor:wait}
     <div style="margin-top:14px">
       <div class="ph"><span class="pt">التقارير</span></div>
       <div class="rcard" id="rep-body"><div class="ee">اضغط تحديث لعرض التقرير</div></div>
-      <button class="btnref" onclick="buildReport()">🔄 تحديث التقرير</button>
+      <button class="btnref" onclick="buildReport()">🔄 تحديث التقرير</button><div class="fx-actions report-controls"><button class="btp" onclick="staffSummaryReport('print')">طباعة ملخص الموظفين والأسماء</button><button class="btg" onclick="staffSummaryReport('export')">تصدير ملخص الموظفين والأسماء</button></div>
     </div>
   </div>
 
@@ -412,15 +414,15 @@ button:disabled{opacity:.55;cursor:wait}
       <div id="doc-dept-view">
         <div class="ph"><span class="pt">🩺 جدول أطباء الاستشاريين</span></div>
         <div class="doc-dept-grid">
-          <button class="doc-dept-btn" onclick="openDocDept('مسالك')"><span class="doc-dept-icon">🫘</span>مسالك</button>
-          <button class="doc-dept-btn" onclick="openDocDept('مفاصل وكسور')"><span class="doc-dept-icon">🦴</span>مفاصل وكسور</button>
-          <button class="doc-dept-btn" onclick="openDocDept('نسائية')"><span class="doc-dept-icon">👩‍⚕️</span>نسائية</button>
-          <button class="doc-dept-btn" onclick="openDocDept('أطفال')"><span class="doc-dept-icon">👶</span>أطفال</button>
-          <button class="doc-dept-btn" onclick="openDocDept('أنف أذن حنجرة')"><span class="doc-dept-icon">👂</span>أنف أذن حنجرة</button>
-          <button class="doc-dept-btn" onclick="openDocDept('ايكو وقلبية')"><span class="doc-dept-icon">❤️</span>ايكو وقلبية</button>
-          <button class="doc-dept-btn" onclick="openDocDept('باطنية')"><span class="doc-dept-icon">🩺</span>باطنية</button>
-          <button class="doc-dept-btn" onclick="openDocDept('جملة عصبية')"><span class="doc-dept-icon">🧠</span>جملة عصبية</button>
-          <button class="doc-dept-btn" onclick="openDocDept('جراحة عامة')"><span class="doc-dept-icon">🔪</span>جراحة عامة</button>
+          <button class="doc-dept-btn" onclick="openDocDept('مسالك')"><span class="doc-dept-icon"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 4C4 3 3 8 4 13c1 5 6 6 7 2 1-2-2-3-2-5s3-4 1-6ZM14 4c6-1 7 4 6 9-1 5-6 6-7 2-1-2 2-3 2-5s-3-4-1-6Z"/></svg></span>مسالك</button>
+          <button class="doc-dept-btn" onclick="openDocDept('مفاصل وكسور')"><span class="doc-dept-icon"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 9 7 7M7 5a3 3 0 0 0-4 4c-2 3 1 6 4 4l7 7c-2 3 1 6 4 4a3 3 0 0 0 4-4c2-3-1-6-4-4l-7-7c2-3-1-6-4-4Z"/></svg></span>مفاصل وكسور</button>
+          <button class="doc-dept-btn" onclick="openDocDept('نسائية')"><span class="doc-dept-icon"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="5"/><path d="M12 13v8m-3-3h6"/></svg></span>نسائية</button>
+          <button class="doc-dept-btn" onclick="openDocDept('أطفال')"><span class="doc-dept-icon"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4c4-3 6 0 2 2M8 10v1m8-1v1m-7 4c2 2 4 2 6 0"/></svg></span>أطفال</button>
+          <button class="doc-dept-btn" onclick="openDocDept('أنف أذن حنجرة')"><span class="doc-dept-icon"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 8a6 6 0 0 1 12 0c0 7-6 7-6 11-1 4-6 2-6-1m4-9c0-4 5-4 5 0 0 3-4 3-4 6"/></svg></span>أنف أذن حنجرة</button>
+          <button class="doc-dept-btn" onclick="openDocDept('ايكو وقلبية')"><span class="doc-dept-icon"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6c-3-4-7-2-8 1-1-3-5-5-8-1-4 5 3 10 8 14 5-4 12-9 8-14ZM4 12h4l2-3 3 6 2-3h5"/></svg></span>ايكو وقلبية</button>
+          <button class="doc-dept-btn" onclick="openDocDept('باطنية')"><span class="doc-dept-icon"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3v6a5 5 0 0 0 10 0V3M3 3h4m6 0h4M10 14v2a5 5 0 0 0 10 0v-3"/><circle cx="20" cy="11" r="2"/></svg></span>باطنية</button>
+          <button class="doc-dept-btn" onclick="openDocDept('جملة عصبية')"><span class="doc-dept-icon"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5c-4-5-8 0-6 3-5 1-4 7-1 8-1 5 4 7 7 3m0-14c4-5 8 0 6 3 5 1 4 7 1 8 1 5-4 7-7 3V5M7 9l3 2m7-2-3 2m-7 5 3-1m7 1-3-1"/></svg></span>جملة عصبية</button>
+          <button class="doc-dept-btn" onclick="openDocDept('جراحة عامة')"><span class="doc-dept-icon"><svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 4 10 10m-8-8 4-4 9 9-4 4M15 15l-4 7-3-3 7-4Z"/></svg></span>جراحة عامة</button>
         </div>
       </div>
       <div id="doc-schedule-view" style="display:none">
@@ -445,8 +447,8 @@ button:disabled{opacity:.55;cursor:wait}
   </div>
 
   <!-- PERMISSIONS PAGE (dev only) -->
-  <div class="page" id="pg-h"><div style="padding:16px"><h3>✅ طلبات التعيين</h3><p class="fx-note">لا يدخل الموظف قائمة العاملين أو الرواتب حتى موافقة شخص يملك صلاحية اعتماد التعيين.</p><div id="hires-list"></div></div></div>
-  <div class="page" id="pg-f"><div style="padding:16px"><h3>💰 التقرير المالي الشهري</h3><div id="finance-controls"><label class="fl">الشهر</label><input class="fi" type="month" id="finance-month"><label class="fl">القسم</label><select class="fs2" id="finance-dept" onchange="renderFinance()"></select><label class="fl">الموظف</label><select class="fs2" id="finance-employee" onchange="renderFinance()"></select><div class="fx-actions"><button class="btp" onclick="loadFinance()">تحديث التقرير</button><button class="btg" onclick="printFinance()">طباعة التقرير</button></div><p class="fx-note">المبالغ بالدينار العراقي. البصمة للعرض فقط؛ جميع الخصومات المالية تُدخل يدويًا.</p></div><div id="finance-body"></div></div></div>
+  <div class="page" id="pg-h"><div style="padding:16px"><h3>✅ طلبات التعيين</h3><p class="fx-note">لا يدخل الموظف قائمة العاملين أو الرواتب حتى موافقة شخص يملك صلاحية اعتماد التعيين.</p><h4>طلبات التعيين المعلقة</h4><div id="hires-list"></div><h4>طلبات إنهاء الخدمات المعلقة</h4><div id="terminations-list"></div></div></div>
+  <div class="page" id="pg-f"><div style="padding:16px"><h3>💰 التقرير المالي الشهري</h3><div id="finance-controls"><label class="fl">الشهر</label><input class="fi" type="month" id="finance-month"><label class="fl">القسم</label><select class="fs2" id="finance-dept" onchange="renderFinance()"></select><label class="fl" for="finance-search">البحث عن موظف</label><input class="fi" id="finance-search" type="search" placeholder="اكتب اسم الموظف..."><label class="fl">الموظف</label><select class="fs2" id="finance-employee" onchange="renderFinance()"></select><div class="fx-actions"><button class="btp" onclick="loadFinance()">تحديث التقرير</button><button class="btg" onclick="printFinance()">طباعة التقرير</button><button class="btg" onclick="financeReport('export')">تصدير التقرير</button></div><p class="fx-note">المبالغ بالدينار العراقي. البصمة للعرض فقط؛ جميع الخصومات المالية تُدخل يدويًا.</p></div><div id="finance-body"></div></div></div>
   <div class="page" id="pg-p">
     <div style="margin-top:14px" id="perm-content">
       <div class="ph"><span class="pt">⚙️ إدارة الصلاحيات</span></div>
@@ -564,7 +566,7 @@ button:disabled{opacity:.55;cursor:wait}
 </div>
 
 <div class="ov" id="notifications-modal"><div class="mo"><div class="moh"><h3>🔔 مركز الإشعارات</h3><button class="moc" onclick="el('notifications-modal').classList.remove('show')">✕</button></div><div class="mob"><button class="btp" onclick="markNotifications()">تحديد الكل كمقروء</button><p class="fx-note">آخر 100 إشعار لكل قسم مسموح. لا تتضمن الإشعارات مبالغ الرواتب.</p><div id="notifications-list"></div></div></div></div>
-<div class="ov" id="terminate-modal"><div class="mo"><div class="moh"><h3>إنهاء الخدمات</h3><button class="moc" onclick="el('terminate-modal').classList.remove('show')">✕</button></div><div class="mob"><input type="hidden" id="term-dept"><input type="hidden" id="term-key"><p id="term-name"></p><label class="fl">تاريخ انتهاء الخدمة</label><input class="fi" type="date" id="term-date"><label class="fl">السبب</label><textarea class="ft" id="term-reason" maxlength="500"></textarea><div class="fx-actions"><button class="btdg" onclick="saveTermination()">تأكيد إنهاء الخدمات</button></div><p class="fx-note">يبقى سجل الموظف والرواتب والعقوبات محفوظًا للتقارير السابقة.</p></div></div></div>
+<div class="ov" id="terminate-modal"><div class="mo"><div class="moh"><h3>طلب إنهاء الخدمات</h3><button class="moc" onclick="el('terminate-modal').classList.remove('show')">✕</button></div><div class="mob"><input type="hidden" id="term-dept"><input type="hidden" id="term-key"><p id="term-name"></p><label class="fl">تاريخ انتهاء الخدمة</label><input class="fi" type="date" id="term-date"><label class="fl">السبب</label><textarea class="ft" id="term-reason" maxlength="500"></textarea><div class="fx-actions"><button class="btdg" onclick="saveTermination()">إرسال طلب إنهاء الخدمات</button></div><p class="fx-note">يبقى الموظف على رأس العمل حتى موافقة المسؤول الذي يمتلك صلاحية اعتماد إنهاء الخدمات. تبقى السجلات محفوظة للتقارير السابقة.</p></div></div></div>
 <div class="ov" id="finance-modal"><div class="mo"><div class="moh"><h3 id="finance-title">تفاصيل الموظف</h3><button class="moc" onclick="el('finance-modal').classList.remove('show')">✕</button></div><div class="mob" id="finance-detail"></div></div></div>
 <!-- ADD MONTH MODAL -->
 <div class="ov" id="month-modal">
@@ -645,5 +647,6 @@ button:disabled{opacity:.55;cursor:wait}
 <script src="spark.js"></script>
 <script src="app.js"></script>
 <script src="features.js"></script>
+<script src="reports.js"></script>
 </body>
 </html>
