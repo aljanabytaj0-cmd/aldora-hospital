@@ -193,7 +193,7 @@ function accountPerms(role, input) {
 }
 const BOARD_IDS = ['top_chairman','top_deputy'];
 function isBoard(id) { return BOARD_IDS.includes(id); }
-const FLAGS = ['canViewVio','canViewDelay','canViewReports','canEditStaff','canViewSal','canManageUsers','canViewDoctors','canEditVio','canEditDelay','canEditDoctors','canApproveHires','canTerminateStaff','canApproveTerminations','canViewNotifications','canViewFinance','canManageFinance'];
+const FLAGS = ['canViewVio','canViewDelay','canViewReports','canEditStaff','canViewSal','canManageUsers','canViewDoctors','canEditVio','canApproveVio','canEditDelay','canEditDoctors','canApproveHires','canTerminateStaff','canApproveTerminations','canViewNotifications','canViewFinance','canManageFinance'];
 function username(value) {
   const name = String(value || '').trim().toLowerCase();
   if (!/^[a-z][a-z0-9_-]{2,31}$/.test(name)) throw Object.assign(new Error('رمز المستخدم يجب أن يكون 3–32 حرفًا إنجليزيًا أو رقمًا أو _ أو -، ويبدأ بحرف، دون مسافات.'),{userMessage:'رمز المستخدم يجب أن يكون 3–32 حرفًا إنجليزيًا أو رقمًا أو _ أو -، ويبدأ بحرف، دون مسافات.'});
@@ -395,13 +395,14 @@ function salary(hr,id,k,value,m){
 }
 function apply(hr,a,d,now,id){
   const op=d.op,currentDate=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Baghdad',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date(now)),currentMonth=currentDate.slice(0,7);
-  const event=(department,type,name,extra={})=>put(hr,['notifications',department,id],{type,name,actor:a.profile.username,createdAt:now,...extra});
+  const actorName=a.profile.fullName||a.profile.username;
+  const event=(department,type,name,extra={},eventKey=id)=>put(hr,['notifications',department,eventKey],{type,name,actor:a.profile.username,actorName,createdAt:now,...extra});
   const targetDept=()=>dept(a,d.dept);
   const staffDept=()=>{const c=targetDept();if(P.isBoard(d.dept))fail('failed-precondition','هذا منصب إداري خارج الموظفين والمالية وإنهاء الخدمات');return c;};
   const result={ok:true};
   if(op==='staffAdd'||op==='hireSubmit'){
     flag(a,'canEditStaff');targetDept();const hireDate=validDate(d.hireDate||currentDate);
-    const record={name:str(d.name,'الاسم',150,true),role:str(d.role,'المسمى الوظيفي'),shift:str(d.shift,'الدوام'),hireDate,status:'pending',submittedBy:a.uid,submittedName:a.profile.username,createdAt:now};
+    const record={name:str(d.name,'الاسم',150,true),role:str(d.role,'المسمى الوظيفي'),shift:str(d.shift,'الدوام'),hireDate,status:'pending',submittedBy:a.uid,submittedName:actorName,createdAt:now};
     put(hr,['hire_requests',d.dept,id],record);
     if(P.isBoard(d.dept))record.shift='';
     if(!P.isBoard(d.dept)&&Object.hasOwn(d,'salary')&&String(d.salary).trim()!==''){flag(a,'canViewSal');put(hr,['hire_request_salaries',d.dept,id],amount(d.salary));}
@@ -410,7 +411,7 @@ function apply(hr,a,d,now,id){
   if(op==='hireApprove'||op==='hireReject'){
     flag(a,'canApproveHires');targetDept();const k=key(d.key),r=hr.hire_requests?.[d.dept]?.[k];
     if(!r)fail('not-found','طلب التعيين غير موجود');if(r.status!=='pending')fail('failed-precondition','تم اتخاذ قرار على هذا الطلب بالفعل');
-    r.reviewedBy=a.uid;r.reviewedName=a.profile.username;r.reviewedAt=now;
+    r.reviewedBy=a.uid;r.reviewedName=actorName;r.reviewedAt=now;
     if(op==='hireReject'){r.status='rejected';r.reviewReason=str(d.reason,'سبب الرفض',500,true);event(d.dept,'hire_rejected',r.name,{requestKey:k});}
     else{
       if(hr.staff?.[d.dept]?.[k])fail('already-exists','الموظف موجود بالفعل');
@@ -431,7 +432,7 @@ function apply(hr,a,d,now,id){
     flag(a,'canTerminateStaff');staffDept();const k=key(d.key),e=employee(hr,d.dept,k);active(e);const end=validDate(d.date||currentDate);
     if(end>currentDate||(e.hireDate&&end<e.hireDate))fail('invalid-argument','تاريخ إنهاء الخدمات غير صالح');
     if(hr.termination_pending?.[d.dept]?.[k])fail('already-exists','يوجد طلب إنهاء خدمات معلق لهذا الموظف');
-    put(hr,['termination_requests',d.dept,id],{employeeKey:k,name:e.name,date:end,reason:str(d.reason,'سبب إنهاء الخدمات',500,true),status:'pending',submittedBy:a.uid,submittedName:a.profile.username,createdAt:now});
+    put(hr,['termination_requests',d.dept,id],{employeeKey:k,name:e.name,date:end,reason:str(d.reason,'سبب إنهاء الخدمات',500,true),status:'pending',submittedBy:a.uid,submittedName:actorName,createdAt:now});
     put(hr,['termination_pending',d.dept,k],id);
     event(d.dept,'termination_requested',e.name,{employeeKey:k,requestKey:id,date:end});
     return {...result,key:id,status:'pending'};
@@ -440,7 +441,7 @@ function apply(hr,a,d,now,id){
     if(!r)fail('not-found','طلب إنهاء الخدمات غير موجود');
     if(r.status!=='pending'||hr.termination_pending?.[d.dept]?.[r.employeeKey]!==k)fail('failed-precondition','تم اتخاذ قرار على الطلب بالفعل');
     const e=employee(hr,d.dept,r.employeeKey);active(e);
-    Object.assign(r,{reviewedBy:a.uid,reviewedName:a.profile.username,reviewedAt:now});
+    Object.assign(r,{reviewedBy:a.uid,reviewedName:actorName,reviewedAt:now});
     if(op==='terminationReject'){r.status='rejected';r.reviewReason=str(d.reason,'سبب الرفض',500,true);event(d.dept,'termination_rejected',r.name,{employeeKey:r.employeeKey,requestKey:k});}
     else{validDate(r.date);if(r.date>currentDate||(e.hireDate&&r.date<e.hireDate))fail('invalid-argument','تاريخ إنهاء الخدمات غير صالح');r.status='approved';Object.assign(e,{status:'terminated',terminationDate:r.date,terminationReason:r.reason,terminatedBy:a.uid,terminatedAt:now,terminationRequestKey:k});event(d.dept,'staff_terminated',e.name,{employeeKey:r.employeeKey,requestKey:k,date:r.date});}
     put(hr,['termination_pending',d.dept,r.employeeKey],null);
@@ -457,9 +458,36 @@ function apply(hr,a,d,now,id){
     let n=0;if(d.type!=='praise'&&String(d.deductionAmount??d.deduct??'').trim()!=='')n=amount(d.deductionAmount??d.deduct,d.type==='deduct');
     if(d.type==='deduct'&&n<=0)fail('invalid-argument','أدخل مبلغ الخصم بالدينار');
     const payrollMonth=month(d.payrollMonth||date.slice(0,7));payrollEmployment(e,payrollMonth);
-    const rec={employeeKey,empName:e.name,dept:config.title,type:d.type,date,reason:str(d.reason,'سبب العقوبة',2000,true),ts:now,payrollMonth,deductionAmount:n,deductionConfirmed:true,createdBy:a.uid};
-    if(n)rec.deduct=String(n)+' د.ع';if(d.type==='suspend')rec.suspend=str(d.suspend,'مدة الإيقاف',100,true);
-    put(hr,['violations',d.dept,id],rec);result.key=id;
+    const rec={employeeKey,empName:e.name,dept:config.title,type:d.type,date,reason:str(d.reason,'سبب العقوبة',d.type==='suspend'?500:2000,true),ts:now,payrollMonth,deductionAmount:n,deductionConfirmed:true,createdBy:a.uid};
+    if(d.type==='suspend'){active(e);if(hr.termination_pending?.[d.dept]?.[employeeKey])fail('already-exists','يوجد طلب إنهاء خدمات معلق لهذا الموظف');}
+    if(n)rec.deduct=String(n)+' د.ع';
+    Object.assign(rec,{status:'pending',submittedBy:a.uid,submittedName:actorName,createdAt:now});
+    put(hr,['violation_requests',d.dept,id],rec);
+    event(d.dept,'violation_requested',e.name,{requestKey:id,employeeKey,violationType:d.type});
+    return {...result,key:id,status:'pending'};
+  }else if(op==='vioApprove'||op==='vioReject'){
+    flag(a,'canApproveVio');staffDept();const k=key(d.key),r=hr.violation_requests?.[d.dept]?.[k];
+    if(!r)fail('not-found','طلب العقوبة غير موجود');if(r.status!=='pending')fail('failed-precondition','تم اتخاذ قرار على هذا الطلب بالفعل');
+    const e=employee(hr,d.dept,r.employeeKey);
+    if(op==='vioApprove'){
+      employed(e,validDate(r.date));payrollEmployment(e,month(r.payrollMonth));
+      if(r.type==='suspend'){active(e);if(r.date>currentDate)fail('invalid-argument','تاريخ إنهاء الخدمات لا يمكن أن يكون مستقبلياً');if(hr.termination_pending?.[d.dept]?.[r.employeeKey])fail('already-exists','يوجد طلب إنهاء خدمات معلق لهذا الموظف');}
+    }
+    Object.assign(r,{reviewedBy:a.uid,reviewedName:actorName,reviewedAt:now,status:op==='vioApprove'?'approved':'rejected'});
+    if(op==='vioReject')r.reviewReason=str(d.reason,'سبب الرفض',500,true);
+    else{
+      const v={employeeKey:r.employeeKey,empName:e.name,dept:r.dept,type:r.type,date:r.date,reason:r.reason,ts:now,payrollMonth:r.payrollMonth,deductionAmount:r.deductionAmount,deductionConfirmed:true,createdBy:a.uid,requestKey:k,approvedBy:a.uid,approvedAt:now};
+      if(r.deduct)v.deduct=r.deduct;put(hr,['violations',d.dept,k],v);
+      if(r.type==='suspend'){
+        const tk=key(id+'-termination');r.terminationRequestKey=tk;
+        put(hr,['termination_requests',d.dept,tk],{employeeKey:r.employeeKey,name:e.name,date:r.date,reason:r.reason.slice(0,500),status:'pending',submittedBy:a.uid,submittedName:actorName,createdAt:now,sourceViolation:k});
+        put(hr,['termination_pending',d.dept,r.employeeKey],tk);
+        event(d.dept,'termination_requested',e.name,{employeeKey:r.employeeKey,requestKey:tk,date:r.date},tk);
+      }
+    }
+    event(d.dept,op==='vioApprove'?'violation_approved':'violation_rejected',e.name,{requestKey:k,employeeKey:r.employeeKey,violationType:r.type});
+    put(hr,['notification_resolutions',d.dept,k],{kind:'violation',status:r.status,resolvedBy:a.uid,resolvedAt:now});
+    return {...result,key:k,status:r.status};
   }else if(op==='vioDelete'){
     flag(a,'canViewVio');flag(a,'canEditVio');targetDept();const v=hr.violations?.[d.dept]?.[key(d.key)];if(!v)fail('not-found','العقوبة غير موجودة');
     v.status='cancelled';v.cancelledBy=a.uid;v.cancelledAt=now;
@@ -474,7 +502,7 @@ function apply(hr,a,d,now,id){
     else{const k=key(d.employeeKey),e=employee(hr,d.dept,k);payrollEmployment(e,month(d.month));put(hr,['adjustments',d.dept,id],{employeeKey:k,month:month(d.month),amount:amount(d.amount,true),reason:str(d.reason,'سبب الخصم',500,true),category:d.category==='attendance'?'attendance':'other',status:'active',createdBy:a.uid,createdAt:now});result.key=id;}
   }else if(op==='monthAdd'||op==='monthDelete'){
     flag(a,'canViewDelay');flag(a,'canEditDelay');
-    if(op==='monthAdd'){put(hr,['months',id],{name:str(d.name,'الشهر',100,true),ts:now});result.key=id;}
+    if(op==='monthAdd'){put(hr,['months',id],{name:d.period?month(d.period).slice(5)+' / '+d.period.slice(0,4):str(d.name,'الشهر',100,true),...(d.period?{period:month(d.period)}:{}),ts:now});result.key=id;}
     else{if(!a.perms.allDepts)fail('permission-denied','حذف شهر كامل يتطلب صلاحية جميع الأقسام');const m=key(d.month);put(hr,['months',m],null);put(hr,['delays',m],null);}
   }else if(['delayDeptAdd','delayDeptDelete','delayAdd','delayDelete','delayLink','delayAmountSet'].includes(op)){
     if(op==='delayLink')flag(a,'canManageFinance');else{flag(a,'canViewDelay');flag(a,'canEditDelay');}const config=['delayDeptDelete','delayDelete'].includes(op)?targetDept():staffDept(),m=key(d.month);

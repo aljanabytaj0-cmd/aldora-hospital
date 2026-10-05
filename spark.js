@@ -27,7 +27,8 @@ var SPARK=(function(){
     if(isDept){jobs.push(get(['staff',d.dept],ROOT+'/staff/'+d.dept));
       if(a.perms.canViewSal&&!P.isBoard(d.dept)&&['staffEdit','salarySet'].includes(op)){jobs.push(get(['salaries',d.dept],ROOT+'/salaries/'+d.dept),get(['salary_history',d.dept],ROOT+'/salary_history/'+d.dept),get(['hire_request_salaries',d.dept],ROOT+'/hire_request_salaries/'+d.dept));}
       if(['hireApprove','hireReject'].includes(op))jobs.push(get(['hire_requests',d.dept],ROOT+'/hire_requests/'+d.dept));
-      if(['staffDelete','staffTerminate','terminationSubmit','terminationApprove','terminationReject'].includes(op))jobs.push(get(['termination_requests',d.dept],ROOT+'/termination_requests/'+d.dept),get(['termination_pending',d.dept],ROOT+'/termination_pending/'+d.dept));
+      if(['staffDelete','staffTerminate','terminationSubmit','terminationApprove','terminationReject','vioAdd','vioApprove'].includes(op)&&(op!=='vioAdd'||d.type==='suspend'))jobs.push(get(['termination_requests',d.dept],ROOT+'/termination_requests/'+d.dept),get(['termination_pending',d.dept],ROOT+'/termination_pending/'+d.dept));
+      if(['vioApprove','vioReject'].includes(op))jobs.push(get(['violation_requests',d.dept],ROOT+'/violation_requests/'+d.dept));
       if(['vioDelete','vioFinanceLink'].includes(op))jobs.push(get(['violations',d.dept],ROOT+'/violations/'+d.dept));
       if(op==='adjustmentCancel')jobs.push(get(['adjustments',d.dept],ROOT+'/adjustments/'+d.dept));
     }
@@ -39,7 +40,7 @@ var SPARK=(function(){
     // Approved proposals provide the initial base until a salary is explicitly set.
     if(['staffEdit','salarySet'].includes(op))for(const [key,e]of Object.entries(hr.staff?.[d.dept]||{}))if(e.requestKey&&hr.salaries?.[d.dept]?.[key]==null&&hr.hire_request_salaries?.[d.dept]?.[key]!=null){(hr.salaries||={})[d.dept]||={};hr.salaries[d.dept][key]=hr.hire_request_salaries[d.dept][key];}
     const before=clone(hr),result=W.apply(hr,a,d,Date.now(),id);
-    const recordMaps=['staff','hire_requests','termination_requests','violations','adjustments','monthly_salary'];
+    const recordMaps=['staff','hire_requests','termination_requests','violation_requests','violations','adjustments','monthly_salary'];
     function stamp(record,old={}){record.updatedBy=a.uid;record.updatedAt=marker();record.mutationId=id;for(const k of ['ts','createdAt','reviewedAt','approvedAt','terminatedAt','cancelledAt','financialUpdatedAt'])if(typeof record[k]==='number'&&record[k]!==old[k])record[k]=marker();}
     for(const root of recordMaps)for(const [dept,items]of Object.entries(hr[root]||{}))for(const [key,record]of Object.entries(items)){
       if(root==='monthly_salary'){for(const [month,value]of Object.entries(record))if(JSON.stringify(value)!==JSON.stringify(before[root]?.[dept]?.[key]?.[month]))stamp(value,before[root]?.[dept]?.[key]?.[month]);}

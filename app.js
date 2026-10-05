@@ -8,7 +8,7 @@ var ALL_DEPT_NAMES=ALL_CFG.map(function(d){return d.title;});
 var DOC_DAYS=['السبت','الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'];
 var BUSY=new Set();
 var PERM_FLAGS=[
-  ['canViewVio','عرض المخالفات'],['canEditVio','إضافة وإلغاء العقوبات'],
+  ['canViewVio','عرض المخالفات'],['canEditVio','طلب وإلغاء العقوبات'],['canApproveVio','اعتماد أو رفض العقوبات'],
   ['canViewDelay','عرض تأخير البصمة'],['canEditDelay','إضافة وتعديل وإلغاء مبلغ التأخير'],
   ['canViewReports','عرض وطباعة وتصدير التقارير'],['canEditStaff','تقديم طلب تعيين وتعديل الموظفين'],
   ['canViewSal','عرض الرواتب'],['canManageUsers','إدارة حسابات المشاهدة'],
@@ -282,7 +282,7 @@ function renderVios(){
   [['cw','warning'],['cd','deduct'],['cs','suspend'],['cp','praise']].forEach(function(p){el(p[0]).textContent=counters[p[1]];});
   if(VFILTER!=='all')records=records.filter(function(v){return v.type===VFILTER;});
   records.sort(function(a,b){return (b.ts||0)-(a.ts||0);});el('vio-empty').style.display=records.length?'none':'block';
-  var labels={warning:'⚠️ إنذار',deduct:'💸 خصم',suspend:'🚫 إيقاف',praise:'🏅 تقدير'},classes={warning:'bw',deduct:'bdc',suspend:'bss',praise:'bpr'};
+  var labels={warning:'⚠️ إنذار',deduct:'💸 خصم',suspend:'🚫 إيقاف / إنهاء خدمة',praise:'🏅 تقدير'},classes={warning:'bw',deduct:'bdc',suspend:'bss',praise:'bpr'};
   records.forEach(function(v){
     var card=document.createElement('div');card.className='vcard';
     var extra=v.type==='deduct'&&v.deduct?'<br><strong>مقدار الخصم:</strong> '+displayEsc(v.deduct):v.type==='suspend'&&v.suspend?'<br><strong>مدة الإيقاف:</strong> '+displayEsc(v.suspend):'';
@@ -292,13 +292,13 @@ function renderVios(){
 }
 function openVioModal(){
   if(!allowed('canViewVio')||!allowed('canEditVio'))return;
-  el('vio-date').value=today();el('vio-payroll').value=today().slice(0,7);['vio-emp','vio-reason','vio-deduct','vio-suspend'].forEach(function(id){el(id).value='';});fillDeptSelects();fillEmployees('vio-emp',el('vio-dept').value);toggleVioX();el('vio-modal').classList.add('show');
+  el('vio-date').value=today();el('vio-payroll').value=today().slice(0,7);['vio-emp','vio-reason','vio-deduct','vio-search'].forEach(function(id){el(id).value='';});fillDeptSelects();fillEmployees('vio-emp',el('vio-dept').value);searchVioEmployee();toggleVioX();el('vio-modal').classList.add('show');
 }
 function toggleVioX(){el('gd').style.display=el('vio-type').value!=='praise'?'block':'none';el('vio-deduct').value=el('vio-type').value==='deduct'?'':'0';el('gs').style.display=el('vio-type').value==='suspend'?'block':'none';}
 function saveVio(){
   var id=el('vio-dept').value;if(!allowed('canEditVio')||!deptAllowed(id))return;
-  var data={op:'vioAdd',dept:id,employeeKey:el('vio-emp').value,type:el('vio-type').value,date:el('vio-date').value,reason:el('vio-reason').value,deductionAmount:el('vio-deduct').value,payrollMonth:el('vio-payroll').value,suspend:el('vio-suspend').value};
-  return saveAction('vio',function(){return call('hrMutate',data);},function(){el('vio-modal').classList.remove('show');});
+  var data={op:'vioAdd',dept:id,employeeKey:el('vio-emp').value,type:el('vio-type').value,date:el('vio-date').value,reason:el('vio-reason').value,deductionAmount:el('vio-deduct').value,payrollMonth:el('vio-payroll').value};
+  return saveAction('vio',function(){return call('hrMutate',data);},function(){el('vio-modal').classList.remove('show');status('تم إرسال طلب العقوبة للموافقة؛ لا يُحتسب الخصم حتى الاعتماد.');});
 }
 function delVio(dept,key){if(!allowed('canEditVio')||!deptAllowed(dept)||!confirm('حذف العقوبة؟'))return;return saveAction('vio:'+key,function(){return call('hrMutate',{op:'vioDelete',dept:dept,key:key});});}
 function renderMonths(){
@@ -309,7 +309,7 @@ function renderMonths(){
   keys.forEach(function(mk){
     var m=MONTHS[mk],depts=Object.keys(m.depts||{}).filter(function(id){return deptAllowed(id)&&!isBoard(id);}),total=depts.reduce(function(n,id){return n+Object.values(m.depts[id].employees||{}).filter(function(e){return e.status!=='cancelled';}).length;},0);
     var card=document.createElement('div');card.className='month-card'+(openMonths.has(mk)?' open':'');card.dataset.month=mk;
-    var head=document.createElement('div');head.className='month-head';head.innerHTML='<div class="month-icon">📅</div><div class="month-info"><div class="month-title">'+displayEsc(m.name)+'</div><div class="month-meta">'+depts.length+' قسم — '+total+' حالة تأخير</div></div><div class="chv">›</div>';head.onclick=function(){card.classList.toggle('open');};
+    var head=document.createElement('div');head.className='month-head';head.innerHTML='<div class="month-icon">'+displayEsc(delayMonthNumber(m))+'</div><div class="month-info"><div class="month-title">'+displayEsc(m.name)+'</div><div class="month-meta">'+depts.length+' قسم — '+total+' حالة تأخير</div></div><div class="chv">›</div>';head.onclick=function(){card.classList.toggle('open');};
     var body=document.createElement('div');body.className='month-body';var exports=document.createElement('div');exports.className='fx-actions';[['طباعة التقرير','print'],['تصدير التقرير','export']].forEach(function(pair){var b=document.createElement('button');b.className='btg';b.textContent=pair[0];b.onclick=function(){monthlyDelayReport(mk,pair[1]);};exports.appendChild(b);});body.appendChild(exports);
     if(allowed('canEditDelay')){
       var actions=document.createElement('div');actions.className='month-actions';var add=document.createElement('button');add.className='btp';add.textContent='＋ إضافة قسم';add.onclick=function(){openAddDeptModal(mk);};actions.appendChild(add);
@@ -332,7 +332,7 @@ function renderMonths(){
     });card.append(head,body);list.appendChild(card);
   });
 }
-function saveMonth(){if(!allowed('canEditDelay'))return;return saveAction('month',function(){return call('hrMutate',{op:'monthAdd',name:el('m-name').value});},function(){el('m-name').value='';el('month-modal').classList.remove('show');});}
+function saveMonth(){if(!allowed('canEditDelay'))return;if(!el('m-period').value){alert('اختر السنة والشهر من التقويم');return;}return saveAction('month',function(){return call('hrMutate',{op:'monthAdd',period:el('m-period').value});},function(){el('m-period').value='';el('month-modal').classList.remove('show');});}
 function delMonth(mk){if(!allowed('canEditDelay')||!(developer()||USER_PERMS.allDepts)||!confirm('حذف هذا الشهر وجميع سجلاته؟'))return;return saveAction('month:'+mk,function(){return call('hrMutate',{op:'monthDelete',month:mk});});}
 function openAddDeptModal(mk){if(!allowed('canEditDelay'))return;el('adddept-mk').value=mk;fillDeptSelects();el('adddept-sel').value='';el('adddept-modal').classList.add('show');}
 function saveAddDept(){var mk=el('adddept-mk').value,id=el('adddept-sel').value;if(!allowed('canEditDelay')||!deptAllowed(id)){alert('اختر قسماً مسموحاً');return;}return saveAction('delay-dept',function(){return call('hrMutate',{op:'delayDeptAdd',month:mk,dept:id});},function(){el('adddept-modal').classList.remove('show');});}
@@ -367,7 +367,7 @@ function renderUsersListDisplay(){
 function onEditUserChange(){var u=USERS[el('edit-user-sel').value];el('edit-user-fields').style.display=u?'block':'none';if(!u)return;el('edit-user-fullname').value=englishDigits(u.fullName||'');el('edit-user-code').value=u.username;el('edit-user-pass').value='';el('edit-user-role').value=u.role==='developer'?'admin':u.role;el('edit-user-sal').value=u.perms.canViewSal?'true':'false';el('edit-user-label').value=englishDigits(u.label||'');el('edit-user-enabled').value=u.enabled?'true':'false';el('edit-user-role').disabled=!developer()||u.role==='developer';el('edit-user-enabled').disabled=u.role==='developer';el('edit-user-sal').disabled=!developer()||u.role==='developer';renderAccountAccess(el('edit-account-access'),u.perms||{},u.role,developer()&&u.role!=='developer');}
 function addNewUser(){if(!canManage())return;var fullName=el('new-user-fullname').value.trim();if(!fullName||fullName.length>150){alert('أدخل اسم الموظف أو الإداري، بحد أقصى 150 حرفًا');return;}var code;try{code=HR_CORE.P.username(el('new-user-name').value);}catch(e){status(errorMessage(e),true);alert(errorMessage(e));return;}var data={action:'create',fullName:fullName,username:code,password:el('new-user-pass').value,role:el('new-user-role').value,perms:accessValues(el('new-account-access')),label:el('new-user-label').value};return saveAction('new-user',function(){return call('hrUsers',data);},function(){['new-user-name','new-user-fullname','new-user-pass','new-user-label'].forEach(function(id){el(id).value='';});renderAccountAccess(el('new-account-access'),{},el('new-user-role').value,true);refreshUsers();alert('تم إنشاء الحساب وحفظه دائماً');});}
 function saveEditUser(){var u=USERS[el('edit-user-sel').value];if(!canManage()||!u)return;var data={action:'update',uid:u.uid,fullName:el('edit-user-fullname').value.trim(),password:el('edit-user-pass').value,role:el('edit-user-role').value,salary:el('edit-user-sal').value==='true',label:el('edit-user-label').value,enabled:el('edit-user-enabled').value==='true'};if(developer()&&u.role!=='developer')data.perms=accessValues(el('edit-account-access'));return saveAction('edit-user',function(){return call('hrUsers',data);},function(){el('edit-user-pass').value='';el('edit-user-fields').style.display='none';refreshUsers();alert('تم حفظ تعديلات الحساب');});}
-var ACCOUNT_GROUPS=[['العقوبات',['canViewVio','canEditVio']],['التأخير',['canViewDelay','canEditDelay']],['التقارير',['canViewReports']],['الاستشاريون',['canViewDoctors','canEditDoctors']],['التعيينات وإنهاء الخدمات',['canEditStaff','canApproveHires','canTerminateStaff','canApproveTerminations','canViewNotifications']],['المالية',['canViewSal','canViewFinance','canManageFinance']]];
+var ACCOUNT_GROUPS=[['العقوبات',['canViewVio','canEditVio','canApproveVio']],['التأخير',['canViewDelay','canEditDelay']],['التقارير',['canViewReports']],['الاستشاريون',['canViewDoctors','canEditDoctors']],['التعيينات وإنهاء الخدمات',['canEditStaff','canApproveHires','canTerminateStaff','canApproveTerminations','canViewNotifications']],['المالية',['canViewSal','canViewFinance','canManageFinance']]];
 function accountLabel(role){return HR_CORE.P.ROLE_LABELS[role]||role;}
 function accessValues(box){var p={allDepts:!!box.querySelector('[data-all]:checked'),allowedDepts:{}};box.querySelectorAll('[data-flag]').forEach(function(i){p[i.dataset.flag]=i.checked;});box.querySelectorAll('[data-dept]:checked').forEach(function(i){p.allowedDepts[i.dataset.dept]=true;});return p;}
 function permissionDependencies(box,input){var deps={canEditVio:['canViewVio'],canEditDelay:['canViewDelay'],canEditDoctors:['canViewDoctors'],canViewFinance:['canViewSal'],canManageFinance:['canViewFinance','canViewSal']};if(input.checked)(deps[input.dataset.flag]||[]).forEach(function(f){box.querySelector('[data-flag="'+f+'"]').checked=true;});else Object.keys(deps).forEach(function(f){if(deps[f].includes(input.dataset.flag))box.querySelector('[data-flag="'+f+'"]').checked=false;});}
@@ -419,8 +419,8 @@ document.addEventListener('DOMContentLoaded',async function(){
   el('login-btn').onclick=doLogin;el('btn-out').onclick=doLogout;
   el('l-pass').onkeydown=function(e){if(e.key==='Enter')doLogin();};el('l-user').onkeydown=function(e){if(e.key==='Enter')el('l-pass').focus();};
   ['l-user','l-pass'].forEach(function(id){el(id).oninput=function(){el('l-err').style.display='none';};});
-  el('btn-newvio').onclick=openVioModal;el('save-vio').onclick=saveVio;el('vio-type').onchange=toggleVioX;
-  el('btn-newmonth').onclick=function(){if(allowed('canEditDelay'))el('month-modal').classList.add('show');};el('save-month').onclick=saveMonth;el('save-adddept').onclick=saveAddDept;el('save-delay').onclick=saveDelay;el('save-edit').onclick=saveEdit;
+  el('btn-newvio').onclick=openVioModal;el('save-vio').onclick=saveVio;el('vio-type').onchange=toggleVioX;el('vio-search').oninput=searchVioEmployee;el('vio-dept').onchange=function(){fillEmployees('vio-emp',this.value);searchVioEmployee();};el('m-year').oninput=renderMonthCalendar;
+  el('btn-newmonth').onclick=function(){if(allowed('canEditDelay'))openMonthCalendar();};el('save-month').onclick=saveMonth;el('save-adddept').onclick=saveAddDept;el('save-delay').onclick=saveDelay;el('save-edit').onclick=saveEdit;
   [['vio','vio'],['month','month'],['adddept','adddept'],['delay','delay']].forEach(function(pair){['close-','cancel-'].forEach(function(pre){el(pre+pair[0]).onclick=function(){el(pair[1]+'-modal').classList.remove('show');};});});
   el('cancel-edit').onclick=function(){el('edit-modal').classList.remove('show');};
   el('login-btn').disabled=true;
@@ -433,3 +433,13 @@ document.addEventListener('DOMContentLoaded',async function(){
     el('login-btn').disabled=false;
   }catch(e){loginError(errorMessage(e));el('btn-t').textContent='تعذّر تحميل النظام';}
 });
+
+function searchVioEmployee(){
+  var q=el('vio-search').value.trim().toLowerCase(),list=el('vio-search-results');list.replaceChildren();if(!q)return;
+  var matches=[];employeeDeptIds().forEach(function(id){(LOCAL[id]||[]).filter(function(e){return e.status!=='terminated'&&e.name.toLowerCase().includes(q);}).forEach(function(e){matches.push({dept:id,employee:e});});});
+  if(!matches.length){list.textContent='لا توجد نتائج';return;}
+  matches.slice(0,30).forEach(function(m){var b=document.createElement('button');b.type='button';b.className='btg';b.style.cssText='display:block;width:100%;margin-top:6px;text-align:right';b.textContent=englishDigits(m.employee.name+' — '+deptTitle(m.dept));b.onclick=function(){el('vio-dept').value=m.dept;fillEmployees('vio-emp',m.dept,m.employee.key);el('vio-search').value=englishDigits(m.employee.name);list.replaceChildren();};list.appendChild(b);});
+}
+function delayMonthNumber(m){var text=englishDigits(m.period||m.name||''),r=text.match(/^(20\d{2}|2100)[-\/\\ ]+(0?[1-9]|1[0-2])(?:$|\D)/)||text.match(/(?:^|\D)(0?[1-9]|1[0-2])[ \/\\-]+(20\d{2}|2100)/);if(r)return String(Number(r[1].length===4?r[2]:r[1]));var names=['كانون الثاني','شباط','آذار','نيسان','أيار','حزيران','تموز','آب','أيلول','تشرين الأول','تشرين الثاني','كانون الأول'];var n=names.findIndex(function(x){return text.includes(x);});return n<0?'—':String(n+1);}
+function openMonthCalendar(){el('m-year').value=today().slice(0,4);el('m-period').value='';renderMonthCalendar();el('month-modal').classList.add('show');}
+function renderMonthCalendar(){var list=el('m-calendar'),year=el('m-year').value;list.replaceChildren();el('m-selected').textContent='';if(!/^(20[0-9]{2}|2100)$/.test(year)){el('m-period').value='';return;}var old=el('m-period').value.slice(5);el('m-period').value=old?year+'-'+old:'';['كانون الثاني','شباط','آذار','نيسان','أيار','حزيران','تموز','آب','أيلول','تشرين الأول','تشرين الثاني','كانون الأول'].forEach(function(name,i){var value=year+'-'+String(i+1).padStart(2,'0'),b=document.createElement('button');b.type='button';b.textContent=(i+1)+' — '+name;b.setAttribute('aria-pressed',String(el('m-period').value===value));b.onclick=function(){el('m-period').value=value;renderMonthCalendar();};list.appendChild(b);});if(el('m-period').value)el('m-selected').textContent='الشهر المحدد: '+Number(old)+' / '+year;}

@@ -20,7 +20,7 @@ function reportMonth(){var m=el('vio-report-month').value;if(!HR_CORE.F.month(m)
 function monthlyViolationReport(mode){
   if(!allowed('canViewVio'))return;var month=reportMonth();if(!month)return;
   var records=Object.values(VIOS).filter(function(v){return deptAllowed(v.deptId)&&!isBoard(v.deptId)&&v.status!=='cancelled'&&String(v.date||'').slice(0,7)===month&&(VFILTER==='all'||v.type===VFILTER);}).sort(function(a,b){return String(a.date).localeCompare(String(b.date));}),types={warning:'إنذار',deduct:'خصم',suspend:'إيقاف',praise:'تقدير'},total=0;
-  var rows=records.map(function(v,i){var amount=v.deductionConfirmed===true?HR_CORE.F.money(v.deductionAmount):null;if(amount!==null)total+=amount;return [i+1,v.empName,deptTitle(v.deptId),v.date,types[v.type]||v.type,v.reason,amount!==null?iq(amount):(v.type==='deduct'?'يحتاج اعتماد المبلغ':'—'),v.suspend||v.deduct||''];});
+  var rows=records.map(function(v,i){var amount=v.deductionConfirmed===true?HR_CORE.F.money(v.deductionAmount):null;if(amount!==null)total+=amount;return [i+1,v.empName,deptTitle(v.deptId),v.date,v.type==='suspend'&&!v.suspend?'إنهاء خدمة':types[v.type]||v.type,v.reason,amount!==null?iq(amount):(v.type==='deduct'?'يحتاج اعتماد المبلغ':'—'),v.suspend||v.deduct||''];});
   outputReport(reportDocument('التقرير الشهري للعقوبات والمخالفات',month,['ت','الاسم','القسم','التاريخ','الإجراء','السبب','الخصم المعتمد','ملاحظات'],rows,'عدد السجلات: '+rows.length+' — إجمالي الخصومات المعتمدة: '+iq(total),'يعتمد اختيار الشهر على تاريخ المخالفة. الخصم غير المعتمد لا يدخل في الإجمالي. '+(VFILTER==='all'?'يشمل جميع أنواع الإجراءات.':'نوع الإجراء المختار: '+types[VFILTER])), 'aldora-violations-'+month,mode,SESSION,function(){return allowed('canViewVio');});
 }
 function staffSummaryReport(mode){

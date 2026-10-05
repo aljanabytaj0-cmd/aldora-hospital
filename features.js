@@ -1,5 +1,5 @@
 'use strict';
-var STAFF_FILTER='active',HIRES={},TERMINATIONS={},TERM_PENDING={},RESOLUTIONS={},HIRE_SALARIES={},NOTIFICATIONS={},READ_MARKERS={},FINANCE=null,FINANCE_SEQ=0,FINANCE_TARGET=null;
+var STAFF_FILTER='active',HIRES={},VIO_REQUESTS={},ACTOR_NAMES={},ACTOR_WATCHED={},TERMINATIONS={},TERM_PENDING={},RESOLUTIONS={},HIRE_SALARIES={},NOTIFICATIONS={},READ_MARKERS={},FINANCE=null,FINANCE_SEQ=0,FINANCE_TARGET=null;
 var MUTATION_IDS=new Map();
 var oldCall=call;
 call=async function(name,data){
@@ -11,15 +11,15 @@ call=async function(name,data){
 };
 var oldWipe=wipeData;
 wipeData=function(){
-  oldWipe();HIRES={};TERMINATIONS={};TERM_PENDING={};RESOLUTIONS={};HIRE_SALARIES={};NOTIFICATIONS={};READ_MARKERS={};FINANCE=null;FINANCE_TARGET=null;FINANCE_SEQ++;MUTATION_IDS.clear();
-  ['hires-list','terminations-list','notifications-list','finance-body','finance-detail','finance-dept','finance-employee'].forEach(function(id){el(id).replaceChildren();});el('bell-count').textContent='0';
+  oldWipe();HIRES={};VIO_REQUESTS={};ACTOR_NAMES={};ACTOR_WATCHED={};TERMINATIONS={};TERM_PENDING={};RESOLUTIONS={};HIRE_SALARIES={};NOTIFICATIONS={};READ_MARKERS={};FINANCE=null;FINANCE_TARGET=null;FINANCE_SEQ++;MUTATION_IDS.clear();
+  ['hires-list','violation-requests-list','terminations-list','notifications-list','finance-body','finance-detail','finance-dept','finance-employee'].forEach(function(id){el(id).replaceChildren();});el('bell-count').textContent='0';
   ['notifications-modal','terminate-modal','finance-modal'].forEach(function(id){el(id).classList.remove('show');});
   ['term-dept','term-key','term-date','term-reason','finance-month','finance-search','d-key','d-amount'].forEach(function(id){el(id).value='';});el('term-name').textContent='';el('finance-title').textContent='تفاصيل الموظف';
 };
 var oldReset=resetSession;
 resetSession=function(){STAFF_FILTER='active';el('staff-filter').value='active';oldReset();};
 var oldVisible=visiblePage;
-visiblePage=function(id){return id==='pg-h'?(allowed('canEditStaff')||allowed('canApproveHires')||allowed('canTerminateStaff')||allowed('canApproveTerminations')):id==='pg-f'?(allowed('canViewFinance')&&allowed('canViewSal')):oldVisible(id);};
+visiblePage=function(id){return id==='pg-h'?(allowed('canEditStaff')||allowed('canApproveHires')||allowed('canTerminateStaff')||allowed('canApproveTerminations')||allowed('canEditVio')||allowed('canApproveVio')):id==='pg-f'?(allowed('canViewFinance')&&allowed('canViewSal')):oldVisible(id);};
 var oldSet=setPage;
 setPage=function(id){oldSet(id);if(id==='pg-h'||id==='pg-f'){var suffix=id.slice(3);['nt-','bb-'].forEach(function(p){el(p+suffix).classList.add('active');});}};
 var oldShow=showPage;
@@ -34,7 +34,8 @@ syncData=function(){
       watch(DB.ref('hr_spark/hire_requests/'+id),function(s){HIRES[id]=s.val()||{};renderHires();renderNotifications();},DATA_LISTENERS,epoch);
       
     }
-    if((allowed('canTerminateStaff')||allowed('canApproveTerminations'))&&!isBoard(id)){watch(DB.ref('hr_spark/termination_requests/'+id),function(s){TERMINATIONS[id]=s.val()||{};renderHires();renderNotifications();},DATA_LISTENERS,epoch);watch(DB.ref('hr_spark/termination_pending/'+id),function(s){TERM_PENDING[id]=s.val()||{};renderNode(id);},DATA_LISTENERS,epoch);}
+    if((allowed('canTerminateStaff')||allowed('canApproveTerminations')||allowed('canEditVio')||allowed('canApproveVio'))&&!isBoard(id)){watch(DB.ref('hr_spark/termination_requests/'+id),function(s){TERMINATIONS[id]=s.val()||{};renderHires();renderNotifications();},DATA_LISTENERS,epoch);watch(DB.ref('hr_spark/termination_pending/'+id),function(s){TERM_PENDING[id]=s.val()||{};renderNode(id);},DATA_LISTENERS,epoch);}
+    if(allowed('canViewVio')||allowed('canEditVio')||allowed('canApproveVio'))watch(DB.ref('hr_spark/violation_requests/'+id),function(s){VIO_REQUESTS[id]=s.val()||{};renderHires();renderNotifications();},DATA_LISTENERS,epoch);
     if(allowed('canViewNotifications'))watch(DB.ref('hr_spark/notification_resolutions/'+id),function(s){RESOLUTIONS[id]=s.val()||{};renderNotifications();},DATA_LISTENERS,epoch);
     if(CAN_SAL&&!isBoard(id))watch(DB.ref('hr_spark/hire_request_salaries/'+id),function(s){HIRE_SALARIES[id]=s.val()||{};renderHires();renderNode(id);},DATA_LISTENERS,epoch);
     if(allowed('canViewNotifications'))watch(DB.ref('hr_spark/notifications/'+id).orderByChild('createdAt').limitToLast(100),function(s){NOTIFICATIONS[id]=s.val()||{};renderNotifications();},DATA_LISTENERS,epoch);
@@ -50,10 +51,10 @@ function fillEmployees(id,dept,selected){
 function renderHires(){
   var records=[];if(visiblePage('pg-h'))allowedIds().forEach(function(id){Object.entries(HIRES[id]||{}).forEach(function(p){if(p[1].status==='pending')records.push({...p[1],key:p[0],dept:id});});});
   records.sort(function(a,b){return (a.status==='pending'?0:1)-(b.status==='pending'?0:1)||(b.createdAt||0)-(a.createdAt||0);});
-  renderTerminations();var list=el('hires-list');list.replaceChildren();if(!records.length){list.innerHTML='<div class="ee">لا توجد طلبات تعيين معلقة</div>';return;}
+  renderViolationRequests();renderTerminations();watchRequestNames();var list=el('hires-list');list.replaceChildren();if(!records.length){list.innerHTML='<div class="ee">لا توجد طلبات تعيين معلقة</div>';return;}
   var labels={pending:'بانتظار الموافقة',approved:'تم الاعتماد',rejected:'مرفوض'};
   records.forEach(function(r){var card=document.createElement('div');card.className='fx-card';
-    card.innerHTML='<h4>'+displayEsc(r.name)+'</h4><div>'+displayEsc(deptTitle(r.dept))+' — '+displayEsc(r.role)+'</div><div class="fx-note">بدء الخدمة: '+displayEsc(r.hireDate)+'<br>مقدم الطلب: '+displayEsc(r.submittedName)+'<br>الحالة: '+displayEsc(labels[r.status]||r.status)+(r.reviewedName?'<br>صاحب القرار: '+displayEsc(r.reviewedName):'')+(r.reviewReason?'<br>سبب الرفض: '+displayEsc(r.reviewReason):'')+'</div>'+(CAN_SAL&&!isBoard(r.dept)?'<div>الراتب المقترح: '+iq((HIRE_SALARIES[r.dept]||{})[r.key])+'</div>':'');
+    card.innerHTML='<h4>'+displayEsc(r.name)+'</h4><div>'+displayEsc(deptTitle(r.dept))+' — '+displayEsc(r.role)+'</div><div class="fx-note">بدء الخدمة: '+displayEsc(r.hireDate)+'<br>مقدم الطلب: '+displayEsc(requestActorName(r.submittedBy,r.submittedName))+'<br>الحالة: '+displayEsc(labels[r.status]||r.status)+(r.reviewedName?'<br>صاحب القرار: '+displayEsc(requestActorName(r.reviewedBy,r.reviewedName)):'')+(r.reviewReason?'<br>سبب الرفض: '+displayEsc(r.reviewReason):'')+'</div>'+(CAN_SAL&&!isBoard(r.dept)?'<div>الراتب المقترح: '+iq((HIRE_SALARIES[r.dept]||{})[r.key])+'</div>':'');
     if(r.status==='pending'&&allowed('canApproveHires')){var bar=document.createElement('div');bar.className='fx-actions';[['اعتماد','hireApprove'],['رفض','hireReject']].forEach(function(pair){var b=document.createElement('button');b.className=pair[1]==='hireApprove'?'btp':'btg';b.textContent=pair[0];b.onclick=function(){reviewHire(r.dept,r.key,pair[1]);};bar.appendChild(b);});card.appendChild(bar);}list.appendChild(card);
   });
 }
@@ -62,13 +63,13 @@ function reviewHire(dept,key,op){
   var data={op:op,dept:dept,key:key};if(op==='hireReject'){data.reason=prompt('سبب رفض التعيين:');if(!data.reason)return;}else if(!confirm('اعتماد الطلب وإضافة الموظف إلى العاملين؟'))return;
   return saveAction('hire:'+key,function(){return call('hrMutate',data);});
 }
-function notificationItems(){var items=[];if(allowed('canViewNotifications'))allowedIds().forEach(function(id){Object.entries(NOTIFICATIONS[id]||{}).forEach(function(p){items.push({...p[1],key:p[0],dept:id});});});return items.filter(function(r){if(!['hire_requested','termination_requested'].includes(r.type))return true;var request=r.type==='hire_requested'?(HIRES[r.dept]||{})[r.requestKey]:(TERMINATIONS[r.dept]||{})[r.requestKey];return !(RESOLUTIONS[r.dept]||{})[r.requestKey]&&(!request||request.status==='pending');}).sort(function(a,b){return b.createdAt-a.createdAt;});}
+function notificationItems(){var items=[];if(allowed('canViewNotifications'))allowedIds().forEach(function(id){Object.entries(NOTIFICATIONS[id]||{}).forEach(function(p){items.push({...p[1],key:p[0],dept:id});});});return items.filter(function(r){if(!['hire_requested','termination_requested','violation_requested'].includes(r.type))return true;var request=r.type==='hire_requested'?(HIRES[r.dept]||{})[r.requestKey]:r.type==='violation_requested'?(VIO_REQUESTS[r.dept]||{})[r.requestKey]:(TERMINATIONS[r.dept]||{})[r.requestKey];return !(RESOLUTIONS[r.dept]||{})[r.requestKey]&&(!request||request.status==='pending');}).sort(function(a,b){return b.createdAt-a.createdAt;});}
 function renderNotifications(){
-  var items=notificationItems(),unread=items.filter(function(r){return !READ_MARKERS[r.key];}).length;el('bell-count').textContent=unread>99?'99+':String(unread);el('bell-btn').setAttribute('aria-label','مركز الإشعارات — '+unread+' غير مقروء');
+  watchRequestNames();var items=notificationItems(),unread=items.filter(function(r){return !READ_MARKERS[r.key];}).length;el('bell-count').textContent=unread>99?'99+':String(unread);el('bell-btn').setAttribute('aria-label','مركز الإشعارات — '+unread+' غير مقروء');
   var list=el('notifications-list');list.replaceChildren();if(!items.length){list.innerHTML='<div class="ee">لا توجد إشعارات</div>';return;}
-  var labels={hire_requested:'طلب تعيين جديد',hire_approved:'تم اعتماد تعيين موظف',hire_rejected:'رُفض طلب تعيين',staff_terminated:'تم اعتماد إنهاء الخدمات',termination_requested:'طلب إنهاء خدمات',termination_rejected:'رُفض طلب إنهاء خدمات'};
-  items.forEach(function(r){var card=document.createElement('div');card.className='fx-card'+(!READ_MARKERS[r.key]?' fx-unread':'');card.innerHTML='<h4>'+displayEsc(labels[r.type]||'إشعار')+'</h4><div>'+displayEsc(r.name)+'</div><div class="fx-note">'+displayEsc(deptTitle(r.dept))+' — '+displayEsc(r.actor)+'<br>'+displayEsc(new Date(r.createdAt).toLocaleString('ar-IQ-u-nu-latn',{timeZone:'Asia/Baghdad'}))+'</div>';
-    var pending=r.type==='hire_requested'?(HIRES[r.dept]||{})[r.requestKey]:r.type==='termination_requested'?(TERMINATIONS[r.dept]||{})[r.requestKey]:null;if(pending&&pending.status==='pending'){if(r.type==='hire_requested'&&allowed('canApproveHires'))decisionButtons(card,function(op){reviewHire(r.dept,r.requestKey,op);},'hire');if(r.type==='termination_requested'&&allowed('canApproveTerminations'))decisionButtons(card,function(op){reviewTermination(r.dept,r.requestKey,op);},'termination');}
+  var labels={violation_requested:'طلب الموافقة على عقوبة إدارية',violation_approved:'تم اعتماد العقوبة الإدارية',violation_rejected:'رُفض طلب العقوبة',hire_requested:'طلب تعيين جديد',hire_approved:'تم اعتماد تعيين موظف',hire_rejected:'رُفض طلب تعيين',staff_terminated:'تم اعتماد إنهاء الخدمات',termination_requested:'طلب إنهاء خدمات',termination_rejected:'رُفض طلب إنهاء خدمات'};
+  items.forEach(function(r){var card=document.createElement('div');card.className='fx-card'+(!READ_MARKERS[r.key]?' fx-unread':'');card.innerHTML='<h4>'+displayEsc(labels[r.type]||'إشعار')+'</h4><div>'+displayEsc(r.name)+(r.violationType?' — '+displayEsc(violationLabel(r.violationType)):'')+'</div><div class="fx-note">'+displayEsc(deptTitle(r.dept))+' — '+displayEsc(requestActorName(r.actorUid,r.actorName||r.actor))+'<br>'+displayEsc(new Date(r.createdAt).toLocaleString('ar-IQ-u-nu-latn',{timeZone:'Asia/Baghdad'}))+'</div>';
+    var pending=r.type==='hire_requested'?(HIRES[r.dept]||{})[r.requestKey]:r.type==='termination_requested'?(TERMINATIONS[r.dept]||{})[r.requestKey]:r.type==='violation_requested'?(VIO_REQUESTS[r.dept]||{})[r.requestKey]:null;if(pending&&pending.status==='pending'){if(r.type==='hire_requested'&&allowed('canApproveHires'))decisionButtons(card,function(op){reviewHire(r.dept,r.requestKey,op);},'hire');if(r.type==='violation_requested'&&allowed('canApproveVio'))decisionButtons(card,function(op){reviewViolation(r.dept,r.requestKey,op);},'vio');if(r.type==='termination_requested'&&allowed('canApproveTerminations'))decisionButtons(card,function(op){reviewTermination(r.dept,r.requestKey,op);},'termination');}
     if(!READ_MARKERS[r.key]){var b=document.createElement('button');b.className='btg';b.textContent='تحديد كمقروء';b.onclick=function(){markNotifications([r]);};card.appendChild(b);}list.appendChild(card);});
 }
 function openNotifications(){if(!allowed('canViewNotifications'))return;renderNotifications();el('notifications-modal').classList.add('show');}
@@ -116,7 +117,7 @@ function saveFinanceChange(op){
 }
 function printFinance(){if(FINANCE&&visiblePage('pg-f'))financeReport('print');}
 document.addEventListener('DOMContentLoaded',function(){
-  el('vio-dept').onchange=function(){fillEmployees('vio-emp',this.value);};
+  el('vio-dept').onchange=function(){fillEmployees('vio-emp',this.value);searchVioEmployee();};
   el('finance-month').onchange=loadFinance;el('finance-search').oninput=function(){el('finance-employee').value='';renderFinance();};
   el('vio-date').onchange=function(){el('vio-payroll').value=this.value.slice(0,7);};
   el('new-user-role').onchange=function(){accountRoleChanged('new');};
@@ -125,5 +126,20 @@ document.addEventListener('DOMContentLoaded',function(){
 var baseOpenEdit=openEdit;openEdit=function(sec,key,name,role,shift,sal){if((SALARIES[sec]||{})[key]==null)sal=(HIRE_SALARIES[sec]||{})[key]??sal;baseOpenEdit(sec,key,name,role,shift,sal);};
 
 function decisionButtons(card,callback,kind){var bar=document.createElement('div');bar.className='fx-actions';[['موافقة','Approve','btp'],['رفض','Reject','btg']].forEach(function(p){var b=document.createElement('button');b.className=p[2];b.textContent=p[0];b.onclick=function(){callback(kind+p[1]);};bar.appendChild(b);});card.appendChild(bar);}
-function renderTerminations(){var list=el('terminations-list');list.replaceChildren();if(!visiblePage('pg-h'))return;var requests=[];employeeDeptIds().forEach(function(id){Object.entries(TERMINATIONS[id]||{}).forEach(function(p){if(p[1].status==='pending')requests.push({...p[1],dept:id,key:p[0]});});});requests.sort(function(a,b){return b.createdAt-a.createdAt;});if(!requests.length){list.innerHTML='<div class="ee">لا توجد طلبات إنهاء خدمات معلقة</div>';return;}requests.forEach(function(r){var card=document.createElement('div');card.className='fx-card';card.innerHTML='<h4>'+displayEsc(r.name)+'</h4><div>'+displayEsc(deptTitle(r.dept))+'</div><div class="fx-note">تاريخ إنهاء الخدمات: '+displayEsc(r.date)+'<br>السبب: '+displayEsc(r.reason)+'<br>مقدم الطلب: '+displayEsc(r.submittedName)+'<br>بانتظار الموافقة</div>';if(allowed('canApproveTerminations'))decisionButtons(card,function(op){reviewTermination(r.dept,r.key,op);},'termination');list.appendChild(card);});}
+function renderTerminations(){var list=el('terminations-list');list.replaceChildren();if(!visiblePage('pg-h'))return;var requests=[];employeeDeptIds().forEach(function(id){Object.entries(TERMINATIONS[id]||{}).forEach(function(p){if(p[1].status==='pending')requests.push({...p[1],dept:id,key:p[0]});});});requests.sort(function(a,b){return b.createdAt-a.createdAt;});if(!requests.length){list.innerHTML='<div class="ee">لا توجد طلبات إنهاء خدمات معلقة</div>';return;}requests.forEach(function(r){var card=document.createElement('div');card.className='fx-card';card.innerHTML='<h4>'+displayEsc(r.name)+'</h4><div>'+displayEsc(deptTitle(r.dept))+'</div><div class="fx-note">تاريخ إنهاء الخدمات: '+displayEsc(r.date)+'<br>السبب: '+displayEsc(r.reason)+'<br>مقدم الطلب: '+displayEsc(requestActorName(r.submittedBy,r.submittedName))+'<br>بانتظار الموافقة</div>';if(allowed('canApproveTerminations'))decisionButtons(card,function(op){reviewTermination(r.dept,r.key,op);},'termination');list.appendChild(card);});}
 function reviewTermination(dept,key,op){if(!allowed('canApproveTerminations')||!deptAllowed(dept)||isBoard(dept))return;var data={op:op,dept:dept,key:key};if(op==='terminationReject'){data.reason=prompt('سبب رفض إنهاء الخدمات:');if(!data.reason)return;}else if(!confirm('الموافقة على إنهاء الخدمات؟ سيُحفظ الموظف ضمن منتهية الخدمات.'))return;return saveAction('termination-review:'+key,function(){return call('hrMutate',data);});}
+
+function violationLabel(type){return {warning:'إنذار',deduct:'خصم من الراتب',suspend:'إيقاف عن العمل / إنهاء خدمة',praise:'شهادة تقدير'}[type]||type;}
+function requestActorName(uid,fallback){return ACTOR_NAMES[uid]||fallback||'غير محدد';}
+function watchRequestNames(){
+  if(!visiblePage('pg-h')&&!allowed('canViewNotifications'))return;
+  var rows=[];[HIRES,TERMINATIONS,VIO_REQUESTS].forEach(function(map){Object.values(map).forEach(function(dept){rows.push(...Object.values(dept));});});
+  Object.values(NOTIFICATIONS).forEach(function(dept){rows.push(...Object.values(dept));});
+  rows.forEach(function(r){[r.submittedBy,r.reviewedBy,r.actorUid].filter(Boolean).forEach(function(uid){if(ACTOR_WATCHED[uid])return;ACTOR_WATCHED[uid]=true;watch(DB.ref('user_profiles/'+uid+'/fullName'),function(s){ACTOR_NAMES[uid]=s.val()||'';renderHires();renderNotifications();},DATA_LISTENERS,DATA_EPOCH);});});
+}
+function renderViolationRequests(){
+  var list=el('violation-requests-list');list.replaceChildren();var rows=[];allowedIds().forEach(function(id){Object.entries(VIO_REQUESTS[id]||{}).forEach(function(p){if(p[1].status==='pending')rows.push({...p[1],deptId:id,key:p[0]});});});
+  rows.sort(function(a,b){return b.createdAt-a.createdAt;});if(!rows.length){list.innerHTML='<div class="ee">لا توجد طلبات عقوبات معلقة</div>';return;}
+  rows.forEach(function(r){var card=document.createElement('div');card.className='fx-card';card.innerHTML='<h4>'+displayEsc(r.empName)+'</h4><div>'+displayEsc(deptTitle(r.deptId))+' — '+displayEsc(violationLabel(r.type))+'</div><div class="fx-note">'+displayEsc(r.reason)+'<br>التاريخ: '+displayEsc(r.date)+'<br>مقدم الطلب: '+displayEsc(requestActorName(r.submittedBy,r.submittedName))+'<br>بانتظار الموافقة — لا يُحتسب الخصم بعد</div><div>مبلغ الخصم: '+iq(r.deductionAmount)+'</div>';if(allowed('canApproveVio'))decisionButtons(card,function(op){reviewViolation(r.deptId,r.key,op);},'vio');list.appendChild(card);});
+}
+function reviewViolation(dept,key,op){if(!allowed('canApproveVio')||!deptAllowed(dept))return;var data={op:op,dept:dept,key:key};if(op==='vioReject'){data.reason=prompt('سبب رفض العقوبة:');if(!data.reason)return;}else if(!confirm('اعتماد العقوبة؟ سيُحتسب خصمها في شهر الراتب المحدد. عقوبة إنهاء الخدمة ترسل طلب إنهاء خدمات مستقلاً.'))return;return saveAction('vio-review:'+key,function(){return call('hrMutate',data);});}

@@ -169,7 +169,7 @@ body{font-family:"Tajawal",sans-serif;background:var(--bg);color:var(--tx);min-h
 /* شهر */
 .month-card{background:#fff;border-radius:var(--rd);border:1.5px solid #BFCFFF;box-shadow:var(--sh);margin-bottom:9px;overflow:hidden}
 .month-head{display:flex;align-items:center;gap:10px;padding:13px;cursor:pointer;background:#fff}
-.month-icon{width:40px;height:40px;border-radius:10px;background:var(--prl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.month-calendar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.month-calendar button{padding:12px 4px;border:1px solid var(--bd);border-radius:10px;background:#f1f4ff;color:#193567;font:inherit;cursor:pointer}.month-calendar button[aria-pressed="true"]{background:var(--pr);color:white}.month-icon{width:40px;height:40px;border-radius:10px;background:var(--prl);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
 .month-info{flex:1}
 .month-title{font-size:14px;font-weight:800;color:var(--pr)}
 .month-meta{font-size:11px;color:var(--t3);margin-top:2px}
@@ -381,7 +381,7 @@ button:disabled{opacity:.55;cursor:wait}
         <div class="fc active" onclick="fvio('all',this)">الكل</div>
         <div class="fc" onclick="fvio('warning',this)">إنذار</div>
         <div class="fc" onclick="fvio('deduct',this)">خصم</div>
-        <div class="fc" onclick="fvio('suspend',this)">إيقاف</div>
+        <div class="fc" onclick="fvio('suspend',this)">إيقاف / إنهاء خدمة</div>
         <div class="fc" onclick="fvio('praise',this)">تقدير</div>
       </div>
       <div id="vio-list"></div>
@@ -447,7 +447,7 @@ button:disabled{opacity:.55;cursor:wait}
   </div>
 
   <!-- PERMISSIONS PAGE (dev only) -->
-  <div class="page" id="pg-h"><div style="padding:16px"><h3>✅ طلبات التعيين</h3><p class="fx-note">لا يدخل الموظف قائمة العاملين أو الرواتب حتى موافقة شخص يملك صلاحية اعتماد التعيين.</p><h4>طلبات التعيين المعلقة</h4><div id="hires-list"></div><h4>طلبات إنهاء الخدمات المعلقة</h4><div id="terminations-list"></div></div></div>
+  <div class="page" id="pg-h"><div style="padding:16px"><h3>✅ طلبات التعيين</h3><p class="fx-note">لا يدخل الموظف قائمة العاملين أو الرواتب حتى موافقة شخص يملك صلاحية اعتماد التعيين.</p><h4>طلبات التعيين المعلقة</h4><div id="hires-list"></div><h4>طلبات العقوبات المعلقة</h4><div id="violation-requests-list"></div><h4>طلبات إنهاء الخدمات المعلقة</h4><div id="terminations-list"></div></div></div>
   <div class="page" id="pg-f"><div style="padding:16px"><h3>💰 التقرير المالي الشهري</h3><div id="finance-controls"><label class="fl">الشهر</label><input class="fi" type="month" lang="en" id="finance-month"><label class="fl">القسم</label><select class="fs2" id="finance-dept" onchange="renderFinance()"></select><label class="fl" for="finance-search">البحث عن موظف</label><input class="fi" id="finance-search" type="search" placeholder="اكتب اسم الموظف..."><label class="fl">الموظف</label><select class="fs2" id="finance-employee" onchange="renderFinance()"></select><div class="fx-actions"><button class="btp" onclick="loadFinance()">تحديث التقرير</button><button class="btg" onclick="printFinance()">طباعة التقرير</button><button class="btg" onclick="financeReport('export')">تصدير التقرير</button></div><p class="fx-note">المبالغ بالدينار العراقي. مبلغ التأخير المحفوظ يُخصم تلقائيًا من راتب شهر تاريخه، ويظهر منفصلًا عن العقوبات والخصومات الأخرى.</p></div><div id="finance-body"></div></div></div>
   <div class="page" id="pg-p">
     <div style="margin-top:14px" id="perm-content">
@@ -526,32 +526,21 @@ button:disabled{opacity:.55;cursor:wait}
   <div class="mo">
     <div class="moh"><h3>إضافة عقوبة إدارية</h3><button class="moc" id="close-vio">✕</button></div>
     <div class="mob">
+      <div class="fg"><label class="fl" for="vio-search">البحث عن موظف</label><input class="fi" id="vio-search" type="search" placeholder="ابحث بالاسم في الأقسام المسموحة"><div id="vio-search-results"></div></div>
+      <div class="fg"><label class="fl" for="vio-dept">القسم</label><select class="fs2" id="vio-dept"><option value="">— اختر القسم —</option></select></div>
+      <div class="fg"><label class="fl" for="vio-emp">اسم الموظف</label><select class="fs2" id="vio-emp"><option value="">اختر القسم ثم الموظف</option></select></div>
       <div class="fg"><label class="fl">نوع العقوبة</label>
         <select class="fs2" id="vio-type">
           <option value="warning">⚠️ إنذار</option>
           <option value="deduct">💸 خصم من الراتب</option>
-          <option value="suspend">🚫 إيقاف عن العمل</option>
+          <option value="suspend">🚫 إيقاف عن العمل / إنهاء خدمة</option>
           <option value="praise">🏅 شهادة تقدير</option>
-        </select></div>
-      <div class="fg"><label class="fl">اسم الموظف</label><select class="fs2" id="vio-emp"><option value="">اختر القسم ثم الموظف</option></select></div>
-      <div class="fg"><label class="fl">القسم</label>
-        <select class="fs2" id="vio-dept">
-          <option value="">— اختر القسم —</option>
-          <option>رئيس مجلس الإدارة</option><option>معاون رئيس مجلس الإدارة</option>
-          <option>المدير الفني</option><option>المدير الإداري</option>
-          <option>صالة الولادة</option><option>قسم العناية المركزة</option><option>قسم الطوارئ</option>
-          <option>قسم العمليات</option><option>قسم التخدير</option><option>الأطباء المقيمون</option>
-          <option>قسم الأشعة</option><option>قسم المختبر</option><option>قسم الصيدلية</option>
-          <option>قسم الخدج</option><option>تمريض الطابق</option><option>قسم العلاج الطبيعي</option>
-          <option>قسم الأسنان</option><option>قسم الحسابات</option><option>قسم IT</option>
-          <option>قسم الصيانة</option><option>قسم الاستعلامات</option><option>قسم الأمنية</option>
-          <option>الكافتيريا</option><option>موظفو الخدمات</option>
         </select></div>
       <div class="fg"><label class="fl">التاريخ</label><input class="fi" type="date" lang="en" id="vio-date"></div>
       <div class="fg"><label class="fl">السبب والتفاصيل</label><textarea class="ft" id="vio-reason" placeholder="اكتب تفاصيل العقوبة..."></textarea></div>
       <div class="fg" id="gd" style="display:none"><label class="fl">مبلغ الخصم اليدوي بالدينار (0 إذا لا يوجد خصم)</label><input class="fi" type="number" lang="en" min="0" step="1" id="vio-deduct" placeholder="مثال: 25000"><label class="fl">شهر خصم العقوبة</label><input class="fi" type="month" lang="en" id="vio-payroll"></div>
-      <div class="fg" id="gs" style="display:none"><label class="fl">مدة الإيقاف</label><input class="fi" type="text" id="vio-suspend" placeholder="مثال: 3 أيام"></div>
-      <div class="btr"><button class="btdg" id="save-vio">💾 حفظ العقوبة</button><button class="btg" id="cancel-vio">إلغاء</button></div>
+      <p class="fx-note" id="gs" style="display:none">بعد الموافقة على العقوبة يُرسل طلب إنهاء خدمات مستقل. يبقى الموظف على رأس العمل حتى اعتماد إنهاء الخدمات.</p>
+      <div class="btr"><button class="btdg" id="save-vio">إرسال طلب العقوبة</button><button class="btg" id="cancel-vio">إلغاء</button></div>
     </div>
   </div>
 </div>
@@ -564,7 +553,7 @@ button:disabled{opacity:.55;cursor:wait}
   <div class="mo">
     <div class="moh"><h3>➕ إضافة شهر جديد</h3><button class="moc" id="close-month">✕</button></div>
     <div class="mob">
-      <div class="fg"><label class="fl">اسم الشهر</label><input class="fi" type="text" id="m-name" placeholder="مثال: مايو 2025"></div>
+      <div class="fg"><label class="fl" for="m-year">السنة</label><input class="fi" id="m-year" type="number" lang="en" min="2000" max="2100" step="1"></div><label class="fl">اختر الشهر من التقويم</label><div id="m-calendar" class="month-calendar"></div><input type="hidden" id="m-period"><p id="m-selected" class="fx-note"></p>
       <div class="btr"><button class="btp" id="save-month">حفظ الشهر</button><button class="btg" id="cancel-month">إلغاء</button></div>
     </div>
   </div>
